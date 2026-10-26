@@ -18,9 +18,10 @@ reference implementation.
 
 ## Motivation
 
-Five other Craft apps ship a CLI (cadcraft, deckcraft, filmcraft, gridcraft
-and wordcraft), and none of them uses clap: each parses its arguments its own
-way. The problems photocraft had before its port are likely in each of them:
+Twelve other Craft apps ship a CLI (cadcraft, deckcraft, designcraft,
+effectcraft, figcraft, filmcraft, gridcraft, lightcraft, pdfcraft, soundcraft,
+vectorcraft and wordcraft), and none of them uses clap: each parses its
+arguments its own way. The problems photocraft had before its port are likely in each of them:
 
 - A mistyped flag (`--fromat`) was silently ignored, and a repeated one quietly
   took the last value.
