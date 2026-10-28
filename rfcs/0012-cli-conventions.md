@@ -56,7 +56,11 @@ maintainers, so the other apps can follow it.
    value starting with `-` is written `--out=-image.png`; negative numbers are
    accepted where they mean something.
 5. **Paths are paths.** Arguments are read as `OsString` and paths kept as
-   `PathBuf`, so a file name that isn't valid Unicode reaches the command.
+   `PathBuf`, so a file name that isn't valid Unicode reaches the command. The
+   exception is a path the CLI only hands on through a text protocol, such as
+   an engine command that takes JSON: that one may be a `String`, so clap
+   refuses a non-Unicode name as a usage error before any work starts, instead
+   of the command failing halfway.
 6. **Nothing destructive by default.** An output that would replace an input is
    refused unless a flag such as `--in-place` asks for it.
 7. **Environment variables** are `<APP>_<NAME>` fallbacks for flags, declared
@@ -67,6 +71,11 @@ maintainers, so the other apps can follow it.
    - a secret's value is never shown (`hide_env_values`);
    - a variable never grants filesystem or network access on its own: such
      authority comes from flags only.
+
+   clap's `env =` alone gives only the first of these. Photocraft adds the
+   empty-means-unset and variable-naming parts with
+   [`blank_env_is_unset`](https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/automation/src/args.rs#L65) and
+   [`name_env_vars`](https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/automation/src/args.rs#L73).
 8. **Help is the documentation.** The help text is the doc comments on the clap
    types, so `--help` is the source of truth. The app's book has one page for
    its CLI that links to it rather than repeating it.
@@ -85,10 +94,13 @@ maintainers, so the other apps can follow it.
    JSON. Relations between flags are declared with clap (`ArgGroup`,
    `conflicts_with`, `requires`). The code that does the work never sees a raw
    string it has to validate.
-2. **Errors are enums.** Each error a crate returns is a variant of a
-   `thiserror` enum. No `Result<_, String>`, no `Err(format!(…))`, no message
-   kept in a `&str` constant. A usage error the parser can't express is still a
-   variant, turned into a clap error by a method that picks its
+2. **Errors are types.** Each error a crate returns is a `thiserror` type: an
+   enum for a set of failures, or a struct for a single one, with the parts of
+   the message as fields (photocraft's
+   [`NotAPort`](https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/automation/src/args.rs#L61)). No `Result<_, String>`, no
+   `Err(format!(…))`, no message kept in a `&str` constant. A usage error the
+   parser can't express is still such a type, turned into a clap error by a
+   method that picks its
    [`ErrorKind`](https://docs.rs/clap/latest/clap/error/enum.ErrorKind.html), so
    it prints and exits like clap's own.
 3. **Named types over tuples** for anything that returns several values.
@@ -99,8 +111,25 @@ maintainers, so the other apps can follow it.
    a shared crate as clap `Args` structs and are flattened where used.
 6. **Cargo features are for optional features**, not for switching off a
    crate's core dependency such as clap.
-7. **Tests pin the interface**: help on stdout with exit 0, each usage error's
-   exit code and stream, and the result of each subcommand.
+7. **Tests pin the interface.** Through `run`, an app's tests check at least:
+   - `--help` and `--version` on stdout with exit 0, a failed command with
+     exit 1, and each usage error with exit 2 and its message on stderr;
+   - that a protocol subcommand (MCP, JSON lines) writes nothing else to
+     stdout;
+   - an unknown flag and a repeated one refused, and a documented repeatable
+     flag accepted;
+   - `--` before a positional that starts with `-`, and negative numbers where
+     the flag takes them;
+   - a path that isn't valid Unicode reaching the command (or refused as a
+     usage error, under rule 1.5's exception);
+   - a bad typed value, malformed JSON, conflicting flags and a flag the mode
+     doesn't use, each refused before any file is written;
+   - an output that would replace an input refused without the overwrite flag;
+   - for each variable: empty counts as unset, the flag wins, an error names
+     the variable, a secret's value never shows in help or errors, and the
+     variable alone grants no filesystem or network access;
+   - and, in the packaging tests, that the Linux and FreeBSD packages install
+     the completions and a man page per subcommand.
 
 ### 3. Tools and enforcement
 
@@ -129,7 +158,9 @@ An app adopts this RFC in one PR with a clear commit history, rather than a
 stack of small PRs: the work is repeating what photocraft already did. The PR
 moves the CLI to these rules, turns on the ast-grep workflow, and adds
 "Follows [RFC-0012](https://github.com/storytold/craft-contrib/blob/main/rfcs/0012-cli-conventions.md)"
-to the CLI's book page, listing any rule it doesn't follow yet and why.
+to the CLI's book page, listing any rule it doesn't follow yet and why, and
+which paths the ast-grep scan covers. An app claims the line once rule 2.7's
+tests pass and its packages install the generated files.
 
 ## Alternatives
 
