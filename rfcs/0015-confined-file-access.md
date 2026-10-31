@@ -41,8 +41,9 @@ The copies already disagree, and the gaps show up in the same places:
 - **Code and network.** Each app decides on its own whether scripts, plug-ins,
   running programs, URL fetches and control ports are allowed while confined.
 - **Settings that point elsewhere.** SoundCraft 0.14.0 accepts
-  `setup.disk_allocation` with a record folder outside the roots, so new
-  recordings would be written there.
+  `setup.disk_allocation` with a record folder outside the roots
+  (soundcraft#1224). Nothing records into that folder yet, but it would once
+  recording uses the setting; soundcraft#1225 refuses the outside path.
 
 ## Proposal
 
