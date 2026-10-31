@@ -41,7 +41,8 @@ Studio is a Python MCP server (streamable HTTP), live at
 - **Sign-in**: OAuth with any OIDC provider that issues JWT access tokens
   (Auth0 today). Each user gets an opaque id. Their files live under
   `users/<id>/` in S3-compatible storage, with upload and download links that
-  expire.
+  expire. Files attached in ChatGPT, on a phone too, come in through
+  `openai/fileParams`, so people don't need a public link.
 - **Craft apps**: one `<app>-cli mcp` process per user session, started in a
   private temporary folder with `--automation-read-root` and
   `--automation-write-root` set to it, a minimal environment, and memory,
