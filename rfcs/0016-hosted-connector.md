@@ -59,6 +59,11 @@ Studio is a Python MCP server (streamable HTTP), live at
 - **Directory requirements**: privacy, terms and support pages, tool
   annotations (read-only and destructive hints), tool names of 64 characters
   or fewer.
+- **Install routes**: a `server.json` for the official MCP Registry
+  (`io.github.adikshan11/bridgecraft`), a Claude Code plugin marketplace in the
+  repository (`claude plugin marketplace add adikshan11/artcraft-plugin`), an
+  "Add to Cursor" link and a VS Code `code --add-mcp` command. Each points at
+  the same `/studio` address, and a test keeps them in step.
 - **Security**: reviewed with dependency (pip-audit, trivy), static-analysis
   (bandit, semgrep), secret (gitleaks), Dockerfile (hadolint, checkov) and
   workflow (zizmor) scanners; the image runs as a non-root user with a health
@@ -77,7 +82,19 @@ Studio is a Python MCP server (streamable HTTP), live at
    generation endpoints, so the connector can offer image and video
    generation that spends the user's own credits, asking for consent before
    each paid job.
-4. **List it** in the ChatGPT and Claude connector directories as Storytold's.
+4. **List it everywhere assistants look for connectors**, as Storytold's:
+   - the ChatGPT apps directory and the Claude connectors directory, through
+     each vendor's review;
+   - the official MCP Registry under a domain-verified name such as
+     `com.getartcraft/connector`, which VS Code, GitHub and other clients
+     read;
+   - Anthropic's Claude Code plugin directory, from a `storytold`
+     marketplace;
+   - install links for Cursor and VS Code on getartcraft.com.
+
+   The files for the registry and the plugin marketplace already exist in the
+   repository; moving it means changing the name, the address and the
+   publisher, then submitting.
 5. **Admit an app** to the connector only when its latest release passes
    RFC-0015's escape tests. Its manifest entry is updated in the same PR that
    bumps the version.
