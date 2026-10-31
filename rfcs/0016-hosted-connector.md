@@ -12,7 +12,7 @@ and then edit their own photos, documents, drawings and audio by asking for
 it, on the web or a phone, with nothing to install.
 
 A working version of this exists as a community project,
-[artcraft-plugin](https://github.com/adikshan11/artcraft-plugin) ("Studio",
+[BridgeCraft](https://github.com/adikshan11/bridgecraft) ("Studio",
 Apache-2.0). This RFC proposes that Storytold adopt it: move the repository
 into the `storytold` org, run it under a Storytold domain, and list it in the
 assistant directories under Storytold's name.
@@ -36,7 +36,7 @@ assistant directories under Storytold's name.
 ## What exists today
 
 Studio is a Python MCP server (streamable HTTP), live at
-`https://artcraft-storytold-mcp.onrender.com/studio`:
+`https://bridgecraft.onrender.com/studio`:
 
 - **Sign-in**: OAuth with any OIDC provider that issues JWT access tokens
   (Auth0 today). Each user gets an opaque id. Their files live under
@@ -63,7 +63,7 @@ Studio is a Python MCP server (streamable HTTP), live at
 - **Install routes**: a `server.json` for the official MCP Registry
   (`io.github.adikshan11/bridgecraft`), a Claude Code plugin ready for
   Anthropic's directory (one command until it is listed:
-  `claude plugin install bridgecraft --marketplace adikshan11/artcraft-plugin`),
+  `claude plugin install bridgecraft --marketplace adikshan11/bridgecraft`),
   an "Add to Cursor" link and a VS Code `code --add-mcp` command. Each points
   at the same `/studio` address, and a test keeps them in step.
 - **Security**: reviewed with dependency (pip-audit, trivy), static-analysis
