@@ -1,7 +1,7 @@
 # RFC-0015: Confined file access for agents
 
 Related: RFC-0009 (shared infrastructure, "security boundaries"), RFC-0012
-(command-line conventions), storytold/effectcraft#2131 (audit F-11).
+(command-line conventions) and RFC-0004 (duplicate PRs), all still proposals; storytold/effectcraft#2131 (audit F-11).
 
 ## Summary
 
@@ -32,13 +32,17 @@ The copies already disagree, and the gaps show up in the same places:
 - **Paths inside documents.** A document opened from inside a read root can
   name files outside it: footage, linked images, fonts, included files. The
   command checks don't see those paths. EffectCraft 0.19.0 still renders
-  outside footage this way (effectcraft#2131 F-11, fixed by effectcraft#2719).
+  outside footage this way (effectcraft#2131 F-11; a fix is proposed in
+  effectcraft#2719).
 - **Flags that do nothing.** A FilmCraft build once accepted the flags and
   ignored them, so `--help` alone doesn't prove a build is confined. RFC-0012's
-  "reject unknown flags" rule covers the parsing. This RFC covers what the
+  proposed "reject unknown flags" rule would cover the parsing. This RFC covers what the
   flags must do.
 - **Code and network.** Each app decides on its own whether scripts, plug-ins,
   running programs, URL fetches and control ports are allowed while confined.
+- **Settings that point elsewhere.** SoundCraft 0.14.0 accepts
+  `setup.disk_allocation` with a record folder outside the roots, so new
+  recordings would be written there.
 
 ## Proposal
 
@@ -126,9 +130,12 @@ A case passes when the call is refused with a path or confinement error and
 the outside folder is unchanged. Afterwards, the test also checks that no new
 listening ports were opened and no files were created outside the roots.
 
-We have run these cases, in a Python harness against the release builds
-inside a container with no network and a read-only filesystem, for every app
-that ships the flags today. We will port the harness to Rust for the crate.
+We have run most of these cases against the release builds of the nine apps
+that ship the flags, using a Python harness inside a container with no network
+and a read-only filesystem. Paths inside documents were tested where the format
+links files: WordCraft, DeckCraft, DesignCraft, VectorCraft, SoundCraft and
+EffectCraft. The refused-features row was checked per app, not as one shared
+list. We will port the harness to Rust for the crate and fill those gaps there.
 
 ## Rollout
 
@@ -137,7 +144,7 @@ that ships the flags today. We will port the harness to Rust for the crate.
    the shared tests before and after the move, so behaviour only changes where
    an app had a gap.
 3. For CADCraft, FilmCraft, GridCraft and LightCraft, the open PRs adopt the
-   crate instead of their own checks. Under RFC-0004, one PR per app goes
+   crate instead of their own checks. As RFC-0004 proposes, one PR per app goes
    ahead and the others are closed in its favour.
 4. An app's README says "follows RFC-0015" once it passes.
 
