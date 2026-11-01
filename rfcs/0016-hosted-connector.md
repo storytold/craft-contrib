@@ -94,7 +94,8 @@ that code does on the request path.
   days after the session ends, and immediately when the person deletes that
   file, disconnects, or the account is closed. The session ends after
   `CRAFT_IDLE_MINUTES` (default 10) without a request. An active session keeps
-  its files, however old those files are. The sweep runs
+  its files, however old those files are. A user with no session record is
+  treated as last active when their newest file was written. The sweep runs
   at startup and every hour. `STUDIO_FILE_RETENTION_DAYS` is 7; any other
   value is ignored. The deploy notes say a bucket lifecycle rule of that age
   is a backstop for media objects. Usage counts live under `ops/` and hold no
