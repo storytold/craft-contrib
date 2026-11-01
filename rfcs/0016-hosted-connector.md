@@ -54,8 +54,10 @@ that code does on the request path.
 - **Where the community deployment runs.** Auth0 handles sign-in. File
   storage is a private Backblaze B2 bucket when the `S3_*` variables are set;
   Cloudflare R2 is the other storage path, used only when the `R2_*` variables
-  are set instead. Render runs the process (service `bridgecraft` at
-  `bridgecraft.onrender.com`, health check at `/health`). The image runs as
+  are set instead. On 1 November 2026 the Backblaze card for
+  `bridgecraft-studio-files` shows File Lifecycle as Keep all versions. That
+  card does not show a 7-day lifecycle rule. Render runs the process (service
+  `bridgecraft` at `bridgecraft.onrender.com`, health check at `/health`). The image runs as
   the non-root user `studio`. Generation and library reads call
   `https://api.storyteller.ai` with the exchanged token. The public project
   catalog calls `api.github.com`, and that call refuses the connector token
@@ -66,7 +68,13 @@ that code does on the request path.
   `https://artcraft-studio.us.auth0.com/`, and whose scope is `connector`.
   `connect.getartcraft.com` does not resolve. This text does not show that
   Auth0 issues a token for that audience. The connector accepts only that
-  audience.
+  audience. The tenant's API list on that date has two custom APIs: ArtCraft
+  Studio, audience `https://artcraft-storytold-mcp.onrender.com/studio`, and
+  bridgecraft-artcraft, audience `https://bridgecraft.onrender.com/studio`.
+  It also has the Auth0 Management API. It has no API for
+  `https://connect.getartcraft.com/mcp` and no API for
+  `https://api.storyteller.ai`. That list does not show the scopes on the two
+  custom APIs, and this text does not show a completed token exchange.
 - **The connector token stays on the connector.** It is not sent to ArtCraft
   or to any other upstream API. Listing models and estimating a cost send no
   `Authorization` header. Generation, job status, and library reads use the
