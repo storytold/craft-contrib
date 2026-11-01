@@ -75,15 +75,23 @@ Studio is a Python MCP server (streamable HTTP), live at
 ## Proposal
 
 1. **Move the repository** to `storytold/craft-connector` (name open). The
-   current author stays on as a maintainer and keeps fixing things.
+   current author stays on as a maintainer and keeps fixing things. Storytold
+   reviews the code before the repository moves and before the service runs
+   under the org's name. The author remaining a maintainer does not replace
+   that review.
 2. **Run it under a Storytold domain**, for example
-   `https://connect.getartcraft.com/mcp`, with storage and hosting Storytold
-   pays for.
-3. **Replace the sign-in with ArtCraft accounts** once `artcraft-services`
-   offers OAuth to third-party apps. The same token then reaches the
-   generation endpoints, so the connector can offer image and video
-   generation that spends the user's own credits, asking for consent before
-   each paid job.
+   `https://connect.getartcraft.com/mcp`. Storytold operates the service and
+   pays for storage and hosting. On-call is a Storytold rotation. The author
+   is the first responder for the connector, and is not the only person on
+   call.
+3. **Sign in with ArtCraft as two audiences** once `artcraft-services`
+   offers OAuth to third-party apps. The connector is its own resource. It
+   accepts a token only after the issuer, signature, expiry, audience and
+   scopes check out for the connector, and it does not forward that token.
+   Generation and library reads use a second token from an exchange, limited
+   to those two scopes. That second token is kept only while the grant lasts.
+   Disconnecting, or a revocation at ArtCraft, drops both tokens. Each paid
+   job still asks for consent before it runs.
 4. **Keep the listings in one place.** The author publishes BridgeCraft to the
    directories, once, for everyone: Anthropic's directory (claude.ai,
    the desktop app, Cowork and Claude Code), the ChatGPT apps directory, and
@@ -93,13 +101,19 @@ Studio is a Python MCP server (streamable HTTP), live at
    ArtCraft sign-in; until then, getartcraft.com only needs to link to them.
 5. **Admit an app** to the connector only when its latest release passes
    RFC-0015's escape tests. Its manifest entry is updated in the same PR that
-   bumps the version.
+   bumps the version. CADCraft, FilmCraft, GridCraft, LightCraft and
+   EffectCraft stay off the connector until that is true.
+6. **Publish Storytold's own privacy statement, terms and support pages.**
+   Files stay under `users/<id>/` in storage Storytold controls. Before
+   launch, the privacy statement names how long files are kept and how they
+   are deleted, including when an account is closed. A person can delete
+   their files without closing the account.
 
 ## What it needs from other repos
 
 | Repo | Change |
 |---|---|
-| `artcraft-services` | OAuth for third-party apps ("Sign in with ArtCraft"), with a scope that allows generation and reading the user's library (#2676) |
+| `artcraft-services` | OAuth for third-party apps ("Sign in with ArtCraft"). The connector is its own audience. A separate exchanged token, scoped to generation and library read, calls the API (#2676). Revoking the grant drops the connector session. |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
 | effectcraft | release effectcraft#2719 |
@@ -120,5 +134,7 @@ Studio is a Python MCP server (streamable HTTP), live at
   concurrent sessions.
 - Whether the connector should also bridge to a user's running desktop app
   (#1917) when one is connected, so one listing covers both.
+- How long files are kept. The privacy statement has to name the period;
+  the number is not chosen here.
 - Abuse handling: rate limits per account, and what the terms say about
   uploaded content.
