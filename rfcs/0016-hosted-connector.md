@@ -66,32 +66,60 @@ Studio is a Python MCP server (streamable HTTP), live at
   `claude plugin install bridgecraft --marketplace adikshan11/bridgecraft`),
   an "Add to Cursor" link and a VS Code `code --add-mcp` command. Each points
   at the same `/studio` address, and a test keeps them in step.
-- **Security**: reviewed with dependency (pip-audit, trivy), static-analysis
-  (bandit, semgrep), secret (gitleaks), Dockerfile (hadolint, checkov) and
-  workflow (zizmor) scanners; the image runs as a non-root user with a health
-  check, and GitHub Actions are pinned by commit. CI runs the tests, including
-  the real Craft apps inside the built image.
+- **Checks, and what they are not.** BridgeCraft's CI
+  (`.github/workflows/ci.yml`) runs the unit tests, builds the image, and
+  runs `tests.test_craft_real` inside that image. That file checks
+  `/tmp/escape.*` and `../escape.*` on the apps the image has installed. The
+  fake CLI rejects a resolved path outside its root; its comment says that
+  includes symlinks. The image runs as a non-root user and has a health
+  check, and the Actions in that workflow are pinned by commit. The
+  repository does not contain pip-audit, trivy, bandit, semgrep, gitleaks,
+  hadolint, checkov or zizmor, and it has no load test, no downtime drill
+  and no penetration test. `/status` shows
+  how long this process has been up; the code says that figure resets on
+  restart and is not a stored metric. craft-contrib's only workflow is the
+  shared SonarCloud wrapper. It skips instrumented tests when the repository
+  has no Rust crate, and it skips the scan step on a fork pull request when
+  the token is absent. A green check from that wrapper is not a security
+  proof. These are the pre-beta checks. Storytold's security review (below)
+  is still required before hosting.
+
+The community process deletes a file 7 days after it was written, on an
+hourly sweep (`STUDIO_FILE_RETENTION_DAYS`, default 7). The hosted rule in
+the proposal is 7 days after the session ends.
 
 ## Proposal
 
 1. **Move the repository** to `storytold/craft-connector` (name open). The
-   current author stays on as a maintainer and keeps fixing things. Storytold
-   reviews the code before the repository moves and before the service runs
-   under the org's name. The author remaining a maintainer does not replace
-   that review.
-2. **Run it under a Storytold domain**, for example
-   `https://connect.getartcraft.com/mcp`. Storytold operates the service and
-   pays for storage and hosting. On-call is a Storytold rotation. The author
-   is the first responder for the connector, and is not the only person on
-   call.
+   current author stays on as a maintainer of the connector code and keeps
+   fixing it. Storytold reviews the code before the repository moves and
+   before the service runs under the org's name. The author remaining a
+   maintainer does not replace that review, and that review does not replace
+   the security review in item 3.
+2. **Run it at** `https://connect.getartcraft.com/mcp`. That address is the
+   connector, not an example domain. Storytold operates the instance, the
+   network and the storage, and pays for them. On-call is a Storytold
+   rotation. The author maintains the connector code and is the first
+   responder, and is not the only person on call. Once the service runs under
+   the org, the user files and the tokens are Storytold's responsibility.
+   The community repository staying Apache-2.0 does not make that hosted
+   data a public archive. PII and file contents stay inside `users/<id>/`.
+   Logs must not contain file contents, tokens, or raw paths outside the
+   connector.
 3. **Sign in with ArtCraft as two audiences** once `artcraft-services`
-   offers OAuth to third-party apps. The connector is its own resource. It
-   accepts a token only after the issuer, signature, expiry, audience and
-   scopes check out for the connector, and it does not forward that token.
-   Generation and library reads use a second token from an exchange, limited
-   to those two scopes. That second token is kept only while the grant lasts.
-   Disconnecting, or a revocation at ArtCraft, drops both tokens. Each paid
-   job still asks for consent before it runs.
+   offers OAuth to third-party apps. The audience of the connector token is
+   the connector's own URL, `https://connect.getartcraft.com/mcp`. The
+   connector rejects a token whose audience is anything else. It checks the
+   issuer, the signature, the expiry, the audience and the scopes, and it
+   does not forward that token. Generation and library reads use a second
+   token from an exchange, scoped to those two only. That exchanged token is
+   stored encrypted, only on the connector, only while the grant lasts. It
+   is not written to logs, not put in the client, and not forwarded.
+   Disconnect, account close, or revocation at ArtCraft deletes it. Each
+   paid job still asks before it spends credits. Before the service runs
+   under Storytold's name or inside ArtCraft beta, Storytold does a security
+   review of the scopes, where that token is stored, and revocation. The
+   code review in item 1 does not replace this review.
 4. **Keep the listings in one place.** The author publishes BridgeCraft to the
    directories, once, for everyone: Anthropic's directory (claude.ai,
    the desktop app, Cowork and Claude Code), the ChatGPT apps directory, and
@@ -102,18 +130,21 @@ Studio is a Python MCP server (streamable HTTP), live at
 5. **Admit an app** to the connector only when its latest release passes
    RFC-0015's escape tests. Its manifest entry is updated in the same PR that
    bumps the version. CADCraft, FilmCraft, GridCraft, LightCraft and
-   EffectCraft stay off the connector until that is true.
+   EffectCraft stay off the connector until that is true. Apps still waiting
+   on a folder lock stay off.
 6. **Publish Storytold's own privacy statement, terms and support pages.**
-   Files stay under `users/<id>/` in storage Storytold controls. Before
-   launch, the privacy statement names how long files are kept and how they
-   are deleted, including when an account is closed. A person can delete
-   their files without closing the account.
+   Files stay under `users/<id>/` in storage Storytold controls. In beta,
+   files under `users/<id>/` are deleted 7 days after the session ends, and
+   immediately when the person deletes them, disconnects, or the ArtCraft
+   account is closed. A person can delete their files without closing the
+   account. The privacy statement Storytold publishes states that 7-day
+   period.
 
 ## What it needs from other repos
 
 | Repo | Change |
 |---|---|
-| `artcraft-services` | OAuth for third-party apps ("Sign in with ArtCraft"). The connector is its own audience. A separate exchanged token, scoped to generation and library read, calls the API (#2676). Revoking the grant drops the connector session. |
+| `artcraft-services` | OAuth for third-party apps ("Sign in with ArtCraft"). The connector audience is `https://connect.getartcraft.com/mcp`. A separate exchanged token, scoped to generation and library read, calls the API (#2676). The connector stores that token encrypted until disconnect, account close, or revocation. |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
 | effectcraft | release effectcraft#2719 |
@@ -134,7 +165,5 @@ Studio is a Python MCP server (streamable HTTP), live at
   concurrent sessions.
 - Whether the connector should also bridge to a user's running desktop app
   (#1917) when one is connected, so one listing covers both.
-- How long files are kept. The privacy statement has to name the period;
-  the number is not chosen here.
 - Abuse handling: rate limits per account, and what the terms say about
   uploaded content.
