@@ -38,11 +38,22 @@ assistant directories under Storytold's name.
 Studio is a Python MCP server (streamable HTTP), live at
 `https://bridgecraft.onrender.com/studio`:
 
-- **Sign-in**: OAuth with any OIDC provider that issues JWT access tokens
-  (Auth0 today). Each user gets an opaque id. Their files live under
-  `users/<id>/` in S3-compatible storage, with upload and download links that
-  expire. Files attached in ChatGPT, on a phone too, come in through
-  `openai/fileParams`, so people don't need a public link.
+- **Sign-in**: Auth0, issuer `https://artcraft-studio.us.auth0.com/`. The
+  connector token's audience is `https://connect.getartcraft.com/mcp` and
+  nothing else. Studio checks the issuer, the signature, the expiry, the
+  audience and the `connector` scope, and it does not send that token to
+  ArtCraft or to file storage. Each user gets an opaque id. Their files live
+  under `users/<id>/`, with upload and download links that expire. Files
+  attached in ChatGPT, on a phone too, come in through `openai/fileParams`,
+  so people don't need a public link.
+- **Hosted services**: Auth0 for sign-in, Backblaze B2 for file storage
+  (a private S3-compatible bucket), and Render for the process
+  (`bridgecraft.onrender.com`, health check at `/health`, the image runs as
+  a non-root user). Generation and library reads call ArtCraft at
+  `api.storyteller.ai` with a separate exchanged token, not the connector
+  token. The project catalog calls `api.github.com`. The storage code can
+  also use Cloudflare R2 when those variables are set; the Studio deployment
+  is Backblaze.
 - **Craft apps**: one `<app>-cli mcp` process per user session, started in a
   private temporary folder with `--automation-read-root` and
   `--automation-write-root` set to it, a minimal environment, and memory,
@@ -81,21 +92,23 @@ Studio is a Python MCP server (streamable HTTP), live at
   shared SonarCloud wrapper. It skips instrumented tests when the repository
   has no Rust crate, and it skips the scan step on a fork pull request when
   the token is absent. A green check from that wrapper is not a security
-  proof. These are the pre-beta checks. Storytold's security review (below)
-  is still required before hosting.
+  proof.
 
-The community process deletes a file 7 days after it was written, on an
-hourly sweep (`STUDIO_FILE_RETENTION_DAYS`, default 7). The hosted rule in
-the proposal is 7 days after the session ends.
+Files under `users/<id>/` are deleted 7 days after the session ends. The
+session ends after `CRAFT_IDLE_MINUTES` (default 10) without a request.
+Deleting a file, disconnecting, or closing the account deletes that user's
+files immediately. The sweep runs at startup and every hour
+(`STUDIO_FILE_RETENTION_DAYS` is 7). A Backblaze lifecycle rule of 7 days
+after an object is written is the storage backstop for the same prefix.
+The exchanged ArtCraft token is stored encrypted under that prefix and is
+deleted on disconnect, account close, or revocation. It is not logged.
 
 ## Proposal
 
 1. **Move the repository** to `storytold/craft-connector` (name open). The
    current author stays on as a maintainer of the connector code and keeps
    fixing it. Storytold reviews the code before the repository moves and
-   before the service runs under the org's name. The author remaining a
-   maintainer does not replace that review, and that review does not replace
-   the security review in item 3.
+   before the service runs under the org's name.
 2. **Run it at** `https://connect.getartcraft.com/mcp`. That address is the
    connector, not an example domain. Storytold operates the instance, the
    network and the storage, and pays for them. On-call is a Storytold
@@ -106,20 +119,17 @@ the proposal is 7 days after the session ends.
    data a public archive. PII and file contents stay inside `users/<id>/`.
    Logs must not contain file contents, tokens, or raw paths outside the
    connector.
-3. **Sign in with ArtCraft as two audiences** once `artcraft-services`
-   offers OAuth to third-party apps. The audience of the connector token is
-   the connector's own URL, `https://connect.getartcraft.com/mcp`. The
-   connector rejects a token whose audience is anything else. It checks the
-   issuer, the signature, the expiry, the audience and the scopes, and it
-   does not forward that token. Generation and library reads use a second
-   token from an exchange, scoped to those two only. That exchanged token is
-   stored encrypted, only on the connector, only while the grant lasts. It
-   is not written to logs, not put in the client, and not forwarded.
-   Disconnect, account close, or revocation at ArtCraft deletes it. Each
-   paid job still asks before it spends credits. Before the service runs
-   under Storytold's name or inside ArtCraft beta, Storytold does a security
-   review of the scopes, where that token is stored, and revocation. The
-   code review in item 1 does not replace this review.
+3. **Sign in as two tokens.** Auth0 issues the connector token. Its audience
+   is `https://connect.getartcraft.com/mcp`. Studio rejects a token whose
+   audience is anything else. It checks the issuer, the signature, the
+   expiry, the audience and the `connector` scope, and it does not forward
+   that token to ArtCraft or to Backblaze. Generation and library reads use
+   a second token from an exchange at the Auth0 token endpoint, scoped to
+   `generation` and `library:read` only, and sent only to `api.storyteller.ai`.
+   That exchanged token is stored encrypted under `users/<id>/`, only while
+   the grant lasts. It is not written to logs, not put in the client, and not
+   forwarded. Disconnect, account close, or revocation deletes it. Each paid
+   job still asks before it spends credits.
 4. **Keep the listings in one place.** The author publishes BridgeCraft to the
    directories, once, for everyone: Anthropic's directory (claude.ai,
    the desktop app, Cowork and Claude Code), the ChatGPT apps directory, and
@@ -144,7 +154,7 @@ the proposal is 7 days after the session ends.
 
 | Repo | Change |
 |---|---|
-| `artcraft-services` | OAuth for third-party apps ("Sign in with ArtCraft"). The connector audience is `https://connect.getartcraft.com/mcp`. A separate exchanged token, scoped to generation and library read, calls the API (#2676). The connector stores that token encrypted until disconnect, account close, or revocation. |
+| `artcraft-services` | "Sign in with ArtCraft" for third-party apps, so the issuer can be ArtCraft's instead of the Auth0 tenant above. The connector audience stays `https://connect.getartcraft.com/mcp`. Generation and library reads keep using the exchanged token (#2676). |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
 | effectcraft | release effectcraft#2719 |
