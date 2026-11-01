@@ -51,36 +51,52 @@ The copies already disagree, and the gaps show up in the same places:
 
 1. `--automation-read-root DIR` and `--automation-write-root DIR` are each
    repeatable. A write root can also be read.
-2. With either flag present, the process is **confined**. Without them, nothing
-   changes.
-3. A root that doesn't exist, or that isn't a directory, is an error at
+2. An agent entry point (`<app>-cli mcp`, and any other headless automation
+   entry point) is confined. It refuses to start unless both a read root and
+   a write root are set. An unset root is a refusal of the feature, not
+   unrestricted access.
+3. A desktop launch that is not an agent entry point is unchanged when
+   neither flag is present. If either flag is present, that process is
+   confined, and an access whose root was not set is refused.
+4. A root that doesn't exist, or that isn't a directory, is an error at
    startup, before anything else runs.
-4. Every path is checked after resolving it: `..` collapsed, symbolic links
-   followed, and the result compared with the resolved roots. A path that
-   can't be resolved, such as a new file in a folder that doesn't exist, is
-   checked through its nearest existing parent.
-5. A relative path is resolved against the first write root, or the first
+5. Resolve the path first, then compare components with the resolved roots.
+   `..` is collapsed. Symbolic links are followed, and so are Windows
+   junctions. The comparison is of the resolved components, so a root of
+   `/sandbox` does not allow `/sandbox-other`, and the string the caller
+   passed is not what is compared. On a case-insensitive file system the
+   comparison is case-insensitive. A UNC path (`\\server\share` or
+   `//server/share`) and a device path (`\\?\`, `\\.`) are resolved and then
+   compared the same way; if they do not fall inside a root, they are
+   refused. An 8.3 short name is resolved to the long path before the
+   comparison. The short name is not trusted on its own. A path that can't
+   be resolved yet, such as a new file whose parent does not exist, is
+   resolved through its nearest existing parent, and the create in section 4
+   still has to land inside the root.
+6. A relative path is resolved against the first write root, or the first
    read root when there's no write root. (This replaces EffectCraft's
    "absolute paths only" rule.)
-6. A refusal is an error that names the path, the access (read or write) and
+7. A refusal is an error that names the path, the access (read or write) and
    the roots. It never falls back to a default location.
 
 ### 2. What is checked
 
-The check sits where files are opened, not only where commands take
-parameters:
+The confined open sits where files are opened. A check that returns a path,
+followed by a later open of that path, is not this contract: the directory
+or the symlink can change in between.
 
-1. Every path a command is given.
+1. Every path a command is given, opened or created through section 4.
 2. Every path a command writes to without being given one: Save, autosave,
    recovery files, render and export queues, caches, settings and logs. Each
-   must go inside a write root, go to a folder the process was given for its
-   own use, or be turned off while confined.
+   must be created inside a write root, go to a folder the process was given
+   for its own use, or be turned off while confined.
 3. Every path a document names: linked or placed media, footage, fonts,
    includes, external references. A path outside the read roots is treated
    as missing, so the document opens with that item offline, and the reply
-   says why.
+   says why. The outside file is not read and not modified.
 4. Folder listings, existence checks and file metadata, since those tell an
-   agent what is outside the roots too.
+   agent what is outside the roots too. Those calls use the same resolution
+   and return a refusal, not a listing, for anything outside the roots.
 
 ### 3. What is refused while confined
 
@@ -101,11 +117,22 @@ available while file access is confined".
 Under RFC-0009's "security boundaries" exception, `craft-libs` gets a
 `confine` crate with:
 
-- `Confinement { read, write }`, built from the parsed flags;
-- `check(path, Access) -> Result<PathBuf, Refusal>`, with the resolution rules
-  in section 1;
+- `Confinement { read, write }`, built from the parsed flags. Building it
+  for an agent entry point fails if either root is unset.
+- `open_read(path)`, `open_write(path)` and `create(path)`, each returning
+  `Result<OpenFile, Refusal>`. One call resolves, compares and opens or
+  creates, and it returns a handle. The caller uses the handle. It does not
+  receive a path to open later. `check(path, Access) -> PathBuf` is not the
+  interface.
+- The same property on every platform the app ships. On Linux, `openat2`
+  with `RESOLVE_BENEATH` or `RESOLVE_IN_ROOT` is one way to stop a directory
+  from being swapped during the open. macOS and Windows do that with a
+  directory handle and a final component, and refuse if the handle no longer
+  names a directory inside the root. The contract is that property, not the
+  Linux call.
 - a file-access wrapper an app's engine can read through, so that section 2's
-  item 3 doesn't depend on knowing which command led to the read;
+  item 3 doesn't depend on knowing which command led to the read. The wrapper
+  uses the same open.
 - the shared escape tests (section 5) as a test-support module.
 
 Apps keep their own lists of commands to refuse. Those depend on each app's
@@ -123,20 +150,56 @@ root, with a second folder outside it holding a marker file:
 | symlinked file | `<root>/link.*` → `<outside>/secret.*` |
 | symlinked folder | `<root>/dir/secret.*`, where `dir` → `<outside>` |
 | write through a link | saving over `<root>/link.*` must not change the target |
+| junction, where the platform has them | a Windows junction inside the root pointing outside |
+| UNC and device path | `\\server\share\secret.*`, `//server/share/secret.*`, `\\?\` and `\\.\` forms that resolve outside |
+| 8.3 name | a short name inside the root whose long path is outside |
+| case fold | a path that matches a root only by case, on a case-insensitive volume, and must not match a different directory |
+| directory swap | a directory inside the root replaced with a symlink to outside after lookup starts, including while creating a new file in that directory |
+| symlink swap | a file inside the root replaced with a symlink to outside after lookup starts |
 | generic command tools | the same paths through `execute`, `run_command`, `batch` |
-| paths inside a document | a document in the root naming each path above |
+| paths inside a document | a document in the root naming each direct-escape path above |
 | refused features | one call per item in section 3 |
 
-A case passes when the call is refused with a path or confinement error and
-the outside folder is unchanged. Afterwards, the test also checks that no new
-listening ports were opened and no files were created outside the roots.
+A platform that does not have junctions, UNC paths, 8.3 names or a
+case-insensitive volume skips that row. A skip is not a pass.
 
-We have run most of these cases against the release builds of the nine apps
-that ship the flags, using a Python harness inside a container with no network
-and a read-only filesystem. Paths inside documents were tested where the format
-links files: WordCraft, DeckCraft, DesignCraft, VectorCraft, SoundCraft and
-EffectCraft. The refused-features row was checked per app, not as one shared
-list. We will port the harness to Rust for the crate and fill those gaps there.
+A direct read or write (every row except "paths inside a document" and
+"refused features") passes only when the call is refused and the outside
+file is not used. The marker bytes must not appear in the reply or in any
+file the call wrote, and the marker file must be unchanged. The directory-swap
+row includes creating a new file while the parent is swapped: that file must
+not appear outside the root.
+
+"Paths inside a document" is a different assertion. The document opens, the
+outside item is offline, and the reply says why. The marker bytes must not
+appear in the reply or in any file the call wrote, and the marker file must
+be unchanged. Refusing to open the document does not pass this row. An open
+that reads or modifies the outside file fails it.
+
+"Refused features" passes when the call is refused with a confinement error.
+It does not open or change the outside file.
+
+Afterwards, the test also checks that no new listening ports were opened and
+no files were created outside the roots.
+
+We have run most of the earlier rows against the release builds of the nine
+apps that ship the flags, using a Python harness inside a container with no
+network and a read-only filesystem. Paths inside documents were tested where
+the format links files: WordCraft, DeckCraft, DesignCraft, VectorCraft,
+SoundCraft and EffectCraft. The refused-features row was checked per app,
+not as one shared list. That harness run did not include the junction, UNC,
+8.3, case-fold, directory-swap or symlink-swap rows. We will port the harness
+to Rust for the crate and fill those gaps there. This RFC does not claim
+those rows have been run.
+
+### 6. Bridge mode fails closed
+
+`mcp --connect` and `--bridge` drive a running desktop process. A confined
+CLI refuses that connection unless the receiving process enforces this same
+confinement: the same roots, the same open and create, and the same
+refusals. Connecting a confined CLI to an unrestricted desktop process
+bypasses the boundary. An app that does that is not following RFC-0015, and
+this is not optional for an app that says it does.
 
 ## Rollout
 
@@ -165,6 +228,3 @@ list. We will port the harness to Rust for the crate and fill those gaps there.
 - Should a confined process also get a per-session temporary folder flag
   (`--automation-temp-dir`), so caches and recovery files have a place that
   isn't a user's root?
-- Should the bridge mode (`mcp --connect`/`--bridge`, which drives the running
-  desktop app) refuse to start with the flags, since the desktop app's session
-  isn't confined?
