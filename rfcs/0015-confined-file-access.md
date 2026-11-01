@@ -32,18 +32,22 @@ The copies already disagree, and the gaps show up in the same places:
 - **Paths inside documents.** A document opened from inside a read root can
   name files outside it: footage, linked images, fonts, included files. The
   command checks don't see those paths. EffectCraft 0.19.0 still renders
-  outside footage this way (effectcraft#2131 F-11; a fix is proposed in
-  effectcraft#2719).
+  outside footage this way (effectcraft#2131 F-11). effectcraft#2719, which
+  refuses that read, merged on 31 October 2026. That merge is not in the
+  0.19.0 release, and EffectCraft is not in the hosted BridgeCraft image.
 - **Flags that do nothing.** A FilmCraft build once accepted the flags and
   ignored them, so `--help` alone doesn't prove a build is confined. RFC-0012's
   proposed "reject unknown flags" rule would cover the parsing. This RFC covers what the
   flags must do.
 - **Code and network.** Each app decides on its own whether scripts, plug-ins,
   running programs, URL fetches and control ports are allowed while confined.
-- **Settings that point elsewhere.** SoundCraft 0.14.0 accepts
-  `setup.disk_allocation` with a record folder outside the roots
-  (soundcraft#1224). Nothing records into that folder yet, but it would once
-  recording uses the setting; soundcraft#1225 refuses the outside path.
+- **Settings that point elsewhere.** SoundCraft 0.14.0, the version in the
+  hosted BridgeCraft image, accepts `setup.disk_allocation` with a record
+  folder outside the roots (soundcraft#1224). Nothing records into that
+  folder yet, but it would once recording uses the setting. soundcraft#1225
+  is still open; it would refuse the outside path. The hosted image blocks
+  that command until the refusal ships. SoundCraft 0.15.0 is a later release
+  and is not the hosted build.
 
 ## Proposal
 
@@ -228,3 +232,17 @@ this is not optional for an app that says it does.
 - Should a confined process also get a per-session temporary folder flag
   (`--automation-temp-dir`), so caches and recovery files have a place that
   isn't a user's root?
+
+## Decision process
+
+A Storytold maintainer comments the RFC-0000 comment-period end date on this
+pull request. This RFC does not set that date. No end-date comment is
+recorded.
+
+craft-contrib's workflow is the shared SonarCloud wrapper. On a fork pull
+request the scan step is skipped when the token is absent, and instrumented
+tests are skipped when the repository has no Rust crate. A completed wrapper
+check is not security validation. This text does not claim a live exploit
+was reproduced. There is no `confine` crate in `craft-libs`, and the
+junction, UNC, 8.3, case-fold, directory-swap, and symlink-swap rows have
+not been run.
