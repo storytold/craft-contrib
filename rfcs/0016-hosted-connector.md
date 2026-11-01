@@ -60,9 +60,13 @@ that code does on the request path.
   `https://api.storyteller.ai` with the exchanged token. The public project
   catalog calls `api.github.com`, and that call refuses the connector token
   as well. Upload and download links expire (15 minutes and one hour). The
-  process answering that host on 1 November 2026 still publishes
-  `https://bridgecraft.onrender.com/studio` as its protected resource. This
-  tree publishes and accepts only `https://connect.getartcraft.com/mcp`.
+  process answering `https://bridgecraft.onrender.com` on 1 November 2026
+  publishes protected-resource metadata whose resource is
+  `https://connect.getartcraft.com/mcp`, whose authorization server is
+  `https://artcraft-studio.us.auth0.com/`, and whose scope is `connector`.
+  `connect.getartcraft.com` does not resolve. This text does not show that
+  Auth0 issues a token for that audience. The connector accepts only that
+  audience.
 - **The connector token stays on the connector.** It is not sent to ArtCraft
   or to any other upstream API. Listing models and estimating a cost send no
   `Authorization` header. Generation, job status, and library reads use the
@@ -141,7 +145,9 @@ and idle limits. `craft_apps.json` pins each app's release by sha256 and lists
 the tools it hides and the engine commands it refuses. WordCraft, DeckCraft,
 PdfCraft, PhotoCraft, VectorCraft, DesignCraft, FigCraft, and SoundCraft are
 hosted. CADCraft, FilmCraft, GridCraft, and LightCraft stay off until their
-folder lock lands, and EffectCraft stays off until effectcraft#2719. Everyday
+folder lock lands. effectcraft#2719 is merged and is not in the 0.19.0
+release. EffectCraft is not in the hosted image, and it stays off until a
+release that includes that merge is pinned and passes RFC-0015. Everyday
 edits without a Craft app use FFmpeg, Pillow, and the PDF tools.
 
 Directory pages (privacy, terms, support), tool annotations, and tool names of
@@ -169,6 +175,14 @@ The community privacy page says the site is not operated by Storytold. It
 also states the audience, the encrypted grant, deletion 7 days after the
 session ends, immediate deletion on delete, disconnect, or account close, and
 that logs do not contain file contents, tokens, or secrets.
+
+The community deployment runs on the author's Render account. The author
+operates it. Storytold does not operate that host, does not pay for it, and
+has no on-call for it. This RFC does not name an on-call rotation. The
+author is the sole maintainer of the BridgeCraft repository. A Storytold
+maintainer has not reviewed the service code that would run under the org's
+name. Adoption still needs that review, and a Storytold decision to operate,
+pay for, and staff the service.
 
 ## Proposal
 
@@ -209,7 +223,7 @@ that logs do not contain file contents, tokens, or secrets.
 | `artcraft-services` | Issue connector tokens for audience `https://connect.getartcraft.com/mcp`, with the `connector` scope, and accept the exchanged token (scopes `generation` and `library:read`) on generation and on `GET /v1/media_files/project/list` (#2676). The connector already calls that route with the exchanged token and does not send the connector token. |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
-| effectcraft | release effectcraft#2719 |
+| effectcraft | #2719 is merged and is not in the 0.19.0 release or the hosted image. Pin a later release only after it passes RFC-0015 |
 
 ## Alternatives
 
