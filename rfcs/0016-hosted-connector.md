@@ -95,25 +95,43 @@ that code does on the request path.
   not stored. Off Render, the process uses an ephemeral key that is never
   written down. The token is not logged, not returned to the assistant, and
   not written into the repository. Disconnect, account close, and revocation
-  delete it. Revocation is ArtCraft answering 401 on a call made with the
-  exchanged token: Studio deletes the grant, marks the session ended, and
-  closes that user's Craft sessions. Stored files then follow the 7-day
-  clock. `disconnect_account`, `close_account`, `POST /account/disconnect`,
-  and `POST /account/close` delete the grant and every object under
-  `users/<id>/` immediately. A paid generation still starts only after the
-  caller passes `max_credits` that covers the price.
-- **Files.** User data stays under `users/<id>/`. Files there are deleted 7
-  days after the session ends, and immediately when the person deletes that
-  file, disconnects, or the account is closed. The session ends after
-  `CRAFT_IDLE_MINUTES` (default 10) without a request. An active session keeps
-  its files, however old those files are. A user with no session record is
-  treated as last active when their newest file was written. The sweep runs
-  at startup and every hour. `STUDIO_FILE_RETENTION_DAYS` is 7; any other
-  value is ignored. The deploy notes say a bucket lifecycle rule of that age
-  is a backstop for media objects. Usage counts live under `ops/` and hold no
-  paths, inputs, file contents, or account ids. The session clock is
-  `users/<id>/session/session.json` and stores `last_active` and `ended_at`
-  only.
+  remove the current grant key. Revocation is ArtCraft answering 401 on a
+  call made with the exchanged token: Studio removes that current grant key,
+  marks the session ended, and closes that user's Craft sessions. Stored
+  files then follow the 7-day clock. `disconnect_account`, `close_account`,
+  `POST /account/disconnect`, and `POST /account/close` remove the current
+  grant key and every current object under `users/<id>/` from the listing.
+  On a bucket that keeps versions, that is not erasure of every retained
+  copy. A paid generation still starts only after the caller passes
+  `max_credits` that covers the price.
+- **Files.** User data stays under `users/<id>/`. The intended policy is that
+  a file leaves the account 7 days after the session ends, and when the
+  person deletes that file, disconnects, or the account is closed. The
+  session ends after `CRAFT_IDLE_MINUTES` (default 10) without a request. An
+  active session keeps its files, however old those files are. A user with no
+  session record is treated as last active when their newest file was
+  written. The sweep runs at startup and every hour.
+  `STUDIO_FILE_RETENTION_DAYS` is 7; any other value is ignored. Usage counts
+  live under `ops/` and hold no paths, inputs, file contents, or account ids.
+  The session clock is `users/<id>/session/session.json` and stores
+  `last_active` and `ended_at` only.
+- **What a delete does on the community bucket.** At BridgeCraft
+  `0ab4dee742858168f9c521012b5207ebc89383b5`, `S3Storage.delete`,
+  `delete_private`, and `delete_user` call `delete_object` with `Bucket` and
+  `Key` only. `delete_user` lists with `list_objects_v2`, which returns
+  current keys, then deletes those the same way. None of those calls lists
+  object versions or passes `VersionId`. The community bucket
+  `bridgecraft-studio-files` is set to Keep all versions. Backblaze documents
+  that a delete without `versionId` inserts a delete marker and leaves stored
+  versions in place
+  (https://www.backblaze.com/apidocs/s3-delete-object). The key disappears
+  from a current listing. Older versions remain, including earlier media and
+  the encrypted grant at `users/<id>/grant/exchanged-token`. The deploy notes
+  call a 7-day lifecycle rule a backstop for media objects. That rule is not
+  on the bucket card, and a lifecycle rule does not make a delete marker an
+  immediate erasure of kept versions. Until proposal item 7 is met, this RFC
+  does not say that delete, disconnect, account close, or the 7-day sweep
+  permanently deletes stored bytes.
 - **Logs.** Tools do not log file contents. A logging handler redacts JWTs,
   bearer values, ArtCraft job tokens, and the process secrets `GRANT_KEY`,
   the S3 and R2 keys, `ARTCRAFT_API_KEY`, `GITHUB_TOKEN`, and
@@ -139,10 +157,12 @@ that code does on the request path.
   `OAUTH_AUDIENCE` that names a different URL. It refuses to send the
   connector token to ArtCraft, GitHub, or storage. The generation tool sends
   the exchanged token, and that token is absent from the tool result, the
-  stored grant, and the log. Files stay until 7 days after the session ends,
-  and disconnect, a single-file delete, and `POST /account/disconnect` remove
-  them immediately. A wrong audience on that route is rejected and the files
-  stay. Revocation deletes the grant and leaves the files for the 7-day
+  stored grant, and the log. Files stay in the current listing until 7 days
+  after the session ends, and disconnect, a single-file delete, and
+  `POST /account/disconnect` remove the current key. Those tests do not run
+  against a versioned bucket, so they do not show that older versions are
+  gone. A wrong audience on that route is rejected and the current keys stay.
+  Revocation removes the current grant key and leaves the files for the 7-day
   clock. A file's contents are not written to the log. `python -m unittest
   discover -s tests` on this tree passed: 153 tests, 8 skipped.
 
@@ -180,9 +200,12 @@ and it skips the scan step on a fork pull request when the token is absent.
 A green check from that wrapper is not a security proof.
 
 The community privacy page says the site is not operated by Storytold. It
-also states the audience, the encrypted grant, deletion 7 days after the
-session ends, immediate deletion on delete, disconnect, or account close, and
-that logs do not contain file contents, tokens, or secrets.
+also states the audience, the encrypted grant, and that logs do not contain
+file contents, tokens, or secrets. It states deletion 7 days after the
+session ends and immediate deletion on delete, disconnect, or account close.
+Those deletion sentences describe the intended policy and what a current
+listing shows. They are not a verified erasure of versions the bucket keeps.
+That claim stays qualified until proposal item 7 is met.
 
 The community deployment runs on the author's Render account. The author
 operates it. Storytold does not operate that host, does not pay for it, and
@@ -219,10 +242,22 @@ pay for, and staff the service.
    CADCraft, FilmCraft, GridCraft, LightCraft, and EffectCraft stay off until
    that is true.
 6. **Publish the privacy statement, terms, and support pages under Storytold's
-   name** once Storytold hosts the service. The pages in the repository
-   already state the 7-day period, immediate deletion, the audience, where the
-   exchanged token is stored, and the log rule. On the community site those
-   pages say the site is not operated by Storytold.
+   name** once Storytold hosts the service. Hosting waits on item 7. The pages
+   in the repository already state the audience, where the exchanged token is
+   stored, and the log rule. Their deletion sentences describe the intended
+   policy. Storytold's pages do not promise that delete, disconnect, account
+   close, or the 7-day sweep erases every retained version until the
+   regression in item 7 has passed on the bucket Storytold operates. On the
+   community site those pages say the site is not operated by Storytold.
+7. **Erase every retained version before Storytold hosts the service.** This
+   is an adoption gate. `delete`, `delete_private`, `delete_user`, and the
+   retention sweep must list every version of each key they remove, including
+   delete markers, and delete each one by `versionId`. The same requirement
+   covers a single-file delete, disconnect, account close, and expiry at 7
+   days. A regression against a versioned backend must show that after each
+   of those four, no version of the media object or of the encrypted grant
+   remains. A bucket lifecycle rule does not satisfy the gate. That
+   regression is not in the tree at `0ab4dee`.
 
 ## What it needs from other repos
 
