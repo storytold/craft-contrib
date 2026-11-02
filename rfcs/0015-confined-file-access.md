@@ -69,7 +69,10 @@ The copies already disagree, and the gaps show up in the same places:
    junctions. The comparison is of the resolved components, so a root of
    `/sandbox` does not allow `/sandbox-other`, and the string the caller
    passed is not what is compared. On a case-insensitive file system the
-   comparison is case-insensitive. A UNC path (`\\server\share` or
+   comparison is case-insensitive. A differently-cased spelling of a path
+   inside a root is that same path and is allowed. A different directory
+   that only shares a case-folded prefix with a root is outside and is
+   refused. A UNC path (`\\server\share` or
    `//server/share`) and a device path (`\\?\`, `\\.`) are resolved and then
    compared the same way; if they do not fall inside a root, they are
    refused. An 8.3 short name is resolved to the long path before the
@@ -157,22 +160,28 @@ root, with a second folder outside it holding a marker file:
 | junction, where the platform has them | a Windows junction inside the root pointing outside |
 | UNC and device path | `\\server\share\secret.*`, `//server/share/secret.*`, `\\?\` and `\\.\` forms that resolve outside |
 | 8.3 name | a short name inside the root whose long path is outside |
-| case fold | a path that matches a root only by case, on a case-insensitive volume, and must not match a different directory |
+| case fold, same directory | on a case-insensitive volume, another spelling of a file inside the root that differs only by case |
+| case fold, outside | on a case-insensitive volume, a path that shares a case-folded prefix with a root but names a different directory, such as root `/sandbox` and `/sandbox-other/secret.*`, or root `/tmp/Read` and `/tmp/readme/secret.*` |
 | directory swap | a directory inside the root replaced with a symlink to outside after lookup starts, including while creating a new file in that directory |
 | symlink swap | a file inside the root replaced with a symlink to outside after lookup starts |
 | generic command tools | the same paths through `execute`, `run_command`, `batch` |
-| paths inside a document | a document in the root naming each direct-escape path above |
+| paths inside a document | a document in the root naming each refused direct-escape path above, not the same-directory case-fold spelling |
 | refused features | one call per item in section 3 |
 
 A platform that does not have junctions, UNC paths, 8.3 names or a
 case-insensitive volume skips that row. A skip is not a pass.
 
-A direct read or write (every row except "paths inside a document" and
-"refused features") passes only when the call is refused and the outside
-file is not used. The marker bytes must not appear in the reply or in any
-file the call wrote, and the marker file must be unchanged. The directory-swap
-row includes creating a new file while the parent is swapped: that file must
-not appear outside the root.
+A direct read or write (every row except "paths inside a document",
+"refused features", and "case fold, same directory") passes only when the
+call is refused and the outside file is not used. The marker bytes must not
+appear in the reply or in any file the call wrote, and the marker file must
+be unchanged. The directory-swap row includes creating a new file while the
+parent is swapped: that file must not appear outside the root.
+
+"Case fold, same directory" is a different assertion. The call is allowed.
+The bytes read or written are those of the file inside the root. The marker
+bytes must not appear in the reply or in any file the call wrote, and the
+marker file must be unchanged. Refusing that spelling does not pass this row.
 
 "Paths inside a document" is a different assertion. The document opens, the
 outside item is offline, and the reply says why. The marker bytes must not
@@ -192,8 +201,9 @@ network and a read-only filesystem. Paths inside documents were tested where
 the format links files: WordCraft, DeckCraft, DesignCraft, VectorCraft,
 SoundCraft and EffectCraft. The refused-features row was checked per app,
 not as one shared list. That harness run did not include the junction, UNC,
-8.3, case-fold, directory-swap or symlink-swap rows. We will port the harness
-to Rust for the crate and fill those gaps there. This RFC does not claim
+8.3, case-fold (same directory or outside), directory-swap or symlink-swap
+rows. We will port the harness to Rust for the crate and fill those gaps
+there. This RFC does not claim
 those rows have been run.
 
 ### 6. Bridge mode fails closed
@@ -244,5 +254,5 @@ request the scan step is skipped when the token is absent, and instrumented
 tests are skipped when the repository has no Rust crate. A completed wrapper
 check is not security validation. This text does not claim a live exploit
 was reproduced. There is no `confine` crate in `craft-libs`, and the
-junction, UNC, 8.3, case-fold, directory-swap, and symlink-swap rows have
-not been run.
+junction, UNC, 8.3, case-fold (same directory or outside), directory-swap,
+and symlink-swap rows have not been run.
