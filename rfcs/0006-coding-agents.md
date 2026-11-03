@@ -43,8 +43,8 @@ The shared section says:
    outside the bug changed, and the description is true.
 6. **Look for a better PR** before opening yours, as in RFC-0004, and close
    yours when the other is better.
-7. **Don't flood.** Open PRs at a pace the maintainers can review, and don't
-   open new ones while earlier ones have unanswered review comments.
+7. **Keep PRs moving.** Concurrent PRs are welcome; address actionable feedback
+   using the response expectations in core point 14 below.
 8. **Be gentle with GitHub.** Reuse search results, avoid polling loops, and
    stop when you hit a rate limit instead of retrying in a loop.
 9. **A human is responsible.** The person running the agent reads review
@@ -52,27 +52,55 @@ The shared section says:
 
 ## Keeping the rules in sync
 
+### Applicability
+
+The core applies to apps and shared repositories. Select technical rules by
+repository type rather than applying every Rust rule to every repository that
+contains Rust. Repository-specific instructions may be stricter than applicable
+shared rules. Any exception needs a maintainer-approved rationale in the local
+instructions; adopting this RFC does not silently require an architectural rewrite.
+
+In particular, allow a documented tooling exception for Craft PR Review's existing
+Tauri/TypeScript UI: its [merged manifest](https://github.com/storytold/craft-pr-review-tool/blob/197a26dc9f03825bfb72b8e2cc376af87b54e4d8/crates/craft-pr-review/Cargo.toml#L21-L22)
+uses Tauri. This exception does not relax the native Craft apps' Rust-only rule.
+
+### Source and validation
+
 Keep the canonical text in `standards/house-rules-core.md` in this repository,
 with `standards/house-rules-rust.md` for Rust repositories. These are living
-documents: propose changes here for maintainer review, rather than editing the
-copies. If RFC-0013 is accepted, use its point 5 for living documents.
+documents to be published during rollout: propose changes here for maintainer
+review, rather than editing the copies. If RFC-0013 is accepted, use its point 5
+for living documents.
 
 Copy the applicable text into a generated block in each root `AGENTS.md`;
 linking alone is not enough because agents may not follow links. For example:
 
 ```markdown
-<!-- craft-house-rules:start core@<first 12 hex characters of the SHA-256> -->
+<!-- craft-house-rules:start core source=<full merged commit SHA> sha256=<content digest> -->
 ...generated text...
 <!-- craft-house-rules:end -->
 ```
 
-The digest identifies the source text used to generate the block. Checks in
-`craft-common-actions` should fail CI if a generated block has been edited,
-but only warn when an intact block is behind the current source. A maintainer
-runs a command to open a small update PR per repository; there is no scheduled
-bot. Repository-specific rules remain below the block and may be stricter, but
-not weaker. They should cover exact commands, boundaries, task-specific reading,
-and guards that look removable, with the reason for each guard.
+Record core and Rust source revisions and digests independently, using a separate
+block for each. Define the same text and newline normalization for the generator
+and validator. Checks in `craft-common-actions` validate each block against the
+canonical file at its recorded revision and verify that revision belongs to the
+merged source history. A digest edited alongside the text is not proof of integrity.
+An edited block or invalid source reference fails the integrity check. An intact
+older version only warns about freshness. Report inability to check the latest
+source separately; do not describe it as tampering or as confirmed freshness.
+
+### Updates
+
+Prefer automatically opening update PRs, with maintainers reviewing and merging
+them. A maintainer-run command is an acceptable starting point; automation is not
+a prerequisite for adopting this RFC. Both approaches use only merged canonical
+text, keep at most one open synchronization PR per repository, preserve local
+instructions, and link the source revisions with a short summary of rule changes.
+
+Repository-specific rules remain below the blocks, subject to the applicability
+and documented exceptions above. They should cover exact commands, boundaries,
+task-specific reading, and guards that look removable, with the reason for each.
 
 Where `CLAUDE.md` exists, it should import the same instructions with
 `@AGENTS.md`; rare Claude-specific rules can follow. An import avoids symlink
@@ -111,15 +139,24 @@ not already accepted policy.
 10. **Keep secrets and personal details out** of the repository, logs and
     outgoing requests.
 11. **CI stays shared.** Workflows call `storytold/craft-common-actions`. Do not
-    add or change CI in a feature or fix PR; if CI cannot cover the change, link
+    add or change CI in a feature or fix PR, even when related: CI changes get
+    separate PRs for independent review. If CI cannot cover the change, link
     or open an issue there.
 12. **Guards say why.** A check that looks removable carries a comment saying
     what it prevents. Read that reason before changing it.
 13. **Keep instructions usable by everyone.** Do not add machine-specific notes
     or send readers to files they cannot open.
-14. **Go at a pace people can review.** Answer open review comments before
-    opening more PRs. Reuse search results, avoid polling loops, and stop at
-    rate limits.
+14. **Keep PRs moving.** Concurrent PRs are welcome; leaving actionable feedback
+    unaddressed is the concern. Respond within 7 days, with a reminder or escalation
+    at 14 days and eligibility for closure at 30 days. Count elapsed time from
+    an identified actionable request while it awaits the author, not from PR
+    creation. Optional suggestions and unconfirmed bot findings do not start the
+    clock. A substantive fix, explanation or agreed plan addressing that request
+    resets its clock if author action remains; unrelated activity does not.
+    Pause while awaiting reviewer clarification or a maintainer decision. PRs
+    waiting on maintainers do not count against contributors. Maintainers resolve
+    disputed cases and decide closure; closure is never automatic. Reuse search
+    results, avoid polling loops, and stop at rate limits.
 
 ### Rust
 
@@ -134,17 +171,22 @@ not already accepted policy.
 3. **Assets and fonts.** Assets must be original or suitably licensed and
    recorded in `ATTRIBUTION.md` in the same change. Font files belong in
    `storytold/craft-fonts`.
-4. **Rust only.** No handwritten JavaScript or TypeScript, Tauri, Electron or
-   webview shell. Preserve any existing web build.
+4. **Rust only for native Craft apps.** No handwritten JavaScript or TypeScript,
+   Tauri, Electron or webview shell in those apps. Shared tooling follows its
+   documented technical scope and maintainer-approved exceptions, including the
+   Craft PR Review exception above. Preserve any existing web build.
 5. **Time goes through `chrono`.** Do not hand-roll calendar conversion; for
-   dates beyond its range see `standards/time.md` in craft-contrib.
+   dates beyond its range, preserve the existing whole-400-year Gregorian-cycle
+   exception documented in [craft-libs](https://github.com/storytold/craft-libs/blob/main/AGENTS.md).
+   Publish that guidance as `standards/time.md` before switching references to it.
 6. **Contributor credits.** Add or edit only your own person's entry in
    `contributors/people.toml`, and only after asking them. Never guess a name or
    hand-edit `contributors.json`.
 
 ## Rollout
 
-1. Publish the source files and checks.
+1. Publish the source files and checks, documenting technical applicability and
+   approved exceptions before copying rules into each repository.
 2. Pilot on craft-ai-integrations, craft-libs and FigCraft, and measure the
    result and file sizes.
 3. Move the remaining repositories in small PRs. Each PR lists every removed
@@ -167,4 +209,3 @@ not already accepted policy.
   in gitignored `plan/` files?
 - Should agents mention in the PR that they were used? Existing repositories
   differ; should the core block give one answer?
-- Should the shared rules cover shared repositories as well as apps, as proposed?
