@@ -173,9 +173,10 @@ and idle limits. `craft_apps.json` pins each app's release by sha256 and lists
 the tools it hides and the engine commands it refuses. WordCraft, DeckCraft,
 PdfCraft, PhotoCraft, VectorCraft, DesignCraft, FigCraft, and SoundCraft are
 hosted. CADCraft, FilmCraft, GridCraft, and LightCraft stay off until their
-folder lock lands. effectcraft#2719 is merged and is not in the 0.19.0
-release. EffectCraft is not in the hosted image, and it stays off until a
-release that includes that merge is pinned and passes RFC-0015. Everyday
+folder lock lands. effectcraft#2719 is in EffectCraft 0.20.0 and later, not
+in 0.19.0. EffectCraft is not in the hosted image, and it stays off until a
+release that includes that merge is pinned and passes RFC-0015. TextureCraft
+and MaterialCraft are new, and they stay off until they pass it too. Everyday
 edits without a Craft app use FFmpeg, Pillow, and the PDF tools.
 
 Directory pages (privacy, terms, support), tool annotations, and tool names of
@@ -237,10 +238,17 @@ pay for, and staff the service.
    listing, or from getartcraft.com, with nothing to set up. If Storytold
    adopts the connector, the same listings move to Storytold's name and
    ArtCraft sign-in; until then, getartcraft.com only needs to link to them.
+   Publishing waits on the community privacy page, so nobody is sent to a
+   retention promise that isn't true. A listing goes out only when that page
+   explains that versions the bucket keeps outlast a delete, disconnect,
+   account close, or the 7-day sweep, or when item 7's regression has passed on
+   the community bucket and the page can say those versions are erased. Neither
+   is true on the date of this text. adikshan11/bridgecraft#56 is open and would
+   erase versions on that deployment; it has not run against the real bucket.
 5. **Admit an app** only when its latest release passes RFC-0015's escape
    tests, with the manifest updated in the same change as the version.
-   CADCraft, FilmCraft, GridCraft, LightCraft, and EffectCraft stay off until
-   that is true.
+   CADCraft, FilmCraft, GridCraft, LightCraft, EffectCraft, TextureCraft, and
+   MaterialCraft stay off until that is true.
 6. **Publish the privacy statement, terms, and support pages under Storytold's
    name** once Storytold hosts the service. Hosting waits on item 7. The pages
    in the repository already state the audience, where the exchanged token is
@@ -266,15 +274,15 @@ pay for, and staff the service.
 | `artcraft-services` | Issue connector tokens for audience `https://connect.getartcraft.com/mcp`, with the `connector` scope, and accept the exchanged token (scopes `generation` and `library:read`) on generation and on `GET /v1/media_files/project/list` (#2676). The connector already calls that route with the exchanged token and does not send the connector token. |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
-| effectcraft | #2719 is merged and is not in the 0.19.0 release or the hosted image. Pin a later release only after it passes RFC-0015 |
+| effectcraft | #2719 is in 0.20.0 and later, and is not in the hosted image. Pin one of those releases only after it passes RFC-0015 |
 
 ## Alternatives
 
 - **Leave it as a community project.** It keeps working, but it can't be
   listed as ArtCraft, can't use ArtCraft accounts, and depends on one
   person's hosting.
-- **Each app hosts its own connector.** That's thirteen sign-ins, thirteen
-  listings and thirteen copies of the session and storage code.
+- **Each app hosts its own connector.** That's fifteen sign-ins, fifteen
+  listings and fifteen copies of the session and storage code.
 - **Desktop only (#1917).** This is the best fit for people working in the
   app on their own computer. It doesn't reach the web or phones. The hosted
   connector does not bridge to a desktop app.
