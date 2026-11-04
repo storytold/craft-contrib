@@ -174,10 +174,10 @@ the tools it hides and the engine commands it refuses. WordCraft, DeckCraft,
 PdfCraft, PhotoCraft, VectorCraft, DesignCraft, FigCraft, and SoundCraft are
 hosted. CADCraft, FilmCraft, GridCraft, and LightCraft stay off until their
 folder lock lands. effectcraft#2719 is in EffectCraft 0.20.0 and later, not
-in 0.19.0. EffectCraft is not in the hosted image, and it stays off until a
-release that includes that merge is pinned and passes RFC-0015. TextureCraft
-and MaterialCraft are new, and they stay off until they pass it too. Everyday
-edits without a Craft app use FFmpeg, Pillow, and the PDF tools.
+in 0.19.0. adikshan11/bridgecraft#57 adds EffectCraft 0.21.0, TextureCraft
+0.3.0, and MaterialCraft 0.1.0 after RFC-0015's escape tests, with its evals
+passing for all eleven apps. Everyday edits without a Craft app use FFmpeg,
+Pillow, and the PDF tools.
 
 Directory pages (privacy, terms, support), tool annotations, and tool names of
 64 characters or fewer are in the repo. `server.json` is the MCP Registry
@@ -247,8 +247,7 @@ pay for, and staff the service.
    erase versions on that deployment; it has not run against the real bucket.
 5. **Admit an app** only when its latest release passes RFC-0015's escape
    tests, with the manifest updated in the same change as the version.
-   CADCraft, FilmCraft, GridCraft, LightCraft, EffectCraft, TextureCraft, and
-   MaterialCraft stay off until that is true.
+   CADCraft, FilmCraft, GridCraft, and LightCraft stay off until that is true.
 6. **Publish the privacy statement, terms, and support pages under Storytold's
    name** once Storytold hosts the service. Hosting waits on item 7. The pages
    in the repository already state the audience, where the exchanged token is
