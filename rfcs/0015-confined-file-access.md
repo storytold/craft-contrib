@@ -23,8 +23,8 @@ The folder lock is what makes that safe, and today each app has its own:
   one open PR adding them, and GridCraft has three
   (cadcraft#1904, filmcraft#1657, gridcraft#480, #2739 and #2857,
   lightcraft#2176).
-- TextureCraft and MaterialCraft are new. Their source has the flags, and the
-  escape tests have not been run on them.
+- TextureCraft ships the flags. MaterialCraft 0.1.0 has the lock under other
+  names, `--read-root` and `--write-root`.
 - AniCraft has no CLI yet.
 
 The copies already disagree, and the gaps show up in the same places:
@@ -281,4 +281,17 @@ tests are skipped when the repository has no Rust crate. A completed wrapper
 check is not security validation. This text does not claim a live exploit
 was reproduced. There is no `confine` crate in `craft-libs`, and the
 junction, UNC, 8.3, case-fold (same directory or outside), directory-swap,
-symlink-swap, hard-link, and read/write-separation rows have not been run.
+and symlink-swap rows have not been run.
+
+The other rows have been run from outside, on Linux, against the releases
+BridgeCraft pins: WordCraft 0.15.1, DeckCraft 0.15.0, PdfCraft 0.18.1,
+PhotoCraft 0.20.1, VectorCraft 0.21.0, DesignCraft 0.17.0, FigCraft 0.15.0,
+SoundCraft 0.17.0, EffectCraft 0.21.0, TextureCraft 0.3.0 and MaterialCraft
+0.1.0. The harness tries absolute, `..`, file-symlink, folder-symlink,
+hard-link, sibling-prefix and write-into-read-root paths through every tool
+and engine command that takes a path. It's
+[`scripts/escape_checks.py`](https://github.com/adikshan11/bridgecraft/blob/site/host-all-latest/scripts/escape_checks.py)
+in adikshan11/bridgecraft#57. About 24,000 attempts found one problem:
+SoundCraft's `file.export_midi` and `track.save_preset` write through a hard
+link already inside the root and change the file it points to. The harness
+doesn't cover paths named inside a document, or expressions in EffectCraft.
