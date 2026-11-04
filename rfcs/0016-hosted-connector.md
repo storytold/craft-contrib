@@ -100,9 +100,8 @@ that code does on the request path.
   marks the session ended, and closes that user's Craft sessions. Stored
   files then follow the 7-day clock. `disconnect_account`, `close_account`,
   `POST /account/disconnect`, and `POST /account/close` remove the current
-  grant key and every current object under `users/<id>/` from the listing.
-  On a bucket that keeps versions, that is not erasure of every retained
-  copy. A paid generation still starts only after the caller passes
+  grant key and every object under `users/<id>/`, including kept versions and
+  delete markers. A paid generation still starts only after the caller passes
   `max_credits` that covers the price.
 - **Files.** User data stays under `users/<id>/`. The intended policy is that
   a file leaves the account 7 days after the session ends, and when the
@@ -115,23 +114,20 @@ that code does on the request path.
   live under `ops/` and hold no paths, inputs, file contents, or account ids.
   The session clock is `users/<id>/session/session.json` and stores
   `last_active` and `ended_at` only.
-- **What a delete does on the community bucket.** At BridgeCraft
-  `0ab4dee742858168f9c521012b5207ebc89383b5`, `S3Storage.delete`,
-  `delete_private`, and `delete_user` call `delete_object` with `Bucket` and
-  `Key` only. `delete_user` lists with `list_objects_v2`, which returns
-  current keys, then deletes those the same way. None of those calls lists
-  object versions or passes `VersionId`. The community bucket
+- **What a delete does on the community bucket.** The community bucket
   `bridgecraft-studio-files` is set to Keep all versions. Backblaze documents
   that a delete without `versionId` inserts a delete marker and leaves stored
   versions in place
-  (https://www.backblaze.com/apidocs/s3-delete-object). The key disappears
-  from a current listing. Older versions remain, including earlier media and
-  the encrypted grant at `users/<id>/grant/exchanged-token`. The deploy notes
-  call a 7-day lifecycle rule a backstop for media objects. That rule is not
-  on the bucket card, and a lifecycle rule does not make a delete marker an
-  immediate erasure of kept versions. Until proposal item 7 is met, this RFC
-  does not say that delete, disconnect, account close, or the 7-day sweep
-  permanently deletes stored bytes.
+  (https://www.backblaze.com/apidocs/s3-delete-object). Since
+  adikshan11/bridgecraft#56, `S3Storage.delete`, `delete_private`, and
+  `delete_user` list the key's versions and delete markers and delete each one
+  by `VersionId`. An hourly job removes every version that isn't a file's
+  current one, along with delete markers. `/status.json` reports the real
+  bucket's count as `old_versions`, and it read 0 on 4 November 2026. Unit
+  tests run a single-file delete and the hourly job against a fake versioned
+  backend. Proposal item 7's regression, all four paths against a real
+  versioned bucket, has not been run, so this RFC still doesn't say that item 7
+  is met.
 - **Logs.** Tools do not log file contents. A logging handler redacts JWTs,
   bearer values, ArtCraft job tokens, and the process secrets `GRANT_KEY`,
   the S3 and R2 keys, `ARTCRAFT_API_KEY`, `GITHUB_TOKEN`, and
@@ -159,12 +155,10 @@ that code does on the request path.
   the exchanged token, and that token is absent from the tool result, the
   stored grant, and the log. Files stay in the current listing until 7 days
   after the session ends, and disconnect, a single-file delete, and
-  `POST /account/disconnect` remove the current key. Those tests do not run
-  against a versioned bucket, so they do not show that older versions are
-  gone. A wrong audience on that route is rejected and the current keys stay.
+  `POST /account/disconnect` remove the current key. A wrong audience on that route is rejected and the current keys stay.
   Revocation removes the current grant key and leaves the files for the 7-day
   clock. A file's contents are not written to the log. `python -m unittest
-  discover -s tests` on this tree passed: 153 tests, 8 skipped.
+  discover -s tests` on BridgeCraft `8523497` passed: 210 tests, 8 skipped.
 
 Craft apps run as one `<app>-cli mcp` process per user session, in a private
 temporary folder, with `--automation-read-root` and `--automation-write-root`
@@ -204,9 +198,8 @@ The community privacy page says the site is not operated by Storytold. It
 also states the audience, the encrypted grant, and that logs do not contain
 file contents, tokens, or secrets. It states deletion 7 days after the
 session ends and immediate deletion on delete, disconnect, or account close.
-Those deletion sentences describe the intended policy and what a current
-listing shows. They are not a verified erasure of versions the bucket keeps.
-That claim stays qualified until proposal item 7 is met.
+Since adikshan11/bridgecraft#56 the page says those deletions include earlier
+versions. Item 7's regression on a real bucket hasn't verified that yet.
 
 The community deployment runs on the author's Render account. The author
 operates it. Storytold does not operate that host, does not pay for it, and
@@ -239,12 +232,11 @@ pay for, and staff the service.
    adopts the connector, the same listings move to Storytold's name and
    ArtCraft sign-in; until then, getartcraft.com only needs to link to them.
    Publishing waits on the community privacy page, so nobody is sent to a
-   retention promise that isn't true. A listing goes out only when that page
-   explains that versions the bucket keeps outlast a delete, disconnect,
-   account close, or the 7-day sweep, or when item 7's regression has passed on
-   the community bucket and the page can say those versions are erased. Neither
-   is true on the date of this text. adikshan11/bridgecraft#56 is open and would
-   erase versions on that deployment; it has not run against the real bucket.
+   retention promise that isn't true. A listing goes out only when item 7's
+   regression has passed on the community bucket, because that page now says
+   those versions are erased. adikshan11/bridgecraft#56 is merged and erases
+   them on that deployment, and the live bucket reports 0 old versions, but the
+   regression has not run against the real bucket.
 5. **Admit an app** only when its latest release passes RFC-0015's escape
    tests, with the manifest updated in the same change as the version.
    CADCraft, FilmCraft, GridCraft, and LightCraft stay off until that is true.
@@ -263,8 +255,8 @@ pay for, and staff the service.
    covers a single-file delete, disconnect, account close, and expiry at 7
    days. A regression against a versioned backend must show that after each
    of those four, no version of the media object or of the encrypted grant
-   remains. A bucket lifecycle rule does not satisfy the gate. That
-   regression is not in the tree at `0ab4dee`.
+   remains. A bucket lifecycle rule does not satisfy the gate. The erasing code
+   is in BridgeCraft since adikshan11/bridgecraft#56; that regression isn't yet.
 
 ## What it needs from other repos
 
