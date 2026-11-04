@@ -23,6 +23,8 @@ The folder lock is what makes that safe, and today each app has its own:
   one open PR adding them, and GridCraft has three
   (cadcraft#1904, filmcraft#1657, gridcraft#480, #2739 and #2857,
   lightcraft#2176).
+- TextureCraft and MaterialCraft are new. Their source has the flags, and the
+  escape tests have not been run on them.
 - AniCraft has no CLI yet.
 
 The copies already disagree, and the gaps show up in the same places:
@@ -33,8 +35,8 @@ The copies already disagree, and the gaps show up in the same places:
   name files outside it: footage, linked images, fonts, included files. The
   command checks don't see those paths. EffectCraft 0.19.0 still renders
   outside footage this way (effectcraft#2131 F-11). effectcraft#2719, which
-  refuses that read, merged on 31 October 2026. That merge is not in the
-  0.19.0 release, and EffectCraft is not in the hosted BridgeCraft image.
+  refuses that read, merged on 31 October 2026. It is in 0.20.0 and later, not
+  in 0.19.0, and EffectCraft is not in the hosted BridgeCraft image.
 - **Flags that do nothing.** A FilmCraft build once accepted the flags and
   ignored them, so `--help` alone doesn't prove a build is confined. RFC-0012's
   proposed "reject unknown flags" rule would cover the parsing. This RFC covers what the
@@ -54,7 +56,9 @@ The copies already disagree, and the gaps show up in the same places:
 ### 1. What the flags mean
 
 1. `--automation-read-root DIR` and `--automation-write-root DIR` are each
-   repeatable. A write root can also be read.
+   repeatable. A write root can also be read. A read root that isn't also a
+   write root can't be written: no saving over a file, creating, renaming, or
+   deleting inside it.
 2. An agent entry point (`<app>-cli mcp`, and any other headless automation
    entry point) is confined. It refuses to start unless both a read root and
    a write root are set. An unset root is a refusal of the feature, not
@@ -85,6 +89,18 @@ The copies already disagree, and the gaps show up in the same places:
    "absolute paths only" rule.)
 7. A refusal is an error that names the path, the access (read or write) and
    the roots. It never falls back to a default location.
+8. Hard links are refused, because resolving a path can't reveal them. A hard
+   link inside a root and a name outside it are one file, so reading or writing
+   the inside name reaches the outside one. After opening a regular file, the
+   confined open reads its link count from the handle (`st_nlink` from `fstat`,
+   `nNumberOfLinks` from `GetFileInformationByHandle`) and refuses the file if
+   the count is above one. A link count says that another name exists, not
+   where, so two names that are both inside a root are refused too. A volume
+   that can't report link counts can't be used as a root, and naming one is a
+   startup error. A confined process can't create hard links.
+   This covers links that exist when the file is opened. It doesn't cover a
+   link that another process adds to an open file, so a root must not be
+   writable by anyone the boundary protects against.
 
 ### 2. What is checked
 
@@ -147,8 +163,9 @@ command catalogue. The crate's maintainer is named in the PR that adds it.
 
 ### 5. Shared escape tests
 
-Each app runs the same cases in CI, against a temporary folder used as the
-root, with a second folder outside it holding a marker file:
+Each app runs the same cases in CI, with three temporary folders: a read
+root, a separate write root, and a folder outside both holding a marker file.
+`<root>` in the table means each of the two roots in turn:
 
 | Case | Paths tried |
 |---|---|
@@ -164,15 +181,18 @@ root, with a second folder outside it holding a marker file:
 | case fold, outside | on a case-insensitive volume, a path that shares a case-folded prefix with a root but names a different directory, such as root `/sandbox` and `/sandbox-other/secret.*`, or root `/tmp/Read` and `/tmp/readme/secret.*` |
 | directory swap | a directory inside the root replaced with a symlink to outside after lookup starts, including while creating a new file in that directory |
 | symlink swap | a file inside the root replaced with a symlink to outside after lookup starts |
+| hard link | `<root>/hard.*` is a hard link to `<outside>/secret.*`; reading it and saving over it |
+| read/write separation | in the read root: read a file, save over it, create, rename and delete. In the write root: the same calls |
 | generic command tools | the same paths through `execute`, `run_command`, `batch` |
 | paths inside a document | a document in the root naming each refused direct-escape path above, not the same-directory case-fold spelling |
 | refused features | one call per item in section 3 |
 
-A platform that does not have junctions, UNC paths, 8.3 names or a
+A platform that does not have junctions, UNC paths, 8.3 names, hard links or a
 case-insensitive volume skips that row. A skip is not a pass.
 
 A direct read or write (every row except "paths inside a document",
-"refused features", and "case fold, same directory") passes only when the
+"refused features", "read/write separation", and "case fold, same directory")
+passes only when the
 call is refused and the outside file is not used. The marker bytes must not
 appear in the reply or in any file the call wrote, and the marker file must
 be unchanged. The directory-swap row includes creating a new file while the
@@ -189,6 +209,12 @@ appear in the reply or in any file the call wrote, and the marker file must
 be unchanged. Refusing to open the document does not pass this row. An open
 that reads or modifies the outside file fails it.
 
+"Read/write separation" is a different assertion. In the read root, the read
+succeeds with the file's bytes. Saving, creating, renaming and deleting are
+each refused, and the folder's contents and bytes are unchanged afterwards. In
+the write root, every call succeeds. An implementation that lets writes reach
+the read root fails this row, even if it passes every escape row.
+
 "Refused features" passes when the call is refused with a confinement error.
 It does not open or change the outside file.
 
@@ -201,8 +227,8 @@ network and a read-only filesystem. Paths inside documents were tested where
 the format links files: WordCraft, DeckCraft, DesignCraft, VectorCraft,
 SoundCraft and EffectCraft. The refused-features row was checked per app,
 not as one shared list. That harness run did not include the junction, UNC,
-8.3, case-fold (same directory or outside), directory-swap or symlink-swap
-rows. We will port the harness to Rust for the crate and fill those gaps
+8.3, case-fold (same directory or outside), directory-swap, symlink-swap,
+hard-link or read/write-separation rows. We will port the harness to Rust for the crate and fill those gaps
 there. This RFC does not claim
 those rows have been run.
 
@@ -255,4 +281,4 @@ tests are skipped when the repository has no Rust crate. A completed wrapper
 check is not security validation. This text does not claim a live exploit
 was reproduced. There is no `confine` crate in `craft-libs`, and the
 junction, UNC, 8.3, case-fold (same directory or outside), directory-swap,
-and symlink-swap rows have not been run.
+symlink-swap, hard-link, and read/write-separation rows have not been run.
