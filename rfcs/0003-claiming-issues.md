@@ -3,9 +3,10 @@
 ## Summary
 
 Before working on an issue, check that it is still free and still broken,
-then say on the issue that you are taking it. A claim expires if nothing
-visible happens, and is released when you stop. People and coding agents
-follow the same rules, in every craft-app repository.
+then say on the issue that you are taking it. A comment-only, unstarted claim
+expires if nothing visible happens; work with an active draft calls for a
+check-in before takeover. Release a claim when you stop. People and coding
+agents follow the same rules, in every craft-app repository.
 
 ## Motivation
 
@@ -41,9 +42,12 @@ causing collisions.
 4. **What is not a claim.** Automated comments (for example "Possibly related"
    from bots), reactions, and messages on Discord or elsewhere. If it is not on
    the issue or in a linked PR, it does not count.
-5. **A claim lasts 24 hours** without a visible sign of progress: a draft PR, a
-   commit pushed to a linked PR, or an update comment on the issue. After that
-   anyone can take the issue, by commenting that they are taking it over.
+5. **A comment-only, unstarted claim lasts 24 hours** without a visible sign of
+   progress: a draft PR, a commit pushed to a linked PR, or an update comment on
+   the issue. After that anyone can take the issue, by commenting that they are
+   taking it over. **An active draft PR does not automatically expire after
+   24 hours.** Before taking over work with an active draft, check in with its
+   author on the issue or linked PR and coordinate next steps.
 6. **Release when you stop.** If you give up, get stuck, or find that someone
    else's PR is better, say so on the issue, and add what you found so the
    next person starts further ahead.
@@ -61,6 +65,10 @@ What happens when two PRs exist anyway is covered by RFC-0004.
 The rules go into each repository's contributing guide and PR template, and
 into the shared `AGENTS.md` section (RFC-0006).
 
+When this RFC is adopted, align house rule 2 in `standards/house-rules-core.md`
+(RFC-0006) and its repository copies with the claim-expiry and active-draft
+distinction here. The deployed house rule remains unchanged until then.
+
 ## Alternatives
 
 - **No written rule, keep commenting informally** (suggested in
@@ -74,7 +82,7 @@ into the shared `AGENTS.md` section (RFC-0006).
 
 ## Open questions
 
-- Is 24 hours the right length? (storytold/photocraft#3561 also suggests 24.) Large features may need a longer claim, stated
-  in the claiming comment.
+- After a check-in on an apparently abandoned draft receives no response, who
+  should release the claim, and when?
 - How should this fit the labels and triage process proposed in
   storytold/craft-libs#119 (section 6 there has its own claim rules)?
