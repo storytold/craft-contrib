@@ -108,12 +108,11 @@ portability problems on Windows. Budget 3 KB for the core block and a 10 KB
 soft limit for the root file, measured in bytes. Measure the pilot rather than
 assuming that longer context improves results.
 
-## Candidate shared text
+## Shared text
 
-The following is proposed text for the source files, subject to the open
-questions below. It incorporates the nine points above and rules repeated in
-existing repositories. References to other open RFCs describe proposed policy,
-not already accepted policy.
+This is the text for the source files. It incorporates the nine points above
+and rules repeated in existing repositories. References to other open RFCs
+describe proposed policy, not already accepted policy.
 
 ### Core
 
@@ -132,10 +131,13 @@ not already accepted policy.
    yours if the other is better or equal, and say why.
 7. **Report only what ran.** Say what you tested and what you could not run. If
    you cannot build or test locally, say so and rely on CI before marking ready.
-8. **Changes reach `main` through a pull request.** Do not push directly. The
-   possible maintainer exception is an open question.
-9. **Stop and ask about decisions outside your remit:** licensing, publishing,
-   releases, secrets and anything hard to undo. Otherwise keep working.
+8. **Changes reach `main` through a pull request.** Do not push directly.
+   Branch protection enforces this. There is no maintainer exception.
+9. **Stop and ask only about:** licensing outside the allowlist, publishing,
+   releases, pushing to a new remote, secrets, spending money, destructive
+   git, and anything else that is hard to undo. Otherwise keep working.
+   `plan/` is not a source of rules. It is a gitignored maintainer notebook.
+   An agent that does not have it does not ask for it and does not stop.
 10. **Keep secrets and personal details out** of the repository, logs and
     outgoing requests.
 11. **CI stays shared.** Workflows call `storytold/craft-common-actions`. Do not
@@ -157,6 +159,8 @@ not already accepted policy.
     waiting on maintainers do not count against contributors. Maintainers resolve
     disputed cases and decide closure; closure is never automatic. Reuse search
     results, avoid polling loops, and stop at rate limits.
+15. **No agent attribution.** A pull request does not say that an agent wrote
+    it.
 
 ### Rust
 
@@ -186,11 +190,14 @@ not already accepted policy.
 ## Rollout
 
 1. Publish the source files and checks, documenting technical applicability and
-   approved exceptions before copying rules into each repository.
+   approved exceptions before copying rules into each repository. If the
+   licence allowlist still lives only in `craftrules`, copy it into these
+   rules. Do not publish the rest of that repository.
 2. Pilot on craft-ai-integrations, craft-libs and FigCraft, and measure the
    result and file sizes.
 3. Move the remaining repositories in small PRs. Each PR lists every removed
-   rule and where it went, so no guard disappears quietly.
+   rule and where it went, so no guard disappears quietly. Delete links to
+   `craftrules`.
 
 ## Alternatives
 
@@ -199,13 +206,16 @@ not already accepted policy.
 - **Ban or limit AI-assisted PRs.** The craft apps chose to welcome them; this
   RFC keeps that choice and makes the volume easier to handle.
 
-## Open questions
+## Decided
 
-- Should maintainers have an exception to the proposed PR-only rule for `main`?
-  Some repositories currently permit direct pushes and others prohibit them.
-- Should useful standards from `craftrules` be published here, or should that
-  repository be retired? Some existing links are inaccessible to outsiders.
-- Does the public list of decisions requiring a pause cover what currently lives
-  in gitignored `plan/` files?
-- Should agents mention in the PR that they were used? Existing repositories
-  differ; should the core block give one answer?
+- **`main` is pull requests only.** Branch protection is on. Nobody pushes to
+  it directly, including maintainers.
+- **`craftrules` is retired.** Its old tree is not published here. The house
+  rules replace it. Rollout copies the licence allowlist across if these
+  rules do not already contain it, then deletes the links. That is not
+  another RFC.
+- **`plan/` decides nothing.** The stop-and-ask list in the shared text is
+  the only one. A missing `plan/` is not a reason to stop or to ask for the
+  folder.
+- **No agent attribution.** A pull request does not say that an agent wrote
+  it. That line is redundant here, and a repository rule may not require it.
