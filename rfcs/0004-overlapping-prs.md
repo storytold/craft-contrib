@@ -2,10 +2,10 @@
 
 ## Summary
 
-When two open PRs fix the same issue, the authors compare them first, and the
-better fix wins, not the faster one. The author whose PR loses closes it and
-says why. Maintainers review the earlier valid claim first and only decide
-when the authors can't.
+When two open PRs fix the same behaviour, the authors compare them first, and
+the better fix wins, not the faster one. The author whose PR loses closes it
+and says why. Maintainers compare correctness, completeness and verification
+and decide only when the authors can't.
 
 ## Motivation
 
@@ -22,7 +22,10 @@ one of a few reasons. Writing these down makes everyone's first PR better.
 ## Proposal
 
 1. **Look before opening.** Right before opening a PR, search open PRs for the
-   issue number and for the function or file you changed.
+   issue number and for the function or file you changed. These find candidates,
+   not proof of duplication: compare the actual behaviour each PR changes. PRs
+   for independent parts of the same issue, or that touch the same file without
+   overlapping behaviour, are not duplicates and should remain separate.
 2. **Compare, then decide yourself.** If another PR fixes the same thing,
    compare the two with these questions:
    - Does it fix only where the bug is? A fix limited to the one platform or
@@ -43,8 +46,10 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    other could use (for example a common helper), the specific PR waits for
    the general one and is rebuilt on top of it.
 6. **Maintainers decide ties.** When the authors don't agree, a maintainer
-   picks one and says why on both PRs. By default the earlier valid claim
-   (RFC-0003) is reviewed first.
+   compares correctness, completeness and verification using the questions in
+   point 2, then explains the choice on both PRs. An earlier claim coordinates
+   work (RFC-0003); it does not give an implementation priority for review or
+   merge. Preserve useful parts and contributor credit as in point 4.
 
 ## Alternatives
 
