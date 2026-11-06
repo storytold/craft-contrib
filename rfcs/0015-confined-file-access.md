@@ -36,20 +36,22 @@ The copies already disagree, and the gaps show up in the same places:
   command checks don't see those paths. EffectCraft 0.19.0 still renders
   outside footage this way (effectcraft#2131 F-11). effectcraft#2719, which
   refuses that read, merged on 31 October 2026. It is in 0.20.0 and later, not
-  in 0.19.0, and EffectCraft is not in the hosted BridgeCraft image.
+  in 0.19.0. The hosted BridgeCraft image pins EffectCraft 0.21.1
+  (adikshan11/bridgecraft#66), which is after that fix.
 - **Flags that do nothing.** A FilmCraft build once accepted the flags and
   ignored them, so `--help` alone doesn't prove a build is confined. RFC-0012's
   proposed "reject unknown flags" rule would cover the parsing. This RFC covers what the
   flags must do.
 - **Code and network.** Each app decides on its own whether scripts, plug-ins,
   running programs, URL fetches and control ports are allowed while confined.
-- **Settings that point elsewhere.** SoundCraft 0.14.0, the version in the
-  hosted BridgeCraft image, accepts `setup.disk_allocation` with a record
-  folder outside the roots (soundcraft#1224). Nothing records into that
-  folder yet, but it would once recording uses the setting. soundcraft#1225
-  is still open; it would refuse the outside path. The hosted image blocks
-  that command until the refusal ships. SoundCraft 0.15.0 is a later release
-  and is not the hosted build.
+- **Settings that point elsewhere.** SoundCraft 0.14.0 accepts
+  `setup.disk_allocation` with a record folder outside the roots
+  (soundcraft#1224). Nothing records into that folder yet, but it would once
+  recording uses the setting. soundcraft#1225 is still open; it would refuse
+  the outside path. That report is about 0.14.0. SoundCraft 0.15.0 is a later
+  release, and it is not the hosted build. 0.14.0 is not the hosted build
+  either. adikshan11/bridgecraft#66, merged on 5 November 2026, pins
+  SoundCraft 0.17.1, and that image blocks the command while #1225 is open.
 
 ## Proposal
 
@@ -138,7 +140,9 @@ available while file access is confined".
 ### 4. One shared crate
 
 Under RFC-0009's "security boundaries" exception, `craft-libs` gets a
-`confine` crate with:
+`confine` crate. RFC-0009 is still a proposal. If that exception changes,
+the crate still belongs in `craft-libs`, and the maintainers name the rule
+that lets shared security code land. The crate has:
 
 - `Confinement { read, write }`, built from the parsed flags. Building it
   for an agent entry point fails if either root is unset.
@@ -228,9 +232,11 @@ the format links files: WordCraft, DeckCraft, DesignCraft, VectorCraft,
 SoundCraft and EffectCraft. The refused-features row was checked per app,
 not as one shared list. That harness run did not include the junction, UNC,
 8.3, case-fold (same directory or outside), directory-swap, symlink-swap,
-hard-link or read/write-separation rows. We will port the harness to Rust for the crate and fill those gaps
-there. This RFC does not claim
-those rows have been run.
+hard-link or read/write-separation rows. A later sweep, recorded under
+Decision process, did run the hard-link row and a separate read root and
+write root. We will port the harness to Rust for the crate and fill the
+remaining gaps there. This RFC does not claim the junction, UNC, 8.3,
+case-fold, directory-swap or symlink-swap rows have been run.
 
 ### 6. Bridge mode fails closed
 
@@ -249,7 +255,9 @@ this is not optional for an app that says it does.
    an app had a gap.
 3. For CADCraft, FilmCraft, GridCraft and LightCraft, the open PRs adopt the
    crate instead of their own checks. As RFC-0004 proposes, one PR per app goes
-   ahead and the others are closed in its favour.
+   ahead and the others are closed in its favour. RFC-0004 is still a
+   proposal (#5). If it changes, this step is still one shared crate, and the
+   maintainers choose which pull request proceeds.
 4. An app's README says "follows RFC-0015" once it passes.
 
 ## Alternatives
@@ -272,8 +280,12 @@ this is not optional for an app that says it does.
 ## Decision process
 
 A Storytold maintainer comments the RFC-0000 comment-period end date on this
-pull request. This RFC does not set that date. No end-date comment is
-recorded.
+pull request. This RFC does not set that date. On 6 November 2026
+@Jeremy8776 commented that the period ends on Monday 9 November 2026, at the
+end of the day UK time. RFC-0000 says a member of `craft-app-team` starts
+the period. GitHub does not show that comment's author as a member of the
+organization on this pull request, so this text does not count the comment
+as the start.
 
 craft-contrib's workflow is the shared SonarCloud wrapper. On a fork pull
 request the scan step is skipped when the token is absent, and instrumented
@@ -284,14 +296,26 @@ junction, UNC, 8.3, case-fold (same directory or outside), directory-swap,
 and symlink-swap rows have not been run.
 
 The other rows have been run from outside, on Linux, against the releases
-BridgeCraft pins: WordCraft 0.15.1, DeckCraft 0.15.0, PdfCraft 0.18.1,
-PhotoCraft 0.20.1, VectorCraft 0.21.0, DesignCraft 0.17.0, FigCraft 0.15.0,
-SoundCraft 0.17.0, EffectCraft 0.21.0, TextureCraft 0.3.0 and MaterialCraft
-0.1.0. The harness tries absolute, `..`, file-symlink, folder-symlink,
-hard-link, sibling-prefix and write-into-read-root paths through every tool
-and engine command that takes a path. It's
-[`scripts/escape_checks.py`](https://github.com/adikshan11/bridgecraft/blob/site/host-all-latest/scripts/escape_checks.py)
-in adikshan11/bridgecraft#57. About 24,000 attempts found one problem:
-SoundCraft's `file.export_midi` and `track.save_preset` write through a hard
-link already inside the root and change the file it points to. The harness
-doesn't cover paths named inside a document, or expressions in EffectCraft.
+adikshan11/bridgecraft#57 pinned: WordCraft 0.15.1, DeckCraft 0.15.0,
+PdfCraft 0.18.1, PhotoCraft 0.20.1, VectorCraft 0.21.0, DesignCraft 0.17.0,
+FigCraft 0.15.0, SoundCraft 0.17.0, EffectCraft 0.21.0, TextureCraft 0.3.0
+and MaterialCraft 0.1.0. The harness tries absolute, `..`, file-symlink,
+folder-symlink, hard-link, sibling-prefix and write-into-read-root paths
+through every tool and engine command that takes a path. It is
+[`scripts/escape_checks.py`](https://github.com/adikshan11/bridgecraft/blob/ed06a71e42d16b2a6a4e840151877143b84688f8/scripts/escape_checks.py).
+About 24,000 attempts found one problem: SoundCraft 0.17.0's
+`file.export_midi` and `track.save_preset` write through a hard link already
+inside the root and change the file it points to
+([soundcraft#1359](https://github.com/storytold/soundcraft/issues/1359)).
+[soundcraft#1360](https://github.com/storytold/soundcraft/pull/1360) would
+write to a temporary file and rename it over the destination. That pull
+request is still open, and the change is not in SoundCraft 0.17.1.
+adikshan11/bridgecraft#66, merged on 5 November 2026, pins WordCraft 0.15.2,
+DeckCraft 0.15.1, PdfCraft 0.18.2, PhotoCraft 0.20.2, VectorCraft 0.21.1,
+DesignCraft 0.17.2, FigCraft 0.15.1, SoundCraft 0.17.1, EffectCraft 0.21.1,
+TextureCraft 0.3.2 and MaterialCraft 0.1.2. Each app's note on that commit
+says the same harness reached nothing outside the roots. SoundCraft's note
+is 693 attempts. The image still blocks `file.export_midi`,
+`track.save_preset` and `setup.disk_allocation`, so that run did not exercise
+the two commands #1359 is about. The harness doesn't cover paths named
+inside a document, or expressions in EffectCraft.
