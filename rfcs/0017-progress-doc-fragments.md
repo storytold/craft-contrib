@@ -1,5 +1,7 @@
 # RFC-0017: Progress-doc entries are fragments
 
+Updated by: [RFC-0018](0018-gap-parity-items.md) (open-PR migration).
+
 Every pull request edits the same few lines of `ROADMAP.md` and the other
 progress docs, so any two open PRs conflict there. In WordCraft the
 status line holds a "previously …" chain of 100+ entries, and the line
@@ -60,14 +62,20 @@ follow-up RFC, not this one. `CHANGELOG` did not show up as a conflict.
   alone.
 - Depend on the craft-libs joiner from xtask, and add the check to CI.
 - Write new log entries as fragments. Existing entries stay where they are.
+- Before enabling joins, inventory open PRs that edit the old log or status
+  lines. Convert their intended entries to fragments with a scripted pass,
+  and compare the joined result to the intended change. Ambiguous edits
+  require author/maintainer review; do not silently drop them. Until
+  converted, old-format edits must fail safely with a migration diagnostic.
+  RFC-0018 adds this migration requirement for both logs and item tables.
 - Tell agents about the change in `AGENTS.md` (RFC-0006).
 
 ## Not in this RFC
 
 What the progress docs say. Release-note fragments, which MailCraft
 already has. `docs/gaps.md` and the parity docs: they track the state of
-each item rather than appending entries, so a follow-up RFC should give
-them one file per item, with a `status:` field, soon rather than later.
+each item rather than appending entries. [RFC-0018](0018-gap-parity-items.md)
+gives them one file per item, with fields for each configured state column.
 
 ## References
 
