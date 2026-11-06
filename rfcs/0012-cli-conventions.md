@@ -56,11 +56,7 @@ maintainers, so the other apps can follow it.
    value starting with `-` is written `--out=-image.png`; negative numbers are
    accepted where they mean something.
 5. **Paths are paths.** Arguments are read as `OsString` and paths kept as
-   `PathBuf`, so a file name that isn't valid Unicode reaches the command. The
-   exception is a path the CLI only hands on through a text protocol, such as
-   an engine command that takes JSON: that one may be a `String`, so clap
-   refuses a non-Unicode name as a usage error before any work starts, instead
-   of the command failing halfway.
+   `PathBuf`, so a file name that isn't valid Unicode reaches the command.
 6. **Nothing destructive by default.** An output that would replace an input is
    refused unless a flag such as `--in-place` asks for it.
 7. **Environment variables** are `<APP>_<NAME>` fallbacks for flags, declared
@@ -120,8 +116,7 @@ maintainers, so the other apps can follow it.
      flag accepted;
    - `--` before a positional that starts with `-`, and negative numbers where
      the flag takes them;
-   - a path that isn't valid Unicode reaching the command (or refused as a
-     usage error, under rule 1.5's exception);
+   - a path that isn't valid Unicode reaching the command;
    - a bad typed value, malformed JSON, conflicting flags and a flag the mode
      doesn't use, each refused before any file is written;
    - an output that would replace an input refused without the overwrite flag;
@@ -161,6 +156,25 @@ moves the CLI to these rules, turns on the ast-grep workflow, and adds
 to the CLI's book page, listing any rule it doesn't follow yet and why, and
 which paths the ast-grep scan covers. An app claims the line once rule 2.7's
 tests pass and its packages install the generated files.
+
+### 5. Reference implementation: known exceptions
+
+PhotoCraft is the starting point for these conventions, not a claim that its
+whole CLI already complies. At
+[`1f7fc0f5`](https://github.com/storytold/photocraft/tree/1f7fc0f53696e54da79b95015abb37d7c22cdd1a):
+
+- **Rule 1.1:** the root clap command declares a version but does not set
+  `propagate_version`, so `--version`/`-V` work at the top level only.
+  Full adoption needs version propagation and tests for every subcommand.
+- **Rule 1.5:** `DropletArgs.file`, `.inputs` and `.out` use `String`,
+  `Vec<String>` and `Option<String>`. They reject non-Unicode paths during
+  parsing. Full adoption needs native path types and a path through execution
+  that preserves them, with a non-Unicode-path test.
+
+These are reference implementation gaps, not exceptions for the twelve ports.
+The reference must list them when describing its compliance; a clean ast-grep
+scan alone does not establish that these or the other behavior and packaging
+requirements pass.
 
 ## Alternatives
 
