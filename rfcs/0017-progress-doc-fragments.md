@@ -48,9 +48,8 @@ follow-up RFC, not this one. `CHANGELOG` did not show up as a conflict.
   `--write` moves the fragments under their heading, newest first by
   commit date, and deletes them. Only the joiner touches the log heading
   and the status line, so the join commit does not conflict with pull
-  requests. Anything that reads `ROADMAP.md` raw, including craftrules
-  scripts and the site generator, calls the joiner. That change lands
-  before rollout.
+  requests. Anything that reads `ROADMAP.md` raw, including the site
+  generator, calls the joiner. That change lands before rollout.
 - **CI** (`cargo xtask ci`) fails a pull request whose fragment does not
   join: bad format, an empty file, a duplicate id.
 
@@ -70,17 +69,10 @@ already has. `docs/gaps.md` and the parity docs: they track the state of
 each item rather than appending entries, so a follow-up RFC should give
 them one file per item, with a `status:` field, soon rather than later.
 
-## Before rollout
-
-craftrules `standards/progress-docs.md` changes to match this RFC. It
-could not be read while this was drafted or decided, so its owner
-confirms the two agree before any app rolls the joiner out.
-
 ## References
 
 - MailCraft#464 (release-note fragments), MailCraft#495 (status lines),
   MailCraft#759, MailCraft#776
 - MailCraft `xtask/src/release_notes.rs`,
   `packaging/release-notes.d/README.md`, `docs/releasing.md`
-- craftrules `standards/progress-docs.md`
 - RFC-0006 (`AGENTS.md`)
