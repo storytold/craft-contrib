@@ -66,8 +66,8 @@ follow-up RFC, not this one. `CHANGELOG` did not show up as a conflict.
 
 What the progress docs say. Release-note fragments, which MailCraft
 already has. `docs/gaps.md` and the parity docs: they track the state of
-each item rather than appending entries, so a follow-up RFC should give
-them one file per item, with a `status:` field, soon rather than later.
+each item rather than appending entries. [RFC-0018](0018-gap-parity-items.md)
+gives them one file per item, with a `status:` field.
 
 ## References
 
