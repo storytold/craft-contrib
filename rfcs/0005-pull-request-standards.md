@@ -40,9 +40,16 @@ anywhere.
 7. **Red `main`.** If a check fails on a test your PR does not touch, check
    whether the same test fails on `main`. If it does, say so on the PR with a
    link to the failing run on `main`, instead of changing unrelated code.
-8. **Answer reviews quickly.** Reply to review comments within a day, or say
-   when you will. A PR with an unanswered question for more than 3 days may be
-   closed by a maintainer and reopened later.
+8. **Keep review feedback moving.** Follow accepted
+   [house rule 14](https://github.com/storytold/craft-contrib/blob/main/standards/house-rules-core.md):
+   respond within 7 days to an identified actionable request, with a reminder
+   or escalation at 14 days and eligibility for closure at 30 days. Count only time
+   when that request awaits the author, not time since the PR opened. Optional
+   suggestions and unconfirmed bot findings do not start the clock. A substantive
+   fix, explanation or agreed plan addressing that request resets it if author
+   action remains; unrelated activity does not. Pause while awaiting reviewer
+   clarification or a maintainer decision. Waiting on maintainers does not count
+   against the contributor. A maintainer decides closure; it is never automatic.
 9. **Keep it current.** If `main` moved and the PR conflicts, rebase it and
    check that the fix is still needed (the bug may have been fixed meanwhile).
 
@@ -54,6 +61,8 @@ anywhere.
 - **A PR template only.** A template is the way to apply this RFC, not a
   replacement for agreeing on the rules.
 
-## Open questions
+## Relationship to the accepted house rules
 
-- Is 3 days the right limit for an unanswered review question? Agents answer in minutes, but the person running them may be away over a weekend.
+The review-response timing question is covered by accepted RFC-0006 and house
+rule 14. This proposal uses that clock rather than introducing a separate
+one-day response or three-day closure threshold.
