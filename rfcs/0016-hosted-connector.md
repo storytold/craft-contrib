@@ -37,7 +37,11 @@ assistant directories under Storytold's name.
 
 Studio is a Python MCP server (streamable HTTP). The community deployment is
 live at `https://bridgecraft.onrender.com/studio`. The controls below are what
-that code does on the request path.
+that code does on the request path. Dated checks, including the bucket card,
+the tenant's API list, a test count, and what the process published on a
+given day, are in
+[0016-hosted-connector-observations.md](0016-hosted-connector-observations.md).
+This section keeps the behavior the decision depends on.
 
 - **Sign-in.** Auth0 is the sign-in service. The community deployment's
   authorization server is `https://artcraft-studio.us.auth0.com/`. The
@@ -54,27 +58,15 @@ that code does on the request path.
 - **Where the community deployment runs.** Auth0 handles sign-in. File
   storage is a private Backblaze B2 bucket when the `S3_*` variables are set;
   Cloudflare R2 is the other storage path, used only when the `R2_*` variables
-  are set instead. On 1 November 2026 the Backblaze card for
-  `bridgecraft-studio-files` shows File Lifecycle as Keep all versions. That
-  card does not show a 7-day lifecycle rule. Render runs the process (service
-  `bridgecraft` at `bridgecraft.onrender.com`, health check at `/health`). The image runs as
-  the non-root user `studio`. Generation and library reads call
-  `https://api.storyteller.ai` with the exchanged token. The public project
-  catalog calls `api.github.com`, and that call refuses the connector token
-  as well. Upload and download links expire (15 minutes and one hour). The
-  process answering `https://bridgecraft.onrender.com` on 1 November 2026
-  publishes protected-resource metadata whose resource is
-  `https://connect.getartcraft.com/mcp`, whose authorization server is
-  `https://artcraft-studio.us.auth0.com/`, and whose scope is `connector`.
-  `connect.getartcraft.com` does not resolve. This text does not show that
-  Auth0 issues a token for that audience. The connector accepts only that
-  audience. The tenant's API list on that date has two custom APIs: ArtCraft
-  Studio, audience `https://artcraft-storytold-mcp.onrender.com/studio`, and
-  bridgecraft-artcraft, audience `https://bridgecraft.onrender.com/studio`.
-  It also has the Auth0 Management API. It has no API for
-  `https://connect.getartcraft.com/mcp` and no API for
-  `https://api.storyteller.ai`. That list does not show the scopes on the two
-  custom APIs, and this text does not show a completed token exchange.
+  are set instead. Render runs the process. The image runs as the non-root
+  user `studio`. Generation and library reads call `https://api.storyteller.ai`
+  with the exchanged token. The public project catalog calls `api.github.com`,
+  and that call refuses the connector token. Upload and download links expire
+  (15 minutes and one hour). The 1 November 2026 check of the bucket card, the
+  protected-resource metadata, and the tenant's API list is in the
+  observations. That check did not show an API for the connector audience or
+  for `https://api.storyteller.ai`, and it did not show a completed token
+  exchange. `connect.getartcraft.com` did not resolve.
 - **The connector token stays on the connector.** It is not sent to ArtCraft
   or to any other upstream API. Listing models and estimating a cost send no
   `Authorization` header. Generation, job status, and library reads use the
@@ -122,12 +114,11 @@ that code does on the request path.
   adikshan11/bridgecraft#56, `S3Storage.delete`, `delete_private`, and
   `delete_user` list the key's versions and delete markers and delete each one
   by `VersionId`. An hourly job removes every version that isn't a file's
-  current one, along with delete markers. `/status.json` reports the real
-  bucket's count as `old_versions`, and it read 0 on 4 November 2026. Unit
-  tests run a single-file delete and the hourly job against a fake versioned
-  backend. Proposal item 7's regression, all four paths against a real
-  versioned bucket, has not been run, so this RFC still doesn't say that item 7
-  is met.
+  current one, along with delete markers. Unit tests run a single-file delete
+  and the hourly job against a fake versioned backend. Proposal item 7's
+  regression, all four paths against a real versioned bucket, has not been
+  run, so this RFC still doesn't say that item 7 is met. The 4 November 2026
+  reading of `old_versions` is in the observations.
 - **Logs.** Tools do not log file contents. A logging handler redacts JWTs,
   bearer values, ArtCraft job tokens, and the process secrets `GRANT_KEY`,
   the S3 and R2 keys, `ARTCRAFT_API_KEY`, `GITHUB_TOKEN`, and
@@ -157,21 +148,23 @@ that code does on the request path.
   after the session ends, and disconnect, a single-file delete, and
   `POST /account/disconnect` remove the current key. A wrong audience on that route is rejected and the current keys stay.
   Revocation removes the current grant key and leaves the files for the 7-day
-  clock. A file's contents are not written to the log. `python -m unittest
-  discover -s tests` on BridgeCraft `8523497` passed: 210 tests, 8 skipped.
+  clock. A file's contents are not written to the log. One counted run of
+  `python -m unittest discover -s tests` is in the observations.
 
 Craft apps run as one `<app>-cli mcp` process per user session, in a private
 temporary folder, with `--automation-read-root` and `--automation-write-root`
 set to that folder (RFC-0015), a minimal environment, and memory, size, time,
 and idle limits. `craft_apps.json` pins each app's release by sha256 and lists
-the tools it hides and the engine commands it refuses. WordCraft, DeckCraft,
-PdfCraft, PhotoCraft, VectorCraft, DesignCraft, FigCraft, and SoundCraft are
-hosted. CADCraft, FilmCraft, GridCraft, and LightCraft stay off until their
+the tools it hides and the engine commands it refuses. adikshan11/bridgecraft#66,
+merged on 5 November 2026, pins WordCraft 0.15.2, DeckCraft 0.15.1, PdfCraft
+0.18.2, PhotoCraft 0.20.2, VectorCraft 0.21.1, DesignCraft 0.17.2, FigCraft
+0.15.1, SoundCraft 0.17.1, EffectCraft 0.21.1, TextureCraft 0.3.2 and
+MaterialCraft 0.1.2. Each pin's escape note says nothing reached outside the
+roots. CADCraft, FilmCraft, GridCraft, and LightCraft stay off until their
 folder lock lands. effectcraft#2719 is in EffectCraft 0.20.0 and later, not
-in 0.19.0. adikshan11/bridgecraft#57 adds EffectCraft 0.21.0, TextureCraft
-0.3.0, and MaterialCraft 0.1.0 after RFC-0015's escape tests, with its evals
-passing for all eleven apps. Everyday edits without a Craft app use FFmpeg,
-Pillow, and the PDF tools.
+in 0.19.0. #57 is what first hosted EffectCraft, TextureCraft and
+MaterialCraft; #66 is the pin the image runs now. Everyday edits without a
+Craft app use FFmpeg, Pillow, and the PDF tools.
 
 Directory pages (privacy, terms, support), tool annotations, and tool names of
 64 characters or fewer are in the repo. `server.json` is the MCP Registry
@@ -230,13 +223,21 @@ pay for, and staff the service.
    official MCP Registry. People then add it to their own account from the
    listing, or from getartcraft.com, with nothing to set up. If Storytold
    adopts the connector, the same listings move to Storytold's name and
-   ArtCraft sign-in; until then, getartcraft.com only needs to link to them.
-   Publishing waits on the community privacy page, so nobody is sent to a
-   retention promise that isn't true. A listing goes out only when item 7's
+   ArtCraft sign-in. Until then, the directory listing, the sign-in screen
+   and the pages say this is a community project and that Storytold does not
+   operate it. They do not present the service as Storytold's or as ArtCraft.
+   A link from getartcraft.com, if one is added before adoption, says the
+   same thing. adikshan11/bridgecraft#67 is open and not merged. It renames
+   the MCP server and client to `bridgecraft`, says BridgeCraft on the
+   signed-PDF stamp, and says in the homepage's first paragraph that it is a
+   community project. The Auth0 tenant is still named `artcraft-studio`. The
+   sign-in screen is set in the Auth0 dashboard, and #67 does not change it.
+   Publishing also waits on the community privacy page, so nobody is sent to
+   a retention promise that isn't true. A listing goes out only when item 7's
    regression has passed on the community bucket, because that page now says
    those versions are erased. adikshan11/bridgecraft#56 is merged and erases
-   them on that deployment, and the live bucket reports 0 old versions, but the
-   regression has not run against the real bucket.
+   them in the code on that deployment. The regression has not run against
+   the real bucket. The dated `old_versions` reading is in the observations.
 5. **Admit an app** only when its latest release passes RFC-0015's escape
    tests, with the manifest updated in the same change as the version.
    CADCraft, FilmCraft, GridCraft, and LightCraft stay off until that is true.
@@ -265,7 +266,7 @@ pay for, and staff the service.
 | `artcraft-services` | Issue connector tokens for audience `https://connect.getartcraft.com/mcp`, with the `connector` scope, and accept the exchanged token (scopes `generation` and `library:read`) on generation and on `GET /v1/media_files/project/list` (#2676). The connector already calls that route with the exchanged token and does not send the connector token. |
 | `craft-libs` and each app | RFC-0015's shared folder lock and escape tests |
 | cadcraft, filmcraft, gridcraft, lightcraft | land the folder lock (open PRs listed in RFC-0015) |
-| effectcraft | #2719 is in 0.20.0 and later, and is not in the hosted image. Pin one of those releases only after it passes RFC-0015 |
+| effectcraft | #2719 is in 0.20.0 and later. The hosted image pins 0.21.1 (adikshan11/bridgecraft#66), after that fix, and only after the escape note on that pin. |
 
 ## Alternatives
 
@@ -281,4 +282,11 @@ pay for, and staff the service.
 ## Decision process
 
 A Storytold maintainer comments the RFC-0000 comment-period end date on this
-pull request. This RFC does not set that date.
+pull request. This RFC does not set that date. No end-date comment is
+recorded.
+
+Items 1, 2, 3 and 6 ask Storytold to host, pay for and staff the service,
+and ask `artcraft-services` to issue tokens. An owner, or whoever owns
+`artcraft-services`, has not said they will take that on. A maintainer
+comment period does not decide it. Refining the text further does not
+answer that question.
