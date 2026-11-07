@@ -49,6 +49,14 @@ What waits. `craft-suite-account` (keychain research). The web gateway's session
 
 The pilot docs and consumer screenshots currently in #160 move to the app PRs they describe.
 
+## Conflict handling, as acceptance tests
+
+The overwrite-refusal guarantee is an explicit acceptance test for every adapter, exercised by the contracts tests, by `craft-cloud-local`, and by each provider adapter as it lands.
+
+1. Two clients read the same document version. Both save. Exactly one succeeds. The other receives a conflict. No save ever silently overwrites the first.
+2. The conflict path preserves both sides. The losing client keeps its unsaved edits. The newer remote version stays available. Nothing is discarded until the user chooses how to resolve.
+3. An adapter that cannot obtain or atomically enforce a version precondition reports that limitation through its capabilities. It never silently claims the same overwrite protection. The pages surface the weaker guarantee to the user.
+
 ## Reference implementations, non-normative
 
 Working code exists for every piece this RFC names, offered as reading aid and evidence, never as a required dependency. The contract and pages are in the cut-down storytold/craft-libs#160, with `craft-cloud-local` as the in-tree local-folder adapter. The direct provider clients are `crates/webdav` and `crates/nextcloud` in https://github.com/wdunn001/collab-craft, the extraction sources for boundary 2. The hosted-gateway shape of boundary 4 is that repository's relay service, running in one private deployment today. A reviewer can read any of these to see a boundary in practice. None of them is normative. The traits in the contracts PR are the only interface an app may depend on.
