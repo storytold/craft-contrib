@@ -25,6 +25,13 @@ Optimization is capability-driven everywhere, through one mechanism. `DeviceCaps
 
 The browser has its own particulars within that mechanism. Capability probing there moves from static defaults to real adapter queries once async initialization lands in the worker, per the slice's own docs. Future WebGPU extensions ride the same `DeviceCaps` route as everything else. The browser floor therefore rises without app changes as the standard grows.
 
+## Acceptance requirements for the capability model
+
+Two requirements make the portability and fallback claims verifiable, per review.
+
+1. **Caps describe the created device, never just the adapter.** `DeviceCaps` used to select a fast path must reflect the features and limits actually enabled on the device that was created, since an adapter advertises more than a device may grant. Browser defaults stay conservative until initialization succeeds and real device caps replace them. The no-adapter case is defined behavior, the same degrade path the null context exercises. Device loss surfaces as a fault through the job outcome, with the consumer's recovery stated: fall back to the portable path or re-acquire a device and re-probe, never continue against stale caps.
+2. **Real backends in CI, beside the null one.** The null context stays mandatory for every consumer. It cannot validate shader compilation, resource rules or numerical results. Pilot consumers therefore also run representative jobs on a real wgpu backend and in a browser, comparing outputs against expected results with stated tolerances. The suite includes runs with optional features masked off. The portable path is therefore continuously proven.
+
 ## What this RFC decides
 
 The layer lives in the shared repository as the four crates above. wgpu is the baseline implementation and WebGPU the browser floor. Capability differences are explicit data, never implicit behavior. Every consumer must run against `craft-gpu-null` in CI. Named consumers land on the draft PR per review precedent: the runtime slice (worker-host executing GPU jobs) is the first. The render-path apps named there are the second set. Vendor-specific backends beyond wgpu, if ever wanted, arrive as adapters behind the same traits in their own PRs.
