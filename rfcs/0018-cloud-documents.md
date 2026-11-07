@@ -49,6 +49,10 @@ What waits. `craft-suite-account` (keychain research). The web gateway's session
 
 The pilot docs and consumer screenshots currently in #160 move to the app PRs they describe.
 
+## Reference implementations, non-normative
+
+Working code exists for every piece this RFC names, offered as reading aid and evidence, never as a required dependency. The contract and pages are in the cut-down storytold/craft-libs#160, with `craft-cloud-local` as the in-tree local-folder adapter. The direct provider clients are `crates/webdav` and `crates/nextcloud` in https://github.com/wdunn001/collab-craft, the extraction sources for boundary 2. The hosted-gateway shape of boundary 4 is that repository's relay service, running in one private deployment today. A reviewer can read any of these to see a boundary in practice. None of them is normative. The traits in the contracts PR are the only interface an app may depend on.
+
 ## What changes once this merges
 
 storytold/craft-libs#160 gets cut down to item 1 and becomes reviewable on its own. The adapter extractions follow. The four app PRs closed earlier (storytold/designcraft#878, storytold/lightcraft#2060, storytold/effectcraft#1623, storytold/deckcraft#711) come back as new PRs against the merged library, in the pilot-first order above.
