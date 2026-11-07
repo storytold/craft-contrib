@@ -1,6 +1,6 @@
 # RFC-0021: An e-signature contract for the suite
 
-The esign slice was split out of storytold/craft-libs#160 by review, into its own draft PR. This RFC gives that slice the suite-level decision it needs before merging.
+The esign slice was split out of storytold/craft-libs#160 by review, into its own draft PR: storytold/craft-libs#661. This RFC gives that slice the suite-level decision it needs before merging.
 
 ## Summary
 
