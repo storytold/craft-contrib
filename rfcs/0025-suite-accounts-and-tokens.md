@@ -46,7 +46,7 @@ Several apps run at once against one account list and one keychain. The contract
 3. **Propagation is stated, never assumed.** No inter-process channel is assumed. An app validates the account's generation against the shared list before each credential use and each refresh. A removed account therefore stops being used and stops being refreshed on the app's next touch. The staleness window is bounded by that rule and stated openly.
 4. **Forgetting is local. Revoking is at the provider.** Deleting the keychain entry forgets the credential on this machine. It does not invalidate a token already held in another process's memory. It does not end a server-side session. Provider-side revocation is a distinct operation on the provider adapter. The shared UI names the two actions distinctly so a person knows which one they performed.
 
-The provider-specific refresh scheduler stays an extraction-PR detail, per review. The guarantees above are the shared contract every consumer may rely on.
+Refresh itself is out of this RFC entirely. When a token refreshes, how rotation works, what expiry means: these are properties of the provider's auth flow. They vary even within one protocol. OIDC's device flow, authorization code flow, and client-credentials flow each handle refresh differently. The provider adapter owns all of that. This RFC constrains only the boundary where a refresh touches the shared store: a completed refresh writes through the generation check above, and nothing more is dictated. The guarantees above are the shared contract every consumer may rely on.
 
 ## Security posture
 
@@ -65,6 +65,6 @@ Working code backs every claim above, offered as reading aid, never as a depende
 
 ## Open questions left for the PRs
 
-Token refresh ownership (the store holds bytes; whether a provider adapter or the app schedules refresh is per-provider). Handle composition for multi-deployment accounts (the digest today covers deployment plus subject; the extraction PR documents it). Enterprise policy hooks (out of scope until someone needs them).
+Handle composition for multi-deployment accounts (the digest today covers deployment plus subject; the extraction PR documents it). Enterprise policy hooks (out of scope until someone needs them).
 
 Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-launcher#366, storytold/craft-libs#160.
