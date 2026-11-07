@@ -16,8 +16,9 @@ This RFC sets the bar (WCAG 2.2 AA as applied to software), seven rules for
 every UI change, a design step, a check of the accessibility tree next to
 every screenshot check, a check in CI of what the platform's accessibility
 API reports, a list of failures the apps have already produced, two labels,
-builds for testers, and a priority rule. The appendix is the text for each
-app's `AGENTS.md`.
+builds for testers, and a priority rule. This PR publishes the rules as
+`standards/accessibility.md`, with a short form that native apps and shared
+UI libraries copy into `AGENTS.md`, as they copy the house rules.
 
 Tests and agents can't replace a person using a screen reader, and testers
 are few, so no change ever waits for one: a manual test is never a condition
@@ -38,9 +39,9 @@ screen-reader and keyboard issues have been filed. But nothing written asks
 for any of it, so the result depends on who picks up which issue:
 
 - **No rule.** No app's `AGENTS.md` asks for accessibility. Neither do the PR
-  templates, the `CONTRIBUTING` files, the shared standards they point to, or
-  RFC-0005, RFC-0006 and RFC-0007. Agents follow their instructions
-  literally (RFC-0006), so what isn't written isn't done.
+  templates, the `CONTRIBUTING` files, the shared house rules (RFC-0006), or
+  RFC-0005 and RFC-0007. Agents follow their instructions literally
+  (RFC-0006), so what isn't written isn't done.
 - **The check is visual.** `AGENTS.md` tells agents to take `ui.screenshot`
   and compare it with the reference app. Nothing tells them to read the
   accessibility tree, although PdfCraft's `ui.inspect` already returns it.
@@ -171,7 +172,8 @@ without real focus and semantics has to be reworked.
      (storytold/wordcraft#3164);
    - an action that only works by dragging (storytold/filmcraft#1074).
 
-   Failures found later in review or by testers are added to this list.
+   Failures found later in review or by testers are added to the list in
+   `standards/accessibility.md`.
 6. **Say what was checked.** A UI PR's description has an Accessibility
    section. It says what the tests and the tree check cover. Tree tests
    alone never support "works with screen readers". When the PR fixes an
@@ -212,20 +214,33 @@ without real focus and semantics has to be reworked.
    high contrast, as part of its readiness. Tools for making accessible
    documents, such as alt text and the accessibility checker, stay a feature
    area.
-10. **Where it lives.** The appendix goes into every app's `AGENTS.md` (and
-    `CLAUDE.md` where it is a copy), and into the shared section if RFC-0006
-    is accepted. The same text goes into craftrules as
-    `standards/accessibility.md`, next to never-crash. Shared code (a
-    live-region helper, real focus in craft-menu, the tree in every control
-    channel, test helpers, PR builds, platform checks) is tracked in
-    storytold/craft-libs#437.
-11. **Owner and review.** Like every RFC here, the rules belong to the
-    maintainers and change by RFC. The RFC's author is a contact for
-    questions and for screen-reader testing, not a gate. Reviewers check the
-    Accessibility section and the tests on UI PRs. CodeRabbit, which already
-    reviews every PR, can take the first pass: each app's `.coderabbit.yaml`
-    gets a `path_instructions` entry for its UI crate that points to the
-    appendix below.
+10. **Where it lives.**
+    - The rules, points 1 to 9, are `standards/accessibility.md` in this
+      repository: a living document, like the house rules. Failures found
+      later are added to its list, and other changes are proposed here for
+      maintainer review.
+    - Agents may not follow links (RFC-0006), so the short form,
+      `standards/house-rules-accessibility.md`, is a generated block of its
+      own, as the Rust rules are. Native apps and shared libraries that draw
+      interface, such as craft-libs, copy it into `AGENTS.md` after the Rust
+      block. It is about 2.9 KB, within the 3 KB that RFC-0006 sets for the
+      core block, which has no room left for it. Each app's own section below
+      the blocks adds what is specific to it, such as its test harness or its
+      drawn surfaces.
+    - The house-rules check in craft-common-actions learns the block's name
+      and an input that requires it, as it has for the Rust block. Then each
+      of those repositories takes the block in its next house-rules update.
+    - This PR adds both files and lists them in the README.
+    - Shared code (a live-region helper, real focus in craft-menu, the tree
+      in every control channel, test helpers, PR builds, platform checks) is
+      tracked in storytold/craft-libs#437.
+11. **Owner and review.** Like the house rules, the rules belong to the
+    maintainers and change through pull requests here. The RFC's author is a
+    contact for questions and for screen-reader testing, not a gate.
+    Reviewers check the Accessibility section and the tests on UI PRs.
+    CodeRabbit, which already reviews every PR, can take the first pass: each
+    app's `.coderabbit.yaml` gets a `path_instructions` entry for its UI crate
+    that points to the accessibility block in its `AGENTS.md`.
 
 ## Alternatives
 
@@ -245,57 +260,8 @@ without real focus and semantics has to be reworked.
 
 ## Open questions
 
-- Should the rules and the failure list live in `docs/accessibility.md`
-  here, as RFC-0013 proposes for living documents, so the list can grow
-  without a new RFC?
 - Which platform gets PR builds first? Windows has the most screen-reader
   users (NVDA, JAWS, Narrator). Unsigned macOS builds need extra steps to
   open.
 - Is 24 by 24 points right for dense toolbars, or should apps rely on
   WCAG's spacing exception there?
-
-## Appendix: text for `AGENTS.md`
-
-### Accessibility
-
-People use this app with screen readers and braille displays, magnifiers,
-high contrast, large text, voice control and the keyboard alone. They reach
-it only through its AccessKit tree, its keyboard focus and its colours. A UI
-change isn't done until it works for them. Standard: craft-contrib RFC-0014
-(WCAG 2.2 AA as applied to software).
-
-- **Design first.** Name the pattern (menu bar, menu, tab list, toolbar,
-  tree, grid, list, dialog, slider, canvas) and follow its keyboard model
-  and roles from the WAI-ARIA Authoring Practices Guide and the platform's
-  guidelines. Observe from outside how the reference app exposes it, with
-  Accessibility Insights, Accessibility Inspector or Accerciser.
-- **Keyboard.** Every action works from the keyboard, in visual order, with
-  no trap. Esc closes and returns focus. Alt/F10 and F6 behave as on the
-  platform. Move egui's focus (`request_focus`), never only a highlight.
-- **Semantics.** Every control has a role, a translated name that starts
-  with its visible label, and its state and value. Shortcuts and access keys
-  are set on the node, in the current platform's form. Drawn surfaces
-  publish nodes for their content, with caret, selection and correct
-  editability.
-- **Feedback.** Announce changes that happen away from focus through a live
-  region.
-- **Seeing.** Contrast at least 4.5:1 for text and 3:1 for controls and
-  focus, in both themes. Never colour alone. Follow the system's high
-  contrast, text size and reduced motion settings.
-- **Pointer.** Anything done by dragging can be done without dragging.
-- **Check the tree, not only the screenshot.** Every new or changed
-  control, dialog or keyboard path gets a kittest test that drives it by
-  keyboard and asserts roles, names, states, focus and announcements; if the
-  helpers you need don't exist yet, say so in the PR. Keep
-  `with_accessibility_check` on, and keep CI's platform checks green. When
-  you take `ui.screenshot`, also read the accessibility tree and check it.
-- **Rule out known failures:** focus left in the document behind a menu,
-  ribbon or KeyTips; editable surfaces reported read-only; dialogs that
-  don't take or return focus, or leave controls behind them reachable;
-  painted rows with no node; identical names; another platform's shortcut
-  text in a name; silent state changes; drag-only actions.
-- **Be honest in the PR.** Say what the tests and the tree cover. Never
-  claim "works with screen readers" from tree tests. Ask for
-  `needs screen reader test` only when the PR fixes an accessibility problem
-  or builds accessibility logic of its own; never hold a PR back for a
-  screen-reader test.
