@@ -21,6 +21,10 @@ The contract's vocabulary maps onto DocuSign's as follows. Envelope maps to enve
 
 Known gaps against the reference interface, each needing a named triage decision on the PR: templates (reusable envelope definitions), embedded signing (a ceremony URL surfaced inside the app), bulk send, payment tabs. None block a first delivery. Each gap gets a named decision: add to the contract, declare an adapter-level extension, or document as out of scope.
 
+## Reference implementations, non-normative
+
+The contract itself is the held-back `crates/esign` in the craft-libs#160 branch history, readable today, with its in-process patterns mirrored from `craft_cloud::Conversations`. A hosted adapter was prototyped against a CollabCraft deployment in https://github.com/wdunn001/collab-craft, useful as a reading aid for how an adapter drives the ceremony. Neither is normative. The trait surface in the draft PR is the only interface an app may depend on, with DocuSign and any other provider equally behind it.
+
 ## What this RFC decides
 
 The contract lives in the shared layer beside `craft-cloud`. It keeps vendor neutrality as a hard rule. It uses the DocuSign envelope model as its reference semantics, with the gap triage above. It ships with an in-process test double. Consumers: PdfCraft is the first named app. The second consumer or an argued exception lands on the draft PR per review precedent. Adapters (DocuSign, a CollabCraft deployment) follow as separate PRs, none required by any app, with the signing UI degrading to absent when no adapter is connected.
