@@ -1,6 +1,6 @@
-# RFC-0018: Cloud documents across the suite
+# RFC-0024: Cloud documents across the suite
 
-Renumbered from the draft's 0001. That number is already used by #2 and #12.
+Renumbered twice, apologies for the churn. The draft's 0001 was taken by #2 and #12. The interim 0018 collided with #30. 0024 is free.
 
 A note on RFC-0009 (storytold/craft-contrib#10). That RFC is not accepted yet. This RFC does not depend on it. The draft asked for RFC-0009's exception. This revision states the criterion inline. This RFC therefore stands on its own whatever happens to #10.
 
@@ -43,7 +43,7 @@ What waits. `craft-suite-account` (keychain research). The web gateway's session
 3. **craft-esign plus `craft_ui::esign`.** Its own draft PR, storytold/craft-libs#661, governed by RFC-0021.
 4. **craft-tier-store, craft-worker-host, craft-runtime, the JS assets.** Its own draft PR, storytold/craft-libs#662, governed by RFC-0023.
 5. **The craft-gpu family** (`craft-gpu`, `-wgpu`, `-null`, `-providers`). Its own draft PR, storytold/craft-libs#663, governed by RFC-0022.
-6. **craft-suite-account.** No PR until the keychain RFC (RFC-0019, storytold/craft-contrib#35) settles where tokens live.
+6. **craft-suite-account.** No PR until the keychain RFC (RFC-0025, storytold/craft-contrib#35) settles where tokens live.
 7. **storytold/craft-libs#345, craft-crdt.** Concurrent text without region locks. Part of the live-collaboration track, listed here so the track stays whole. It waits for the live-collaboration decision, separate from this RFC.
 8. **Pilot app integrations.** A small number of representative apps (two, per review precedent) integrate after the library merges, to evaluate the interface. The remaining apps follow once the interface has settled.
 
