@@ -1,6 +1,6 @@
 # RFC-0025: Suite accounts and tokens
 
-Renumbered from 0019, which #34 claims. 0025 is free.
+Renumbered from 0019. #34 claims that number. 0025 is free.
 
 RFC-0024 (storytold/craft-contrib#27) deliberately left accounts and tokens out, as the most security-sensitive part of the cloud-documents track. This is the proposal it deferred. It also answers the shared-keychain question raised in review there: the same secret layer serves AI connections and storage connections.
 
