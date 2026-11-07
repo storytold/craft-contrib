@@ -37,4 +37,4 @@ The contract itself is the held-back `crates/esign` in the craft-libs#160 branch
 
 The contract lives in the shared layer beside `craft-cloud`. It keeps vendor neutrality as a hard rule. It uses the DocuSign envelope model as its reference semantics, with the gap triage above. It ships with an in-process test double. Consumers: PdfCraft is the first named app. The second consumer or an argued exception lands on the draft PR per review precedent. Adapters (DocuSign, a CollabCraft deployment) follow as separate PRs, none required by any app, with the signing UI degrading to absent when no adapter is connected.
 
-Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-libs#160 (the review that split this out).
+Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-libs#160 (the review that split this out).
