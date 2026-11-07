@@ -23,6 +23,18 @@ A `-web` build of a Craft app runs inside a browser tab with hard memory limits,
 
 **4. Ranged access is contract surface, never adapter magic.** `read_range` and `stat` live on `craft_cloud::Files`. Any backend can therefore serve them, with the runtime working against the contract alone. A backend without ranged support refuses honestly and the runtime falls back to whole reads where size permits.
 
+## Acceptance requirements
+
+Three requirement sets make the large-document and asynchronous-persistence claims verifiable, per review. The tiering model behind them is production-proven: this runtime serves one live deployment today. The same tier discipline (GPU buffers hot, wasm heap warm, OPFS or a chosen folder cold) runs large-model inference in a second production system, where the real ceilings were measured the hard way.
+
+**1. "Flushed" is defined, in two distinct steps.** Acceptance into the hot mirror is step one. Successful persistence to the intended tier is step two. Only step two may mark a revision saved. Every pending write carries the revision it captured. A flush acknowledgment marks saved only the revision it actually persisted. A late acknowledgment for an older flush can neither overwrite nor mark saved a newer edit. A failed or partial flush restores the unaccepted writes to the pending queue for retry, with per-key results, never a bare count. Quota exhaustion, permission loss and worker restart are each a named test case. An acknowledged save survives closing and reopening the document.
+
+**2. Memory is bounded by configured budget caps per tier, never by a claim about total memory.** A browser cannot know total memory, and the runtime never pretends to. Each tier gets a budget cap: the cold tier sized against what the platform reports (`navigator.storage.estimate()`), the warm tier against the wasm heap's practical ceiling, the hot mirror against its configured byte budget. The caps count everything: resident bytes, pending writes awaiting flush, retained evictions, in-flight ranges, message copies crossing the worker boundary. Exhausting a budget produces backpressure or an explicit refusal, never silent growth. The whole-read fallback checks `stat` before buffering and refuses a file past the budget, including when a server ignored a range request and returned everything.
+
+**3. Worker ownership and isolation are stated.** The shared worker owns persistence for an app's documents, with namespaces separated by app and by document. Simultaneous tabs on one document go through that single owner. Every flush result is tied to the document revision it persisted. The dedicated-worker fallback declares its concurrent-writer policy explicitly: last-writer-wins per revision check, with the same revision-tied acknowledgments, never a silent weakening of the shared-worker guarantees.
+
+**Pilot acceptance.** The named pilots (EffectCraft and FilmCraft) run real-browser tests covering a file larger than the configured memory budget, a slow and a failing persistence layer, and two tabs editing the same document concurrently. The gateway and session design stays with RFC-0024 and RFC-0025.
+
 ## Reference implementations, non-normative
 
 The three crates and the JS assets are in the craft-libs#160 branch history, now its own draft PR. The ranged streaming design, with its v1 implementation notes, is the range and chunk API document in the same tree, prototyped against the gateway in https://github.com/wdunn001/collab-craft. None of this is normative. The crates' public surface in the draft PR is the only interface an app may depend on.
