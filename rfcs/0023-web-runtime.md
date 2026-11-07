@@ -11,7 +11,7 @@ A `-web` build of a Craft app runs inside a browser tab with hard memory limits,
 1. `craft-tier-store`. A synchronous mirror over asynchronous persistence, with a hot-tier LRU, key classes, a tier policy, versioned mirrors and pending-write tracking. The portable model lives in the crate. The JS host hooks (OPFS, File System Access) live in `craft-runtime`'s wasm glue. The model therefore stays testable natively.
 2. `craft-worker-host`. The Rust side of the worker message protocol (`HostMessage`, `WorkerMessage`, pending flush entries), with the JS bootstrap as an asset.
 3. `craft-runtime`. The composition crate: tier storage plus worker protocol plus GPU dispatch, re-exporting the pieces an app actually touches, with a `cloud-delegate` feature connecting tier storage to cloud blobs.
-4. Ranged streaming. Cloud-backed keys hydrate and flush by byte range, so a blob never has to sit whole in the wasm heap. `craft_cloud::Files::read_range` and `stat` are implemented contract surface. Multipart upload is design-only and stays an open item below.
+4. Ranged streaming. Cloud-backed keys hydrate and flush by byte range. A blob therefore never has to sit whole in the wasm heap. `craft_cloud::Files::read_range` and `stat` are implemented contract surface. Multipart upload is design-only and stays an open item below.
 
 ## Boundaries
 
@@ -21,7 +21,7 @@ A `-web` build of a Craft app runs inside a browser tab with hard memory limits,
 
 **3. GPU dispatch is RFC-0022's.** `craft-runtime` composes the GPU layer and adds no GPU semantics of its own. Capability questions route to `DeviceCaps` there.
 
-**4. Ranged access is contract surface, never adapter magic.** `read_range` and `stat` live on `craft_cloud::Files`, so any backend can serve them and the runtime works against the contract alone. A backend without ranged support refuses honestly and the runtime falls back to whole reads where size permits.
+**4. Ranged access is contract surface, never adapter magic.** `read_range` and `stat` live on `craft_cloud::Files`. Any backend can therefore serve them, with the runtime working against the contract alone. A backend without ranged support refuses honestly and the runtime falls back to whole reads where size permits.
 
 ## Reference implementations, non-normative
 
