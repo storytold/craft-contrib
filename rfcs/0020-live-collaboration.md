@@ -26,6 +26,10 @@ These came out of the prototype at real cost. The contracts should make violatin
 4. Opaque frames pass through unparsed. A signed hash chain therefore survives the relay. Ephemeral state is latest-wins per peer and kind and requires no edit permission.
 5. The room key is a stable document identifier, never a path. A path-keyed room splits on rename.
 
+## Reference implementations, non-normative
+
+Every surface and every constraint above is backed by working, tested code in https://github.com/wdunn001/collab-craft, offered as reading aid and evidence, never as a required dependency. The two-model session (ordered submission, opaque scope locks, lock-free `crdt.*` passthrough) is `crates/collab`, with the lock-skip rule enforced in its protocol and pinned by its own tests. The relay half implements the constraint list: TTL'd atomic scope locks with refresh, sequence reconciliation on join, relay-granted identity spaces, opaque frame passthrough, document-id room keys. The ephemeral presence kinds and the keyed-invite flows are in the same tree. The text layer is `craft-crdt` at storytold/craft-libs#345, with its server oracle and N-client simulator. A reviewer can trace any constraint to the bug that forced it. None of this is normative. The contracts PR's traits are the only interface an app may depend on. A mesh or any other transport satisfying them is equally conforming.
+
 ## What this does and does not decide
 
 This RFC decides the contract shapes and their home (the shared layer, beside `craft-cloud`), the degrade-to-absent rule, the constraint list above. It does not decide which backend hosts relays, whether the suite runs a hosted service, or how this relates to the CraftHub (storytold/figcraft#357) and Macula mesh (storytold/wordcraft#4639) proposals. Those remain their own tracks. A mesh transport that satisfies the same contracts is a conforming backend. That is the point of the seam.
