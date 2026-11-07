@@ -19,9 +19,11 @@ The three crates plus `craft-gpu-providers` are written, held back from craft-li
 
 Render-heavy and compute-heavy work recurs across the suite and the runtime track (the worker-host and tier-store slice). Each app growing its own wgpu plumbing reproduces the same device setup, capability probing and fallback logic with drift. One layer makes capability differences explicit data (`DeviceCaps`) and makes "no GPU present" a tested path everywhere. The baseline-plus-seam shape also matches the position already taken publicly in the upstream SolidCraft discussion of hardware ray queries: WebGPU stays the baseline. Vendor-specific acceleration lives behind a seam in a leaf crate.
 
-## Room for WebGPU optimization
+## Room for optimization, on every backend
 
-The browser path keeps the same optimization headroom as native, through the same mechanism. `DeviceCaps` expresses what the adapter actually offers. An app or the runtime therefore takes a faster path when a capability is present (half-precision floats, subgroup operations, timestamp queries, compressed texture formats) and the portable path when it is absent. Browser capability probing moves from static defaults to real adapter queries once async initialization lands in the worker, per the slice's own docs. Future WebGPU extensions ride the same route: a new capability becomes a new `DeviceCaps` field plus a gated fast path, with no fork in app code and no new trait. The baseline stays portable WebGPU. Optimization is always additive on top of it.
+Optimization is capability-driven everywhere, through one mechanism. `DeviceCaps` expresses what the adapter actually offers. An app or the runtime therefore takes a faster path when a capability is present (half-precision floats, subgroup operations, timestamp queries, compressed texture formats) and the portable path when it is absent. A new capability, on any backend, becomes a new `DeviceCaps` field plus a gated fast path, with no fork in app code and no new trait. The baseline stays portable. Optimization is always additive on top of it.
+
+The browser has its own particulars within that mechanism. Capability probing there moves from static defaults to real adapter queries once async initialization lands in the worker, per the slice's own docs. Future WebGPU extensions ride the same `DeviceCaps` route as everything else. The browser floor therefore rises without app changes as the standard grows.
 
 ## What this RFC decides
 
