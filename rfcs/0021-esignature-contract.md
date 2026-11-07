@@ -21,6 +21,14 @@ The contract's vocabulary maps onto DocuSign's as follows. Envelope maps to enve
 
 Known gaps against the reference interface, each needing a named triage decision on the PR: templates (reusable envelope definitions), embedded signing (a ceremony URL surfaced inside the app), bulk send, payment tabs. None block a first delivery. Each gap gets a named decision: add to the contract, declare an adapter-level extension, or document as out of scope.
 
+## Lifecycle and evidence guarantees
+
+Three guarantee sets bind every adapter, as backend-independent conformance cases in the test double and in each adapter's tests. The provider keeps identity verification and its legal audit trail. The shared interface guarantees enough to present the right status and the right completed document.
+
+1. **Uncertain outcomes resolve without duplicates.** A timed-out `create` resolves through its idempotency key: the retry returns the same envelope. `send` gets the same treatment. Sending an envelope already in Sent answers with the current state and never repeats an invitation. A client that lost the response to either call re-asks `status` and proceeds from what it finds, creating nothing new.
+2. **Status moves one way.** The allowed transitions are Draft to Sent, Sent to Completed, Sent to Declined, Sent to Voided. Completed, Declined and Voided are terminal and absorb everything. Duplicate or out-of-order events are ignored once a terminal state is reached. No event, however delayed, moves a terminal envelope back into an active state.
+3. **Evidence binds to the snapshot.** The completion result is bound to the envelope's original `content_sha256` and its recipient set. `CompletedDocument` carries two digests as distinct fields, the original document's and the returned signed artifact's. The two differ whenever the provider's sealing changes the bytes. The contract never conflates them.
+
 ## Reference implementations, non-normative
 
 The contract itself is the held-back `crates/esign` in the craft-libs#160 branch history, readable today, with its in-process patterns mirrored from `craft_cloud::Conversations`. A hosted adapter was prototyped against a CollabCraft deployment in https://github.com/wdunn001/collab-craft, useful as a reading aid for how an adapter drives the ceremony. Neither is normative. The trait surface in the draft PR is the only interface an app may depend on, with DocuSign and any other provider equally behind it.
