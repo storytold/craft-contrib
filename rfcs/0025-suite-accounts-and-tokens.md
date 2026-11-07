@@ -1,12 +1,14 @@
-# RFC-0019: Suite accounts and tokens
+# RFC-0025: Suite accounts and tokens
 
-RFC-0018 (storytold/craft-contrib#27) deliberately left accounts and tokens out, as the most security-sensitive part of the cloud-documents track. This is the proposal it deferred. It also answers the shared-keychain question raised in review there: the same secret layer serves AI connections and storage connections.
+Renumbered from 0019, which #34 claims. 0025 is free.
+
+RFC-0024 (storytold/craft-contrib#27) deliberately left accounts and tokens out, as the most security-sensitive part of the cloud-documents track. This is the proposal it deferred. It also answers the shared-keychain question raised in review there: the same secret layer serves AI connections and storage connections.
 
 ## Summary
 
 Secrets live in the operating system's keychain. The account list holds no secret. It lives in one suite-level folder. A person signs in once, in the launcher or in any app, through the same shared components. Every supporting app then uses that session. The launcher stays optional.
 
-One provider-neutral crate holds the secret store. Three tracks consume it: AI connections (the craft-ai-integrations platform contract already states "secret values belong in the secret store, never in the shared JSON"), storage connections (RFC-0018), the launcher's keychain work (storytold/craft-launcher#366). That gives the crate three named consumers from day one.
+One provider-neutral crate holds the secret store. Three tracks consume it: AI connections (the craft-ai-integrations platform contract already states "secret values belong in the secret store, never in the shared JSON"), storage connections (RFC-0024), the launcher's keychain work (storytold/craft-launcher#366). That gives the crate three named consumers from day one.
 
 ## What exists today, honestly assessed
 
@@ -31,9 +33,9 @@ Its defect, named in review on craft-libs#160: the service half is CollabCraft-s
 
 **4. One secret layer for AI and storage.** An AI connection's API key and a storage connection's bearer token are the same kind of object. Both go through the shared crate. The craft-ai-integrations contract already points this direction. Nothing AI-specific or storage-specific enters the shared crate; a consumer supplies its own service naming under the suite's namespace.
 
-**5. Sign-in surface, launcher optional.** Configuration follows the craft-ai-integrations platform contract, as RFC-0018 boundary 1 established for connections generally. A person configures an account in the launcher or in any app, through the same shared components. Both write the same account list and the same keychain entries. An app never needs the launcher installed. storytold/craft-launcher#366 becomes the launcher's adoption of this layer. The layer itself has no owner app.
+**5. Sign-in surface, launcher optional.** Configuration follows the craft-ai-integrations platform contract, as RFC-0024 boundary 1 established for connections generally. A person configures an account in the launcher or in any app, through the same shared components. Both write the same account list and the same keychain entries. An app never needs the launcher installed. storytold/craft-launcher#366 becomes the launcher's adoption of this layer. The layer itself has no owner app.
 
-**6. Web builds are out of scope.** A browser has no OS keychain. Web sessions belong to the hosting gateway (RFC-0018 boundary 4) and never pass through this crate. The crate stays non-wasm, as the existing code already declares.
+**6. Web builds are out of scope.** A browser has no OS keychain. Web sessions belong to the hosting gateway (RFC-0024 boundary 4) and never pass through this crate. The crate stays non-wasm, as the existing code already declares.
 
 ## Cross-app lifecycle guarantees
 
@@ -57,12 +59,12 @@ Working code backs every claim above, offered as reading aid, never as a depende
 ## Landing order
 
 1. This RFC is accepted.
-2. One extraction PR to craft-libs: the provider-neutral secret layer out of the held-back `suite-account` code, with the CollabCraft service client removed. Named consumers: the launcher (storytold/craft-launcher#366), the AI connection store (craft-ai-integrations), the storage adapters (RFC-0018 track). Named maintainer: wdunn001.
+2. One extraction PR to craft-libs: the provider-neutral secret layer out of the held-back `suite-account` code, with the CollabCraft service client removed. Named consumers: the launcher (storytold/craft-launcher#366), the AI connection store (craft-ai-integrations), the storage adapters (RFC-0024 track). Named maintainer: wdunn001.
 3. storytold/craft-launcher#366 rebases onto the shared crate.
-4. The RFC-0018 storage adapters and the AI integration adopt it as they land.
+4. The RFC-0024 storage adapters and the AI integration adopt it as they land.
 
 ## Open questions left for the PRs
 
 Token refresh ownership (the store holds bytes; whether a provider adapter or the app schedules refresh is per-provider). Handle composition for multi-deployment accounts (the digest today covers deployment plus subject; the extraction PR documents it). Enterprise policy hooks (out of scope until someone needs them).
 
-Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-launcher#366, storytold/craft-libs#160.
+Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-launcher#366, storytold/craft-libs#160.
