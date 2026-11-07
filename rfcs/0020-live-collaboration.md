@@ -38,6 +38,23 @@ These came out of the prototype at real cost. The contracts should make violatin
 
 Every surface and every constraint above is backed by working, tested code in https://github.com/wdunn001/collab-craft, offered as reading aid and evidence, never as a required dependency. The two-model session (ordered submission, opaque scope locks, lock-free `crdt.*` passthrough) is `crates/collab`, with the lock-skip rule enforced in its protocol and pinned by its own tests. The relay half implements the constraint list: TTL'd atomic scope locks with refresh, sequence reconciliation on join, relay-granted identity spaces, opaque frame passthrough, document-id room keys. The ephemeral presence kinds and the keyed-invite flows are in the same tree. The text layer is `craft-crdt` at storytold/craft-libs#345, with its server oracle and N-client simulator. A reviewer can trace any constraint to the bug that forced it. None of this is normative. The contracts PR's traits are the only interface an app may depend on. A mesh or any other transport satisfying them is equally conforming.
 
+## Conformance guarantees
+
+Two sets of observable guarantees bind every conforming backend, with conformance tests in the contracts PR. The mechanisms stay behind the traits. The behavior is shared.
+
+**Mixed editing and recovery.**
+
+1. A structural command that deletes or moves an object while another peer edits its text has one defined outcome. The structural command wins visibility. Text operations arriving for a scope removed by an acknowledged structural command are dropped deterministically, identically on every replica. Deleted text never resurrects the object. The prototype already holds ops for an unseeded scope and retains per-scope history. That is the shape this rule generalizes.
+2. An operation is durable once the relay has sequenced it against the persistent counter. An acknowledgment means exactly that. The counter outlives the process (constraint 2 above). Nothing acknowledged is therefore lost by a relay restart.
+3. Replay never loses an operation and never applies one twice. Sequenced operations dedupe by sequence number. CRDT operations dedupe by operation identity, which the CRDT's own merge makes idempotent. Reconnect, replay after restart, and joining from a snapshot paired with its sequence state are each a conformance case, with the snapshot's sequence number defining exactly which retained operations still apply on top.
+
+**Invite redemption.**
+
+1. Redemption consumes the one-time key atomically. Concurrent redemptions resolve to exactly one winner.
+2. A redeemer whose successful redemption response was lost can retry safely. Redemption is idempotent for the same redeemer: the retry returns the same grant, never a second one.
+3. Fetching or previewing the link never consumes the key. Consumption happens only on the explicit redeem call.
+4. An expired key refuses redemption with a distinct, stated outcome. Revoking an unredeemed invite kills its key. Revoking an invite does not end access already granted through it. Ending granted access is a separate, explicit operation on the grant, so the two acts are never conflated.
+
 ## What this does and does not decide
 
 This RFC decides the contract shapes and their home (the shared layer, beside `craft-cloud`), the degrade-to-absent rule, the constraint list above. It does not decide which backend hosts relays, whether the suite runs a hosted service, or how this relates to the CraftHub (storytold/figcraft#357) and Macula mesh (storytold/wordcraft#4639) proposals. Those remain their own tracks. A mesh transport that satisfies the same contracts is a conforming backend. That is the point of the seam.
