@@ -59,7 +59,7 @@ Working code backs every claim above, offered as reading aid, never as a depende
 ## Landing order
 
 1. This RFC is accepted.
-2. One extraction PR to craft-libs: the provider-neutral secret layer out of the held-back `suite-account` code, with the CollabCraft service client removed. Named consumers: the launcher (storytold/craft-launcher#366), the AI connection store (craft-ai-integrations), the storage adapters (RFC-0024 track). Named maintainer: wdunn001.
+2. One extraction PR to craft-libs, open as a draft: storytold/craft-libs#665. It carries the provider-neutral secret layer out of the held-back `suite-account` code, with the CollabCraft service client removed and the generation field implemented. Named consumers: the launcher (storytold/craft-launcher#366), the AI connection store (craft-ai-integrations), the storage adapters (RFC-0024 track). Named maintainer: wdunn001.
 3. storytold/craft-launcher#366 rebases onto the shared crate.
 4. The RFC-0024 storage adapters and the AI integration adopt it as they land.
 
