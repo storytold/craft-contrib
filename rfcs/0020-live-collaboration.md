@@ -1,10 +1,10 @@
 # RFC-0020: Live collaboration: presence, invites, chat, concurrent text
 
-RFC-0018 (storytold/craft-contrib#27) split live collaboration out of the cloud-documents track for its own decision. This is that proposal. It covers the four surfaces that need a live session: presence, one-time-key invite sharing, chat, concurrent text editing.
+RFC-0024 (storytold/craft-contrib#27) split live collaboration out of the cloud-documents track for its own decision. This is that proposal. It covers the four surfaces that need a live session: presence, one-time-key invite sharing, chat, concurrent text editing.
 
 ## Summary
 
-The shared layer gains contracts for live sessions, with the same shape RFC-0018 set for storage. Apps depend on vendor-neutral contracts and shared UI only. Backends are swappable. No app names a service. Every surface degrades cleanly to absent when no live backend is connected, the same way the Open and Save pages hide without a storage backend.
+The shared layer gains contracts for live sessions, with the same shape RFC-0024 set for storage. Apps depend on vendor-neutral contracts and shared UI only. Backends are swappable. No app names a service. Every surface degrades cleanly to absent when no live backend is connected, the same way the Open and Save pages hide without a storage backend.
 
 ## The four surfaces
 
@@ -66,4 +66,4 @@ This RFC decides the contract shapes and their home (the shared layer, beside `c
 3. A contracts PR adds the live-session contract and the presence, invite and conversation traits beside `craft-cloud`, with an in-process mock and the degrade-to-absent tests. The session contract is the proven two-model protocol: ordered submission with opaque scope locks for commands that do not commute, plus lock-free `crdt.*` passthrough for text. A lock scope is an opaque string each app reads its own way. The contract therefore names no app and no provider. The lock-or-CRDT choice is per command kind, made by the app, carried by the protocol. Any backend implementing the contract supports both models.
 4. Backends follow as adapters, each its own PR, none required by any app.
 
-Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-libs#345, tangency-labs/solidcraft#5184 (the upstream research thread the frame and ephemeral kinds answered).
+Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-libs#345, tangency-labs/solidcraft#5184 (the upstream research thread the frame and ephemeral kinds answered).
