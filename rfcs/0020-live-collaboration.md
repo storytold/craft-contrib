@@ -46,14 +46,14 @@ Two sets of observable guarantees bind every conforming backend, with conformanc
 
 1. A structural command that deletes or moves an object while another peer edits its text has one defined outcome. The structural command wins visibility. Text operations arriving for a scope removed by an acknowledged structural command are dropped deterministically, identically on every replica. Deleted text never resurrects the object. The prototype already holds ops for an unseeded scope and retains per-scope history. That is the shape this rule generalizes.
 2. An operation is durable once the relay has sequenced it against the persistent counter. An acknowledgment means exactly that. The counter outlives the process (constraint 2 above). Nothing acknowledged is therefore lost by a relay restart.
-3. Replay never loses an operation and never applies one twice. Sequenced operations dedupe by sequence number. CRDT operations dedupe by operation identity, which the CRDT's own merge makes idempotent. Reconnect, replay after restart, and joining from a snapshot paired with its sequence state are each a conformance case, with the snapshot's sequence number defining exactly which retained operations still apply on top.
+3. Replay never loses an operation and never applies one twice. Sequenced operations dedupe by sequence number. CRDT operations dedupe by operation identity. The CRDT's own merge makes that idempotent. Reconnect, replay after restart, joining from a snapshot paired with its sequence state: each is a conformance case. The snapshot's sequence number defines exactly which retained operations still apply on top.
 
 **Invite redemption.**
 
 1. Redemption consumes the one-time key atomically. Concurrent redemptions resolve to exactly one winner.
 2. A redeemer whose successful redemption response was lost can retry safely. Redemption is idempotent for the same redeemer: the retry returns the same grant, never a second one.
 3. Fetching or previewing the link never consumes the key. Consumption happens only on the explicit redeem call.
-4. An expired key refuses redemption with a distinct, stated outcome. Revoking an unredeemed invite kills its key. Revoking an invite does not end access already granted through it. Ending granted access is a separate, explicit operation on the grant, so the two acts are never conflated.
+4. An expired key refuses redemption with a distinct, stated outcome. Revoking an unredeemed invite kills its key. Revoking an invite does not end access already granted through it. Ending granted access is a separate, explicit operation on the grant. The two acts are never conflated.
 
 ## What this does and does not decide
 
