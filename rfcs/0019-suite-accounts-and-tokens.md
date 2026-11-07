@@ -35,6 +35,17 @@ Its defect, named in review on craft-libs#160: the service half is CollabCraft-s
 
 **6. Web builds are out of scope.** A browser has no OS keychain. Web sessions belong to the hosting gateway (RFC-0018 boundary 4) and never pass through this crate. The crate stays non-wasm, as the existing code already declares.
 
+## Cross-app lifecycle guarantees
+
+Several apps run at once against one account list and one keychain. The contract therefore states the concurrent behavior explicitly, with multi-process or simulated-interleaving tests in the extraction PR.
+
+1. **No lost updates.** Account-list and credential updates are atomic at the store level (locked update over the list file, one keychain entry per handle). Two apps updating concurrently never lose each other's writes. A partial failure (list updated, keychain write failed, or the reverse) leaves a defined state the next reader detects and repairs, never a silent mismatch.
+2. **Removal wins over refresh.** The account list carries a generation per account. Removing the account bumps the generation and deletes the entry. A refresh that started earlier completes against the old generation and is discarded. A completed refresh can never recreate a removed credential. Only a new sign-in can.
+3. **Propagation is stated, never assumed.** No inter-process channel is assumed. An app validates the account's generation against the shared list before each credential use and each refresh. A removed account therefore stops being used and stops being refreshed on the app's next touch. The staleness window is bounded by that rule and stated openly.
+4. **Forgetting is local. Revoking is at the provider.** Deleting the keychain entry forgets the credential on this machine. It does not invalidate a token already held in another process's memory. It does not end a server-side session. Provider-side revocation is a distinct operation on the provider adapter. The shared UI names the two actions distinctly so a person knows which one they performed.
+
+The provider-specific refresh scheduler stays an extraction-PR detail, per review. The guarantees above are the shared contract every consumer may rely on.
+
 ## Security posture
 
 At rest, the platform encrypts keychain entries and scopes them to the signed-in user. In memory, token bytes are zeroized on drop. For revocation, one suite service name makes every entry visible and deletable in the platform's own credential UI. Removing an account from the list removes its entry. Across apps, no token is in any file. No app ever reads another app's files for one. The threat this design does not address, by the nature of OS keychains: code running as the same user can request the same entries. That is the platform's trust boundary, stated here so nobody mistakes the guarantee.
