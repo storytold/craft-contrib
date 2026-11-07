@@ -1,6 +1,6 @@
 # RFC-0022: A shared GPU layer
 
-The gpu slice was split out of storytold/craft-libs#160 by review, into its own draft PR. This RFC gives that slice the suite-level decision it needs before merging.
+The gpu slice was split out of storytold/craft-libs#160 by review, into its own draft PR: storytold/craft-libs#663. This RFC gives that slice the suite-level decision it needs before merging.
 
 ## Summary
 
