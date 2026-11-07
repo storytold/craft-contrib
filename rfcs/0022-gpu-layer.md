@@ -21,7 +21,7 @@ Render-heavy and compute-heavy work recurs across the suite and the runtime trac
 
 ## Room for WebGPU optimization
 
-The browser path keeps the same optimization headroom as native, through the same mechanism. `DeviceCaps` expresses what the adapter actually offers, so an app or the runtime takes a faster path when a capability is present (half-precision floats, subgroup operations, timestamp queries, compressed texture formats) and the portable path when it is absent. Browser capability probing moves from static defaults to real adapter queries once async initialization lands in the worker, per the slice's own docs. Future WebGPU extensions ride the same route: a new capability becomes a new `DeviceCaps` field plus a gated fast path, with no fork in app code and no new trait. The baseline stays portable WebGPU. Optimization is always additive on top of it.
+The browser path keeps the same optimization headroom as native, through the same mechanism. `DeviceCaps` expresses what the adapter actually offers. An app or the runtime therefore takes a faster path when a capability is present (half-precision floats, subgroup operations, timestamp queries, compressed texture formats) and the portable path when it is absent. Browser capability probing moves from static defaults to real adapter queries once async initialization lands in the worker, per the slice's own docs. Future WebGPU extensions ride the same route: a new capability becomes a new `DeviceCaps` field plus a gated fast path, with no fork in app code and no new trait. The baseline stays portable WebGPU. Optimization is always additive on top of it.
 
 ## What this RFC decides
 
