@@ -51,7 +51,7 @@ The pilot docs and consumer screenshots currently in #160 move to the app PRs th
 
 ## Conflict handling, as acceptance tests
 
-The overwrite-refusal guarantee is an explicit acceptance test for every adapter, exercised by the contracts tests, by `craft-cloud-local`, and by each provider adapter as it lands.
+The overwrite-refusal guarantee is an explicit acceptance test for every adapter, exercised by the contracts tests, by `craft-cloud-local`, by each provider adapter as it lands.
 
 1. Two clients read the same document version. Both save. Exactly one succeeds. The other receives a conflict. No save ever silently overwrites the first.
 2. The conflict path preserves both sides. The losing client keeps its unsaved edits. The newer remote version stays available. Nothing is discarded until the user chooses how to resolve.
