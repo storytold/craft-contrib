@@ -1,6 +1,6 @@
 # RFC-0023: A web runtime for the Craft apps
 
-The runtime slice (tier-store, worker-host, runtime, the JS assets) was split out of storytold/craft-libs#160 by review, into its own draft PR. This RFC gives that slice the suite-level decision it needs before merging. It completes the RFC coverage of that PR: storage is RFC-0018, accounts RFC-0019, live collaboration RFC-0020, e-signature RFC-0021, the GPU layer RFC-0022.
+The runtime slice (tier-store, worker-host, runtime, the JS assets) was split out of storytold/craft-libs#160 by review, into its own draft PR: storytold/craft-libs#662. This RFC gives that slice the suite-level decision it needs before merging. It completes the RFC coverage of that PR: storage is RFC-0018, accounts RFC-0019, live collaboration RFC-0020, e-signature RFC-0021, the GPU layer RFC-0022.
 
 ## Summary
 
