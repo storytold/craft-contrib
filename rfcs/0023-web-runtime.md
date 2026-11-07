@@ -1,6 +1,6 @@
 # RFC-0023: A web runtime for the Craft apps
 
-The runtime slice (tier-store, worker-host, runtime, the JS assets) was split out of storytold/craft-libs#160 by review, into its own draft PR: storytold/craft-libs#662. This RFC gives that slice the suite-level decision it needs before merging. It completes the RFC coverage of that PR: storage is RFC-0018, accounts RFC-0019, live collaboration RFC-0020, e-signature RFC-0021, the GPU layer RFC-0022.
+The runtime slice (tier-store, worker-host, runtime, the JS assets) was split out of storytold/craft-libs#160 by review, into its own draft PR: storytold/craft-libs#662. This RFC gives that slice the suite-level decision it needs before merging. It completes the RFC coverage of that PR: storage is RFC-0024, accounts RFC-0025, live collaboration RFC-0020, e-signature RFC-0021, the GPU layer RFC-0022.
 
 ## Summary
 
@@ -15,7 +15,7 @@ A `-web` build of a Craft app runs inside a browser tab with hard memory limits,
 
 ## Boundaries
 
-**1. The tab holds no provider credentials.** A web runtime reaches storage through a `craft-cloud` HTTP gateway. Provider secrets, WebDAV details and account tokens stay server-side with the gateway (RFC-0018 boundary 4, RFC-0019). Nothing in these crates ever sees a provider credential.
+**1. The tab holds no provider credentials.** A web runtime reaches storage through a `craft-cloud` HTTP gateway. Provider secrets, WebDAV details and account tokens stay server-side with the gateway (RFC-0024 boundary 4, RFC-0025). Nothing in these crates ever sees a provider credential.
 
 **2. The portable model stays portable.** `craft-tier-store` compiles and tests natively. Browser specifics live only in the wasm glue. A native app may reuse the tier model where it helps, with no browser assumptions following it.
 
@@ -33,6 +33,6 @@ The runtime lives in the shared repository as the three crates plus assets. The 
 
 ## Open items
 
-Multipart upload (design-only today; it lands as a contract capability a backend may refuse, the same optional pattern as everything else). The gateway's hosting and session model remains RFC-0018's deferred question and is decided there, never here.
+Multipart upload (design-only today; it lands as a contract capability a backend may refuse, the same optional pattern as everything else). The gateway's hosting and session model remains RFC-0024's deferred question and is decided there, never here.
 
-Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-contrib#38 (RFC-0022), storytold/craft-libs#160.
+Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-contrib#38 (RFC-0022), storytold/craft-libs#160.
