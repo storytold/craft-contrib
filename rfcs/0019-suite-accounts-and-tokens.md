@@ -39,6 +39,10 @@ Its defect, named in review on craft-libs#160: the service half is CollabCraft-s
 
 At rest, the platform encrypts keychain entries and scopes them to the signed-in user. In memory, token bytes are zeroized on drop. For revocation, one suite service name makes every entry visible and deletable in the platform's own credential UI. Removing an account from the list removes its entry. Across apps, no token is in any file. No app ever reads another app's files for one. The threat this design does not address, by the nature of OS keychains: code running as the same user can request the same entries. That is the platform's trust boundary, stated here so nobody mistakes the guarantee.
 
+## Reference implementations, non-normative
+
+Working code backs every claim above, offered as reading aid, never as a dependency. The keychain store, the account list, the handle digest and the memory stand-in are the held-back `crates/suite-account` in the craft-libs#160 branch history. The provider client that must move out of it is its `service.rs`, the device-flow client for one hosted deployment. The problem the design replaces is visible in any current app build: a bearer token in a per-app JSON file beside its settings. None of this is normative. The extraction PR's traits are the only interface a consumer may depend on.
+
 ## Landing order
 
 1. This RFC is accepted.
