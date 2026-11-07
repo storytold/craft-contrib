@@ -36,4 +36,4 @@ Two requirements make the portability and fallback claims verifiable, per review
 
 The layer lives in the shared repository as the four crates above. wgpu is the baseline implementation and WebGPU the browser floor. Capability differences are explicit data, never implicit behavior. Every consumer must run against `craft-gpu-null` in CI. Named consumers land on the draft PR per review precedent: the runtime slice (worker-host executing GPU jobs) is the first. The render-path apps named there are the second set. Vendor-specific backends beyond wgpu, if ever wanted, arrive as adapters behind the same traits in their own PRs.
 
-Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-libs#160 (the review that split this out).
+Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0024), storytold/craft-libs#160 (the review that split this out).
