@@ -34,7 +34,7 @@ This RFC decides the contract shapes and their home (the shared layer, beside `c
 
 1. This RFC is accepted.
 2. storytold/craft-libs#345 (craft-crdt) reviews on its own merits as the text layer.
-3. A contracts PR adds the presence, invite and conversation traits beside `craft-cloud`, with an in-process mock and the degrade-to-absent tests.
+3. A contracts PR adds the live-session contract and the presence, invite and conversation traits beside `craft-cloud`, with an in-process mock and the degrade-to-absent tests. The session contract is the proven two-model protocol: ordered submission with opaque scope locks for commands that do not commute, plus lock-free `crdt.*` passthrough for text. A lock scope is an opaque string each app reads its own way. The contract therefore names no app and no provider. The lock-or-CRDT choice is per command kind, made by the app, carried by the protocol. Any backend implementing the contract supports both models.
 4. Backends follow as adapters, each its own PR, none required by any app.
 
 Related to storytold/craft-libs#123. Context: storytold/craft-contrib#27 (RFC-0018), storytold/craft-libs#345, tangency-labs/solidcraft#5184 (the upstream research thread the frame and ephemeral kinds answered).
