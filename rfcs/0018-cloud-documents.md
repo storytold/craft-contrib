@@ -55,7 +55,7 @@ The overwrite-refusal guarantee is an explicit acceptance test for every adapter
 
 1. Two clients read the same document version. Both save. Exactly one succeeds. The other receives a conflict. No save ever silently overwrites the first.
 2. The conflict path preserves both sides. The losing client keeps its unsaved edits. The newer remote version stays available. Nothing is discarded until the user chooses how to resolve.
-3. An adapter that cannot obtain or atomically enforce a version precondition reports that limitation through its capabilities. It never silently claims the same overwrite protection. The pages surface the weaker guarantee to the user.
+3. Enforcement strength is a behavioral property of the provider and its deployment, never something the interface decides. The contract carries the precondition (`write` takes the etag the caller last saw) and the provider brings whatever enforcement it has. The two reference implementations already differ exactly this way. The local adapter checks the etag and then writes, a client-side check with a race window, honest best effort. The WebDAV path sends `If-Match` for the server to enforce atomically, where that server honors it. The acceptance tests are therefore the probe: run against a live provider, the double-save case reveals what the deployment actually guarantees. An adapter documents its enforcement point (client-side check, or server-side conditional) and never claims atomicity the test cannot demonstrate. The pages surface the weaker guarantee to the user where that is what the provider gives.
 
 ## Reference implementations, non-normative
 
