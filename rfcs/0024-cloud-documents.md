@@ -43,7 +43,7 @@ What waits. `craft-suite-account` (keychain research). The web gateway's session
 3. **craft-esign plus `craft_ui::esign`.** Its own draft PR, storytold/craft-libs#661, governed by RFC-0021.
 4. **craft-tier-store, craft-worker-host, craft-runtime, the JS assets.** Its own draft PR, storytold/craft-libs#662, governed by RFC-0023.
 5. **The craft-gpu family** (`craft-gpu`, `-wgpu`, `-null`, `-providers`). Its own draft PR, storytold/craft-libs#663, governed by RFC-0022.
-6. **craft-suite-account.** No PR until the keychain RFC (RFC-0025, storytold/craft-contrib#35) settles where tokens live.
+6. **craft-suite-account.** Its own draft PR, storytold/craft-libs#665, governed by RFC-0025 (storytold/craft-contrib#35).
 7. **storytold/craft-libs#345, craft-crdt.** Concurrent text without region locks. Part of the live-collaboration track, listed here so the track stays whole. It waits for the live-collaboration decision, separate from this RFC.
 8. **Pilot app integrations.** A small number of representative apps (two, per review precedent) integrate after the library merges, to evaluate the interface. The remaining apps follow once the interface has settled.
 
