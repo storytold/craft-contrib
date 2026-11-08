@@ -40,16 +40,18 @@ anywhere.
 7. **Red `main`.** If a check fails on a test your PR does not touch, check
    whether the same test fails on `main`. If it does, say so on the PR with a
    link to the failing run on `main`, instead of changing unrelated code.
-8. **Keep review feedback moving.** Follow accepted
-   [house rule 14](https://github.com/storytold/craft-contrib/blob/main/standards/house-rules-core.md):
-   respond within 7 days to an identified actionable request, with a reminder
-   or escalation at 14 days and eligibility for closure at 30 days. Count only time
+8. **Keep review feedback moving.** Respond within 3 days to an
+   identified actionable request, with a reminder or escalation at 7 days and
+   eligibility for closure at 14 days. Count only time
    when that request awaits the author, not time since the PR opened. Optional
    suggestions and unconfirmed bot findings do not start the clock. A substantive
    fix, explanation or agreed plan addressing that request resets it if author
    action remains; unrelated activity does not. Pause while awaiting reviewer
    clarification or a maintainer decision. Waiting on maintainers does not count
    against the contributor. A maintainer decides closure; it is never automatic.
+   When this RFC is adopted, update
+   [house rule 14](https://github.com/storytold/craft-contrib/blob/main/standards/house-rules-core.md)
+   to these times.
 9. **Keep it current.** If `main` moved and the PR conflicts, rebase it and
    check that the fix is still needed (the bug may have been fixed meanwhile).
 
