@@ -35,7 +35,7 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    - Does it cover every point of the issue and every way a user reaches the
      bug (each shortcut, menu and input path), with a test for each?
    - Does it update the docs, help text or shortcut tables that describe it?
-3. **The better fix stays.** If theirs is better or equal, close yours with a
+3. **The better fix stays.** If theirs is clearly better, close yours with a
    short comment that says why, and link it. If yours is clearly better (for
    example theirs fixes half the issue), say what the difference is in one
    factual sentence on both PRs. Don't argue about who was first.
@@ -47,9 +47,16 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    the general one and is rebuilt on top of it.
 6. **Maintainers decide ties.** When the authors don't agree, a maintainer
    compares correctness, completeness and verification using the questions in
-   point 2, then explains the choice on both PRs. An earlier claim coordinates
-   work (RFC-0003); it does not give an implementation priority for review or
-   merge. Preserve useful parts and contributor credit as in point 4.
+   point 2, then explains the choice on both PRs. Preserve useful parts and
+   contributor credit as in point 4.
+7. **Live claims count.** Don't open a PR on an issue with a live claim
+   (RFC-0003). If two fixes are equal, the earlier valid claim wins. A PR that
+   ignored a live claim replaces the claimed one only if it is clearly better:
+   it fixes more of the issue or fixes something the other gets wrong, not
+   style. The author of such a PR has to say why it is clearly better. If they
+   don't, a maintainer can close it without comparing the two. If someone keeps
+   ignoring live claims, they get a warning, and after that their PRs on
+   claimed issues are closed without review.
 
 ## Alternatives
 
