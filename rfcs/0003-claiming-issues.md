@@ -47,7 +47,9 @@ causing collisions.
    the issue. After that anyone can take the issue, by commenting that they are
    taking it over. **An active draft PR does not automatically expire after
    24 hours.** Before taking over work with an active draft, check in with its
-   author on the issue or linked PR and coordinate next steps.
+   author on the issue or linked PR and coordinate next steps. If the author
+   doesn't reply within 24 hours, you can take over by saying so on the issue,
+   and credit their work if you build on it.
 6. **Release when you stop.** If you give up, get stuck, or find that someone
    else's PR is better, say so on the issue, and add what you found so the
    next person starts further ahead.
