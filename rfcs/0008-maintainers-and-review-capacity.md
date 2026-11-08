@@ -5,9 +5,9 @@ Related: storytold/photocraft#5439.
 ## Summary
 
 Write down the contributor roles and what each may do, and name review as
-the bottleneck to plan around. Maintainers stay the ArtCraft team: owners
-decide who on the team reviews and merges which app. This RFC adds no path
-for people outside the team to become maintainers.
+the bottleneck to plan around. Maintainers are the ArtCraft team and the
+people the team chooses: owners decide who reviews and merges which app.
+Nobody becomes a maintainer automatically.
 
 ## Motivation
 
@@ -66,8 +66,10 @@ The team simply has far more PRs than time to review them.
      - **Senior Contributor**: given by hand to professionals with a large
        contribution.
      Tiers are given by these rules, not on request.
-   - **Maintainer**: a member of the ArtCraft team in `craft-app-team`, as in
-     RFC-0000. Owners decide who is on it.
+   - **Maintainer**: a member of the ArtCraft team, or someone the team has
+     chosen, in `craft-app-team`, as in RFC-0000. Owners decide who is on it.
+     People can vouch for someone, but the ArtCraft team decides. A count of
+     merged PRs doesn't grant it.
    - **Owner**: as in RFC-0000.
 2. **More review from the team.** Owners can give team members review and
    merge rights for specific apps, so each app has someone responsible for
