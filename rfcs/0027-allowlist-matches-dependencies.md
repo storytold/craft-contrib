@@ -27,17 +27,18 @@ whose licence expression no listed licence satisfies:
 | `Unicode-3.0` | 17 | ICU4X `icu_*` (through `url`/`idna`); covered by RFC-0026 |
 | `Zlib` | 17 | `foldhash` (through `hashbrown`), `slotmap`, `zlib-rs` |
 | `BSL-1.0` | 17 | `clipboard-win`, `error-code` (through `arboard`, Windows clipboard) |
-| `MPL-2.0` | 15 | `option-ext` (through `dirs`), `colored`, `symphonia` |
+| `MPL-2.0` | 6 ship it | `symphonia` (4 apps), `acadrust` (CadCraft), `imbl` (FigCraft); also `option-ext` through `dirs-sys` in 3 apps. In 15 apps' lockfiles only because `colored` comes through `egui_kittest`'s test-only screenshot diffing |
 | `CDLA-Permissive-2.0` | 15 | `webpki-roots`, `webpki-root-certs` (TLS root certificates, data) |
-| `Apache-2.0 WITH LLVM-exception` | 6 | `cranelift-*`, `wasmtime-*` |
+| `Apache-2.0 WITH LLVM-exception` | 6 | `wasmtime-*` and `cranelift-*` (Craft Anything only); elsewhere `target-lexicon` (build scripts, through `cfg-expr`) and `winx` (through `cap-primitives`) |
 | `IJG` | 3 | `jpeg-encoder` (with MIT OR Apache-2.0) |
-| `NCSA` | 2 | `libfuzzer-sys` (fuzz targets only) |
+| `NCSA` | 2 | `libfuzzer-sys`, through `rav1e` for its fuzzing builds |
 | `0BSD` | 1 | `yaxpeax-arch`, `yaxpeax-arm` |
 | `Unlicense` | 1 | `ksni` |
 | `MPL-2.0+` | 1 | `imbl` |
 
 The lockfiles include build, test and every-platform dependencies, so not
-every crate above ships in every build. `Zlib`, `BSL-1.0` and
+every crate above ships in every build. The PR discussion has a
+breakdown of which crates ship and what replacing each would take. `Zlib`, `BSL-1.0` and
 `CDLA-Permissive-2.0` ship in all or nearly all of them.
 
 ## Decision
