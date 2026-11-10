@@ -28,9 +28,9 @@ These boundaries respond to review on this PR. They bind every PR in the track.
 
 ## Mapping the current implementation onto these boundaries
 
-What stands unchanged. The `craft-cloud` contract (about 490 lines, serde and thiserror only, no vendor names) and the `craft-ui` cloud/share pages already match boundary 2's shape. The pages talk to a `CloudBackend`. Any adapter satisfies them.
+What stands unchanged. The `craft-cloud` contract (about 490 lines, serde and thiserror only, no vendor names) and the `craft-ui` cloud/share pages already match boundary 2's shape. The pages talk to a `CloudBackend`. Any adapter satisfies them. One clarification from review: the hosted sign-in and link jobs on `CloudBackend` (`SignIn`, `LinkStart`, the linked notification) are optional for direct adapters. A direct adapter connects with configured credentials and refuses those jobs honestly.
 
-What moves. `craft-webdav` and `craft-nextcloud` move out of the collab-craft tree into the shared layer, becoming the direct adapters boundary 2 requires. That is extraction, with no rewrite expected.
+What moves. `craft-webdav` and `craft-nextcloud` move out of the collab-craft tree into the shared layer, becoming the direct adapters boundary 2 requires. The move includes two correctness fixes, found in review and fixed as part of moving, never ported as they are. `create` sends `If-None-Match: *`, refusing to replace an existing name. That closes the Save As case where a plain PUT silently replaced a colleague's file. `write` returns the etag the PUT itself produced, never one from a second `stat` after it. That closes the interleaving where a caller baselined somebody else's etag and its next conditional save silently replaced their edit. Both land with the review's failing tests as the adapter acceptance tests.
 
 What changes. App integrations wire a configured connection (boundary 1) to an adapter (boundary 2). The CollabCraft client construction they carry today goes away. The pilot apps demonstrate that wiring.
 
@@ -39,7 +39,7 @@ What waits. `craft-suite-account` (keychain research). The web gateway's session
 ## The PRs in this track, in landing order
 
 1. **storytold/craft-libs#160, cut down.** `craft-cloud`, the `craft-ui` cloud and share pages, their tests, plus `craft-cloud-local`. This is the first merge after acceptance. The criterion it meets, stated inline per the note above: it is a platform contract intended for every app, with wdunn001 as named maintainer.
-2. **Direct provider adapters.** `craft-webdav` and `craft-nextcloud` as their own small PRs into the shared layer, after the contracts merge.
+2. **Direct provider adapters, with their bridge.** `craft-webdav` and `craft-nextcloud` as their own PRs into the shared layer, after the contracts merge, carrying the two correctness fixes above. The same step delivers the piece that makes the direct path real end to end: a `Files`-to-`CloudBackend` bridge plus an HTTP transport, since the pages consume `CloudBackend` while the adapter crates implement `craft_cloud::Files` and leave transport to the caller. The bridge is named here so nobody mistakes the adapters alone for a working direct path.
 3. **craft-esign plus `craft_ui::esign`.** Its own draft PR, storytold/craft-libs#661, governed by RFC-0021.
 4. **craft-tier-store, craft-worker-host, craft-runtime, the JS assets.** Its own draft PR, storytold/craft-libs#662, governed by RFC-0023.
 5. **The craft-gpu family** (`craft-gpu`, `-wgpu`, `-null`, `-providers`). Its own draft PR, storytold/craft-libs#663, governed by RFC-0022.
