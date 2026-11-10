@@ -25,7 +25,7 @@ A `-web` build of a Craft app runs inside a browser tab with hard memory limits,
 
 ## Acceptance requirements
 
-Three requirement sets make the large-document and asynchronous-persistence claims verifiable, per review. The tiering model behind them is production-proven: this runtime serves one live deployment today. The same tier discipline (GPU buffers hot, wasm heap warm, OPFS or a chosen folder cold) runs large-model inference in a second production system, where the real ceilings were measured the hard way.
+Three requirement sets make the large-document and asynchronous-persistence claims verifiable, per review.
 
 **1. "Flushed" is defined, in two distinct steps.** Acceptance into the hot mirror is step one. Successful persistence to the intended tier is step two. Only step two may mark a revision saved. Every pending write carries the revision it captured. A flush acknowledgment marks saved only the revision it actually persisted. A late acknowledgment for an older flush can neither overwrite nor mark saved a newer edit. A failed or partial flush restores the unaccepted writes to the pending queue for retry, with per-key results, never a bare count. Quota exhaustion, permission loss and worker restart are each a named test case. An acknowledged save survives closing and reopening the document.
 
