@@ -25,7 +25,7 @@ Its defect, named in review on craft-libs#160: the service half is CollabCraft-s
 
 ## What this RFC decides
 
-**1. Where tokens live.** The platform keychain, exactly as the existing code does it. One suite service name. One entry per account handle. Machine-local persistence where the platform offers it. No token ever lands in a JSON file, a shared store, a tool declaration, or an environment variable written by the suite.
+**1. Where tokens live.** The platform keychain, exactly as the existing code does it. One suite service name. One entry per account handle. Machine-local persistence where the platform offers it. The secrecy rule is stated as what the storage backend must prove, never as a promise the contract makes on a backend's behalf. No plaintext secret ever lands in a JSON file, a shared store, a tool declaration, or an environment variable written by the suite. Where no keychain exists, the encrypted-file fallback absorbed from the craft-ai store is the one permitted on-disk form, holding ciphertext only, with its key outside the suite folder. Both halves are conformance requirements on the token store backend, enforced by its tests on the extraction PR.
 
 **2. Where the account list lives.** The suite-level folder, as item 5 above. The list carries identity and routing only. Grep it for secrets and find none.
 
@@ -52,7 +52,7 @@ Refresh itself is out of this RFC entirely. When a token refreshes, how rotation
 
 ## Security posture
 
-At rest, the platform encrypts keychain entries and scopes them to the signed-in user. In memory, token bytes are zeroized on drop. For revocation, one suite service name makes every entry visible and deletable in the platform's own credential UI. Removing an account from the list removes its entry. Across apps, no token is in any file. No app ever reads another app's files for one. The threat this design does not address, by the nature of OS keychains: code running as the same user can request the same entries. That is the platform's trust boundary, stated here so nobody mistakes the guarantee.
+At rest, the platform encrypts keychain entries and scopes them to the signed-in user. In memory, token bytes are zeroized on drop. For revocation, one suite service name makes every entry visible and deletable in the platform's own credential UI. Removing an account from the list removes its entry. Across apps, no file holds a plaintext secret. The account JSON carries identity and routing only. The encrypted-file fallback's on-disk bytes are ciphertext. No app ever reads another app's files for one. These are backend conformance requirements with tests behind them, the same split the storage track uses for conflict handling, since the interface cannot promise what only a storage backend does. The threat this design does not address, by the nature of OS keychains: code running as the same user can request the same entries. That is the platform's trust boundary, stated here so nobody mistakes the guarantee.
 
 ## Reference implementations, non-normative
 
