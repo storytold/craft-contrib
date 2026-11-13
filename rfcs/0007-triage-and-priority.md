@@ -37,6 +37,8 @@ these labels, so they need a written meaning.
    - `shared`: the problem affects several apps (a shared component or the
      installer);
    - `support`: not a development issue (how-to, installation, account);
+   - `in progress`: an open PR already works on this problem, and it is
+     linked. Check it before starting (RFC-0003, RFC-0004);
    - `spam`, `no action needed`: as named.
 2. **New labels**
    - `already fixed`: the problem no longer happens on `main`; the fixing
