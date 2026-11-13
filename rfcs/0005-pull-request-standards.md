@@ -65,6 +65,6 @@ anywhere.
 
 ## Relationship to the accepted house rules
 
-The review-response timing question is covered by accepted RFC-0006 and house
-rule 14. This proposal uses that clock rather than introducing a separate
-one-day response or three-day closure threshold.
+House rule 14, accepted with RFC-0006, sets 7, 14 and 30 days for review
+responses. This proposal shortens them to 3, 7 and 14 days (point 8), and house
+rule 14 is updated to match when this RFC is adopted.
