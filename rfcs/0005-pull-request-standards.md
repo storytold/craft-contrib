@@ -30,6 +30,8 @@ anywhere.
    - The cause.
    - What changed, and why the change is this wide and no wider.
    - The test: its name and what it checks.
+   - Verification: what ran and where (CI, a test run, a manual check in the
+     app), and what didn't run.
 4. **Title and commits** follow the repository's existing style (check the
    last few commits on `main`).
 5. **User-facing text** goes through the repository's translation system, with
