@@ -575,8 +575,8 @@ The craft-libs pull requests go in this order:
    workflow sets it (`media.yml:83`, `audio.yml:162`). Among the testkit folders, the path filters of
    `media.yml`, `audio.yml` and `video.yml` name only `crates/media-testkit/**` (`:6`, `:8` in each).
    They also match `Cargo.toml` and `Cargo.lock`, so the pull request that adds `crates/testkit`
-   starts all three, but a later change to `crates/testkit/**` alone does not. The `oracle` pull
-   request adds `crates/testkit/**` to those path filters.
+   starts all three, but a later change to `crates/testkit/**` alone does not. A CI-only pull request
+   (house rule 11) adds `crates/testkit/**` to those path filters.
 8. `deadline`'s time scale and watchdog, after the LightCraft stack merges.
 9. The `geom` feature, after RFC-0030 (storytold/craft-contrib#46) is accepted.
 
@@ -880,8 +880,8 @@ for them, as in "Defaults this RFC takes", item 12:
 
     Open craft-libs pull requests also change files that this RFC moves or gates:
     - storytold/craft-libs#1112 (dylanmtaylor) rewrites `media.yml`, `audio.yml`, `video.yml` and
-      `formats.yml`, which step 7 of the craft-libs order gives new path filters and which get the
-      `craft-testkit` wasm32 row.
+      `formats.yml`, which get new path filters in the CI-only pull request of step 7 of the craft-libs
+      order and the `craft-testkit` wasm32 row in its own pull request.
     - storytold/craft-libs#1309 (regendorf-ux) and #1277 (DesignsByRay) change `crates/pdf/src/cos.rs`,
       where `cos::testkit` is declared (`:23-24`).
     - storytold/craft-libs#1337, #1330, #1323, #1263 and #1166 (keithcsqueensu) change
