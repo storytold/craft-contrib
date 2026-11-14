@@ -14,9 +14,10 @@ On 2026-11-06, of the pull requests that conflicted with their base,
 362. Of the 434 checklist conflicts, 343 were in LightCraft's handwritten
 checklist and are covered here. The other 91 were in generated checklists
 and remain out of scope: CADCraft 19, DeckCraft 24, GridCraft 15, WordCraft
-17, PhotoCraft 14, and FigCraft 2. The other parity docs have the same
-shape: a status line, a table,
-prose around it, and a revision history. EffectCraft's `docs/gaps.md`
+17, PhotoCraft 14, and FigCraft 2. PhotoCraft's generated
+`docs/scorecard.md` conflicts the same way and is also out of scope. The
+other parity docs have the same shape: a status line, a table, prose
+around it, and a revision history. EffectCraft's `docs/gaps.md`
 and `docs/ui-parity.md` are the example. The status line is a
 "previously …" chain, the same failure [RFC-0017](0017-progress-doc-fragments.md)
 removed from `ROADMAP.md`.
@@ -34,8 +35,8 @@ that changes, so the fragment is the item, not the change.
   `docs/gaps.d/18-relative-paths.md`. New items use the next free number;
   CI rejects a pull request that adds a duplicate number, even when the
   slugs differ. Reordering never changes a number. Items are never deleted.
-  Two pull requests that change different items do not touch the same file. Two that change the same item still
-  conflict.
+  Two pull requests that change different items do not touch the same
+  file. Two that change the same item still conflict.
 - **One named field per configured column.** An item has the
   front-matter fields its table configuration names, and each is required:
   for example `read:`, `write:` and `fidelity:` for a format, or separate
@@ -73,9 +74,8 @@ that changes, so the fragment is the item, not the change.
   filesystem mtime, and never after today. The line contains date and kind
   of change only. An item change is always `minor`: when a doc's items
   change, the joiner writes that doc's `Last updated` and `Change: minor`.
-  A change to
-  the prose assessment, or to a number that is a judgement rather than a cell, is
-  its own pull request.
+  A change to the prose assessment, or to a number that is a judgement
+  rather than a cell, is its own pull request.
 - **No revision-history row for an item-only change.** The item file
   already records the state. Other changes to the doc still add a row.
 - **CI catches hand edits to joined tables.** `cargo xtask progress --check`
@@ -85,12 +85,13 @@ that changes, so the fragment is the item, not the change.
   joining can overwrite it. The check stops accidental and agent hand-edits,
   which are what cause the conflicts. It does not stop deliberate tampering,
   such as a pull request that disguises an edit with surrounding Markdown;
-  review covers that, as it does for code. Compare protected table regions from the PR
-  base to its head, mapping each changed row/cell to the matching source-item
-  change and rendered value. An unrelated source change does not authorize
-  a manual table edit. Source-item-only PRs remain valid; do not
-  unconditionally demand that every freshly rendered table be committed. Report the table, row and source
-  item needed for repair.
+  review covers that, as it does for code. Compare protected table regions
+  from the PR base to its head, mapping each changed row/cell to the
+  matching source-item change and rendered value. An unrelated source
+  change does not authorize a manual table edit. Source-item-only PRs
+  remain valid; do not unconditionally demand that every freshly rendered
+  table be committed. Report the table, row and source item needed for
+  repair.
 - **CI validates every item**: its file name, every configured field,
   `rank:` and `status:` values, and that no pull request adds a duplicate
   item number.
@@ -104,6 +105,9 @@ that changes, so the fragment is the item, not the change.
   evidence, table assignment, existing row order, numeric gap identifier
   and incoming gap reference. The prose above and below the table stays
   in the doc. Compare the joined result with the original before rollout.
+  Where a status line carries a running list of changes (PhotoCraft's
+  `**Change:** minor (…)` with issue numbers), that list goes away when the
+  joiner takes over the line.
 - Inventory open PRs that edit those tables or the RFC-0017 progress log.
   Provide a scripted conversion of each row/log edit to its matching item
   or fragment and verify the joined result preserves that PR's intended
@@ -113,7 +117,8 @@ that changes, so the fragment is the item, not the change.
   fail safely with a specific migration diagnostic.
 - Point xtask at the new table targets, and add the check to CI.
 - Tell agents, in `AGENTS.md`, that an item change is a change to that
-  item's file (RFC-0006).
+  item's file, and remove any instruction to edit a doc's status line or
+  add a revision-history row for an item change ([RFC-0006](0006-coding-agents.md)).
 
 ## Rollout acceptance tests
 
@@ -143,7 +148,10 @@ approach is not evidence that the tests or migration have already shipped.
 ## Settled in review
 
 The two open questions were settled as built in
-[storytold/craft-libs#629](https://github.com/storytold/craft-libs/pull/629):
+[storytold/craft-libs@997c89a](https://github.com/storytold/craft-libs/commit/997c89a4204e4dce56c3a6c972adee1995027f1c),
+the head of [storytold/craft-libs#629](https://github.com/storytold/craft-libs/pull/629)
+on 2026-11-06. A later change to that pull request is a difference from
+this RFC, not a change to it:
 
 - The change kind of an item change is always `minor`.
 - An item without `rank:` sorts after the ranked items, by number.
@@ -156,13 +164,14 @@ Progress-log storage and joining semantics remain in
 [RFC-0017](0017-progress-doc-fragments.md); the migration safety requirements
 above apply to both progress logs and item tables.
 What the assessments say, and rewriting their hours or percentages.
-Stopping the commit of a generated checklist.
+Stopping the commit of a generated checklist or scorecard.
 
 ## References
 
 - [RFC-0017](0017-progress-doc-fragments.md), and the count in its text
 - EffectCraft `docs/gaps.md`, `docs/ui-parity.md`, `docs/file-format-parity.md`
-- [storytold/craft-libs#629](https://github.com/storytold/craft-libs/pull/629), the joiner as built
+- [storytold/craft-libs@997c89a](https://github.com/storytold/craft-libs/commit/997c89a4204e4dce56c3a6c972adee1995027f1c), the joiner as built
+  ([storytold/craft-libs#629](https://github.com/storytold/craft-libs/pull/629))
 
 ## Review requirements carried forward
 
