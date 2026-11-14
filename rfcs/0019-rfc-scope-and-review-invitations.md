@@ -27,8 +27,12 @@ comments as adopted policy.
 
 2. **Affected-app invitations.** The maintainer who starts an RFC's comment
    period explicitly invites maintainers of the affected apps to weigh in on
-   the PR when announcing the period's end date. This does not require
-   unanimous approval or an affirmative response from every invitee.
+   the PR when announcing the period's end date. The invitation is a GitHub
+   review request to each of them, so it shows on the PR and on their
+   dashboards; the period-start comment says who was invited. When an RFC
+   affects every app, a review request to the `craft-app-team` team is
+   enough. This does not require unanimous approval or an affirmative
+   response from every invitee.
 
 All other RFC-0000 rules remain unchanged. Anyone can open an RFC or comment.
 After the comment period, approval must come from a maintainer other than the
