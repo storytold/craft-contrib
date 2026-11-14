@@ -35,6 +35,6 @@ Dependencies and assets use SPDX identifiers. An expression is allowed when ever
 - `Apache-2.0 WITH LLVM-exception`
 - `LicenseRef-Public-Domain`
 
-`MPL-2.0` is allowed for third-party dependencies used unmodified; vendoring, patching or copying its code needs a maintainer's approval.
+`MPL-2.0` is allowed for third-party dependencies used unmodified; vendoring, patching or copying its code needs a maintainer's approval. `MPL-2.0+` counts as `MPL-2.0`.
 
 `LicenseRef-Storyteller-Trademark` is not in this list. It covers Storyteller brand marks only, where a repository already says so.

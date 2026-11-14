@@ -37,9 +37,16 @@ whose licence expression no listed licence satisfies:
 | `MPL-2.0+` | 1 | `imbl` |
 
 The lockfiles include build, test and every-platform dependencies, so not
-every crate above ships in every build. The PR discussion has a
-breakdown of which crates ship and what replacing each would take. `Zlib`, `BSL-1.0` and
-`CDLA-Permissive-2.0` ship in all or nearly all of them.
+every crate above ships in every build. The
+[PR discussion](https://github.com/storytold/craft-contrib/pull/41#issuecomment-6717237070)
+has a breakdown of which crates ship and what replacing each would take.
+`Zlib`, `BSL-1.0` and `CDLA-Permissive-2.0` ship in all or nearly all of
+them.
+
+The survey covers the app repositories only. The Rust rules also apply to
+shared Rust libraries such as `craft-libs`, whose lockfiles were not
+scanned. They take the same list and may only narrow it; a shared library
+that needs an identifier outside it proposes the addition here.
 
 ## Decision
 
