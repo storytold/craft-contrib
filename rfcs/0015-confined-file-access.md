@@ -74,14 +74,25 @@ The copies already disagree, and the gaps show up in the same places:
    `..` is collapsed. Symbolic links are followed, and so are Windows
    junctions. The comparison is of the resolved components, so a root of
    `/sandbox` does not allow `/sandbox-other`, and the string the caller
-   passed is not what is compared. On a case-insensitive file system the
-   comparison is case-insensitive. A differently-cased spelling of a path
-   inside a root is that same path and is allowed. A different directory
+   passed is not what is compared. Names are compared exactly, because
+   resolving an existing name gives it its real spelling. On a
+   case-insensitive file system a differently-cased spelling of a path
+   inside a root therefore resolves to that same path and is allowed. The
+   comparison does no case folding of its own: Unicode lowercasing turns
+   U+212A KELVIN SIGN into `k`, which NTFS keeps apart, so folding would let
+   a write reach a sibling folder outside the root. A different directory
    that only shares a case-folded prefix with a root is outside and is
-   refused. A UNC path (`\\server\share` or
-   `//server/share`) and a device path (`\\?\`, `\\.`) are resolved and then
-   compared the same way; if they do not fall inside a root, they are
-   refused. An 8.3 short name is resolved to the long path before the
+   refused.
+   A network or device path is refused before any file system call, unless
+   a root has the same server and share. That covers a UNC path
+   (`\\server\share`, `//server/share`), a WebDAV path (`\\host@SSL\share`),
+   `\\?\UNC\`, `\\.\`, and any other `\\?\` form that is not a disk.
+   Resolving such a path opens it, which makes the machine contact a host
+   the caller chose and send the service account's credentials before
+   anything is refused. The same goes for a link on the way to one: it is
+   judged by its own text, before it is followed. A device name is refused
+   in any component, with or without an extension or a colon (`CON`, `NUL`,
+   `NUL:x`, `COM1`, `COM¹`, `LPT³`). An 8.3 short name is resolved to the long path before the
    comparison. The short name is not trusted on its own. A path that can't
    be resolved yet, such as a new file whose parent does not exist, is
    resolved through its nearest existing parent, and the create in section 4
@@ -179,10 +190,11 @@ root, a separate write root, and a folder outside both holding a marker file.
 | symlinked folder | `<root>/dir/secret.*`, where `dir` → `<outside>` |
 | write through a link | saving over `<root>/link.*` must not change the target |
 | junction, where the platform has them | a Windows junction inside the root pointing outside |
-| UNC and device path | `\\server\share\secret.*`, `//server/share/secret.*`, `\\?\` and `\\.\` forms that resolve outside |
+| network path | `\\server\share\secret.*`, `//server/share/secret.*`, `\\host@SSL\share\secret.*`, `\\?\UNC\` and `\\.\` forms, and a link in the root that points at one. The refusal comes before any file system call, so the test needs no network: it names the path's prefix and is not an error from resolving it |
+| device name | `<root>/NUL`, `<root>/com1.txt`, `<root>/COM¹`, `<root>/NUL:x` |
 | 8.3 name | a short name inside the root whose long path is outside |
 | case fold, same directory | on a case-insensitive volume, another spelling of a file inside the root that differs only by case |
-| case fold, outside | on a case-insensitive volume, a path that shares a case-folded prefix with a root but names a different directory, such as root `/sandbox` and `/sandbox-other/secret.*`, or root `/tmp/Read` and `/tmp/readme/secret.*` |
+| case fold, outside | on a case-insensitive volume, a path that shares a case-folded prefix with a root but names a different directory, such as root `/sandbox` and `/sandbox-other/secret.*`, or root `/tmp/Read` and `/tmp/readme/secret.*`, or a root with `k` in its name and a sibling with U+212A in its place |
 | directory swap | a directory inside the root replaced with a symlink to outside after lookup starts, including while creating a new file in that directory |
 | symlink swap | a file inside the root replaced with a symlink to outside after lookup starts |
 | hard link | `<root>/hard.*` is a hard link to `<outside>/secret.*`; reading it and saving over it |
@@ -191,7 +203,7 @@ root, a separate write root, and a folder outside both holding a marker file.
 | paths inside a document | a document in the root naming each refused direct-escape path above, not the same-directory case-fold spelling |
 | refused features | one call per item in section 3 |
 
-A platform that does not have junctions, UNC paths, 8.3 names, hard links or a
+A platform that does not have junctions, network paths, device names, 8.3 names, hard links or a
 case-insensitive volume skips that row. A skip is not a pass.
 
 A direct read or write (every row except "paths inside a document",
