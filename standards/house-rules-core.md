@@ -1,6 +1,6 @@
 ## House rules
 
-These apply in every Craft repository. A later rule may be stricter, not weaker. The source is `standards/house-rules-core.md` in `storytold/craft-contrib`. Propose changes there, not in a copy.
+These apply in every Craft repository. Local rules may be stricter, not weaker. Propose changes to `standards/house-rules-core.md` in `storytold/craft-contrib`, not a copy.
 
 1. **A person is accountable.** Whoever runs an agent answers for what it opens and for its review comments.
 2. **Check, then claim.** Before writing code, read the issue comments, search pull requests for `#N` and the keywords, and check recent commits on `main`. Comment on the issue first. Release a claim you will not finish.
@@ -11,7 +11,7 @@ These apply in every Craft repository. A later rule may be stricter, not weaker.
 7. **Report only what ran.** Say what you tested and what you could not run. Without a local build or test, say so and rely on CI before marking ready.
 8. **`main` changes through a pull request.** Do not push to it. Branch protection enforces this. There is no exception.
 9. **Stop and ask only about** licensing outside the allowlist, publishing, releases, a new remote, secrets, spending money, destructive git, and anything else hard to undo. Otherwise keep working. `plan/` is a gitignored notebook, not rules. Without it, do not ask for it and do not stop.
-10. **Keep secrets and personal details out** of the repository, logs and requests.
+10. **Keep secrets and personal details out** of the repository, logs and requests, except credits a person consented to.
 11. **CI stays shared.** Workflows call `storytold/craft-common-actions`. Do not change CI in a feature or fix pull request. If CI cannot cover a change, open an issue there.
 12. **Guards say why.** A check that looks removable says what it prevents. Read that before changing it.
 13. **Instructions must be readable by everyone.** No notes about one machine, and no links to files a reader cannot open. `craftrules` is retired. Do not link to it.
