@@ -190,5 +190,5 @@ Asset export writes the material's roughness and metallic factors. The vector ti
 - The mesh input, the material, the shared sRGB pair and the Smith-Schlick GGX default.
 - VectorCraft's two tiers.
 
-Work in TextureCraft and MaterialCraft starts after this RFC is accepted, or after a maintainer of each
-of the two apps agrees in its review. Per RFC-0000 this is a 3-day comment period change.
+Work in TextureCraft and MaterialCraft starts after this RFC is accepted. Per RFC-0000 this is a 3-day
+comment period change.
