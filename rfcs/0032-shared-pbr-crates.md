@@ -6,17 +6,17 @@ EffectCraft's physically based renderer into new craft-libs crates. Since that d
 MaterialCraft have added their own PBR code, craft-libs has added mesh, MaterialX, OpenEXR and Radiance
 HDR crates, and RFC-0022 has decided the GPU layer. This revision plans the move with those changes.
 
-Related: storytold/craft-libs#778, storytold/craft-libs#115, storytold/vectorcraft#2560,
-storytold/effectcraft#2970, storytold/effectcraft#2199, storytold/deckcraft#743,
-storytold/deckcraft#1380, storytold/photocraft#8805, storytold/cadcraft#1796.
+Related: storytold/craft-contrib#59, storytold/craft-libs#778, storytold/craft-libs#115,
+storytold/vectorcraft#2560, storytold/effectcraft#2970, storytold/effectcraft#2199,
+storytold/deckcraft#743, storytold/deckcraft#1380, storytold/photocraft#8805, storytold/cadcraft#1796.
 
 ## Summary
 
 Four new craft-libs crates hold the 3D code that several apps now carry separately: `craft-mesh-ops`,
 `craft-texture`, `craft-pbr` and `craft-raster3d`. Each crate is filled from the app whose code already
 has tests for that part. The crates add no importer or decoder. They read the output of `craft-mesh`,
-`craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`. VectorCraft uses them to add
-Roughness and Metallic to its 3D effects, in two tiers.
+`craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`. VectorCraft is a planned
+consumer.
 
 ## What exists
 
@@ -38,9 +38,7 @@ materialcraft `31330629`, pdfcraft `0f22627b` and vectorcraft `08b6cfd3`.
   GGX-prefiltered mip chain and SH9 irradiance. `crates/image` holds f32 image planes with sampling.
 - **PdfCraft.** `crates/prc-render` is a CPU depth-buffered renderer with camera fitting
   (`Camera::fit`) and work ceilings.
-- **VectorCraft.** `crates/three-d` draws 3D effects as shaded vector faces. Asset export writes
-  `metallicFactor` 0 and `roughnessFactor` 1 for every mesh
-  (`crates/engine/src/cmd/fileio/mesh3d.rs:171-172`).
+- **VectorCraft.** `crates/three-d` draws 3D effects as shaded vector faces.
 - **craft-libs.** `craft-mesh` reads mesh files into one `Scene`, and its README leaves computing
   normals, tangents and UVs to the apps. `craft-materialx`, `craft-exr`, `craft-hdr` and
   `craft-raster-codecs` exist. No crate holds textures with sampling, a BRDF, image-based lighting or a
@@ -133,30 +131,9 @@ craft-common-actions `release.yml` fails on any other git source.
 
 ## VectorCraft
 
-VectorCraft's 3D effects gain a `material` parameter (Roughness, Metallic and texture maps), a `render`
-parameter and an `environment` parameter, in two tiers:
-
-1. **Vector (the default).** The faces stay vector paths. With a non-default material, each face is
-   shaded with `craft-pbr` at three points. A face with a solid paint is painted with one linear
-   gradient per color channel, fitted to the three values, as `RgbGradient::triangle` does today for
-   colored lights (`crates/three-d/src/shading.rs:197`). Its base color comes from the paint. A face
-   with a gradient or pattern paint keeps that paint, and the shading is drawn over it as a separate
-   layer, as VectorCraft does today. Roughness and Metallic apply, texture maps are ignored, and a
-   base-color map contributes its average color. The effect's lights and the studio environment light
-   the faces. The output prints and exports as paths.
-2. **Rendered (opt-in per effect).** The solid becomes a triangle mesh with UVs, rendered by
-   `craft-raster3d` with image-based lighting, shadow maps and every map, at the document's raster
-   effects resolution. The app draws the result on the canvas and writes it to PDF, print and SVG output
-   as an image.
-
-Roughness and Metallic range from 0 to 1. A supplied value outside its range is rejected with an error,
-and a default applies only to an omitted value. The default material (roughness 1, metallic 0, no maps,
-vector tier) does not call `craft-pbr`. It uses the existing shading in `crates/three-d`, unshaded mode
-and light softness included, so documents without a `material` parameter draw as they do today, and a
-test checks that their output is unchanged. `crates/three-d` keeps no craft-libs dependency: the
-shading call is in `crates/effects`, and the scene for the rendered tier is built in `crates/render`.
-Asset export writes the material's roughness and metallic factors. The vector tier needs
-`craft-texture` and `craft-pbr`. The rendered tier also needs `craft-raster3d` and `craft-mesh-ops`.
+VectorCraft is a planned consumer of the four crates. How its 3D effects use them, with new effect
+parameters and rendering tiers, is proposed in RFC-0038 (storytold/craft-contrib#59) and is not decided
+here.
 
 ## Defaults this RFC takes
 
@@ -188,7 +165,6 @@ Asset export writes the material's roughness and metallic factors. The vector ti
 - The four crates, their names and their boundaries, as listed in "The crates".
 - The source of each crate's code.
 - The mesh input, the material, the shared sRGB pair and the Smith-Schlick GGX default.
-- VectorCraft's two tiers.
 
 Work in TextureCraft and MaterialCraft starts after this RFC is accepted. Per RFC-0000 this is a 3-day
 comment period change.
