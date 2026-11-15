@@ -13,4 +13,7 @@ also copy
 [standards/house-rules-accessibility.md](standards/house-rules-accessibility.md),
 the short form of [standards/accessibility.md](standards/accessibility.md)
 ([RFC-0014](rfcs/0014-accessibility.md)). The calendar exception is
-[standards/time.md](standards/time.md). Propose a change to those files here.
+[standards/time.md](standards/time.md). Names checked under the naming rule
+([RFC-0029](rfcs/0029-other-companies-names.md)) are listed in
+[standards/feature-names.md](standards/feature-names.md)
+([RFC-0040](rfcs/0040-shared-names-list.md)). Propose a change to those files here.
