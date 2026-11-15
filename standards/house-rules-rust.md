@@ -25,6 +25,16 @@ Dependencies and assets use SPDX identifiers. An expression is allowed when ever
 - `CC0-1.0`
 - `CC-BY-4.0`
 - `CC-BY-SA-4.0`
+- `Zlib`
+- `BSL-1.0`
+- `0BSD`
+- `Unlicense`
+- `IJG`
+- `NCSA`
+- `CDLA-Permissive-2.0`
+- `Apache-2.0 WITH LLVM-exception`
 - `LicenseRef-Public-Domain`
+
+`MPL-2.0` is allowed for third-party dependencies used unmodified; vendoring, patching or copying its code needs a maintainer's approval. `MPL-2.0+` counts as `MPL-2.0`.
 
 `LicenseRef-Storyteller-Trademark` is not in this list. It covers Storyteller brand marks only, where a repository already says so.
