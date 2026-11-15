@@ -159,8 +159,12 @@ here.
 5. **MikkTSpace.** The `mikktspace` 0.3.0 crate declares `MIT/Apache-2.0`. `MIT`, `Apache-2.0` and,
    since RFC-0027 (#41), `Zlib` are on the license allowlist in `standards/house-rules-rust.md`, so
    the crate is allowed whether or not its source files carry a Zlib notice.
-6. **Consumers.** Each crate names at least two consuming apps in its README, which meets the craft-libs
-   rule that a crate is useful to more than one app.
+6. **Consumers and RFC-0009.** RFC-0009 (#10), still open, sets when code may move into craft-libs,
+   including its rule that a crate has two consuming apps and its rule that a crate names a responsible
+   maintainer. The moves in this RFC follow whatever #10 decides. Each crate names at least two planned
+   consumers in its README, but two crates have fewer than two consuming apps at the steps above:
+   `craft-raster3d` has only EffectCraft at step 3, and no app depends on `craft-texture` yet (step 1
+   switches MaterialCraft to it). This RFC does not name a maintainer for any of the crates.
 7. **Other contributors' work.** This RFC changes no open pull request. When storytold/deckcraft#743,
    storytold/deckcraft#1380 or storytold/photocraft#8805 continues, it can use the shared crates. A CPU
    RENDER for storytold/cadcraft#1796 is a use of `craft-raster3d`. The `craft-pbr` material is the data
