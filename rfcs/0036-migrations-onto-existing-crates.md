@@ -111,7 +111,12 @@ Each move is made in three kinds of pull request:
 
 Where a repository keeps its own copy of a craft-libs crate's code, its test suite has diverged from
 the crate's. Before such a copy is deleted, the repository's tests and `tests/support` are compared
-with the crate's, and every case the crate lacks is ported to the crate first.
+with the crate's, and every case the crate lacks is ported to the crate first. The known pairs on
+2026-11-14 were WordCraft `crates/docx/tests/it` and craft-libs `crates/docx/tests/it` (50 shared file
+names, none identical), PdfCraft `crates/cos/tests/it/proptests.rs` and craft-libs
+`crates/pdf/tests/cos/proptests.rs`, LightCraft `crates/meta` and `crates/raw` and craft-libs `metadata`
+and `raw`, FilmCraft `crates/dnx/tests/it/fuzz_hostile.rs` and craft-libs
+`crates/video/tests/dnx/fuzz_hostile.rs`, and AniCraft and craft-libs `crates/xfl/tests/support/fla.rs`.
 
 A switch onto a crate merges with the open pull requests on that crate or waits for them.
 
