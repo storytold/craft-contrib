@@ -20,7 +20,7 @@ storytold/craft-common-actions#225, storytold/craft-contrib#10, storytold/craft-
 storytold/craft-contrib#18, storytold/craft-contrib#21, storytold/craft-contrib#23,
 storytold/craft-contrib#30, storytold/craft-contrib#39, storytold/craft-contrib#41,
 storytold/craft-contrib#43, storytold/craft-contrib#46, storytold/craft-contrib#50,
-storytold/craft-contrib#52, storytold/craft-contrib#54, storytold/lightcraft#3083, storytold/lightcraft#3096,
+storytold/craft-contrib#52, storytold/craft-contrib#54, storytold/craft-contrib#56, storytold/lightcraft#3083, storytold/lightcraft#3096,
 storytold/pdfcraft#6124, storytold/pdfcraft#6188, storytold/pdfcraft#7173,
 storytold/photocraft#10189, storytold/designcraft#1980.
 
@@ -49,11 +49,8 @@ commit with its authorship. The time-scaled waits and the watchdog of `deadline`
 LightCraft pull requests and are added after they merge.
 
 The section "Candidates for later RFCs" lists runtime code that the apps also duplicate, as candidates
-for later RFCs. The RFC also decides that the apps' copies of code that a craft-libs crate already
-holds (`craft-quit`, `craft-dialogs`, `craft-atomic`, `craft-font-catalog`, `craft-menu`, `craft-i18n`,
-`craft-cms`, `craft-settings`, `craft-fonts-build`, `craft-xlsx`, `craft-raw`, `craft-metadata`,
-`craft-video`'s DNx codec and `craft-xfl`) move onto that crate after the crate takes their missing
-test cases.
+for later RFCs. The apps' copies of runtime code that a craft-libs crate already holds are the subject
+of RFC-0036 (storytold/craft-contrib#56), which is related work and is not decided here.
 
 ## What exists
 
@@ -196,8 +193,8 @@ that `Cargo.lock` did not change (`:358-360`), sets `CRAFT_FONTS_DIR` and, when 
   `#[cfg(test)] pub(crate)` (`crates/pdf/src/cos.rs:23-24`), so no other crate can use it.
 - `craft-fonts-build` embeds craft-fonts from an app's `build.rs`. Thirteen apps and Craft Anything
   instead read `CRAFT_FONTS_DIR` in their own `build.rs` (`fn craft_fonts` in PhotoCraft
-  `crates/text/build.rs:66`, LightCraft `crates/engine/build.rs:64` and twelve more; the full list is the
-  `craft-fonts-build` row under "Migrations onto crates that exist"), and the apps reach
+  `crates/text/build.rs:66`, LightCraft `crates/engine/build.rs:64` and twelve more, all listed in the
+  `craft-fonts-build` row of RFC-0036 in storytold/craft-contrib#56), and the apps reach
   `craft-fonts-build` only through `craft-ui`.
 - craft-libs exposes test helpers under seven names today: `test-support` (`craft-zip`, `craft-opc`,
   `craft-wordmodel`, `craft-sf2`), `testgen` (`craft-psd`), `testdata` (`craft-heif`), `test-writer`
@@ -588,15 +585,6 @@ includes the two `TempFolder` copies in `crates/mcp/src/tests.rs:51` and
 `crates/mcp/tests/common/mod.rs:9-28` and the three `TestDir(tempfile::TempDir)` wrappers. PhotoCraft's
 includes `crates/gpu/tests/it/main.rs:5`.
 
-Where a repository still carries its own copy of a craft-libs crate, its test suite has diverged from
-the crate's. Before such a copy is deleted, the repository's tests and `tests/support` are compared
-with the crate's, and every case the crate lacks is ported to the crate first. The known pairs are
-WordCraft `crates/docx/tests/it` and craft-libs `crates/docx/tests/it` (50 shared file names, none
-identical), PdfCraft `crates/cos/tests/it/proptests.rs` and craft-libs
-`crates/pdf/tests/cos/proptests.rs`, LightCraft `crates/meta` and `crates/raw` and craft-libs
-`metadata` and `raw`, FilmCraft `crates/dnx/tests/it/fuzz_hostile.rs` and craft-libs
-`crates/video/tests/dnx/fuzz_hostile.rs`, and AniCraft and craft-libs `crates/xfl/tests/support/fla.rs`.
-
 ## What stays in the apps
 
 - **App fixtures and models.** VectorCraft's document fixtures, invariants, `render_*` helpers, `ai.rs`,
@@ -623,8 +611,7 @@ The apps also duplicate runtime code for which craft-libs has no crate. Each ite
 (repository and path, at the SHAs in "What exists"), the copy whose file and test files hold the most
 `#[test]` functions, two first consumers, and the open pull requests in its area. Each item can become
 its own crate RFC in the shape of this one. This RFC does not decide any of them. Runtime code that
-craft-libs already has a crate for is under "Migrations onto crates that exist", which this RFC
-decides.
+craft-libs already has a crate for is the subject of RFC-0036 (storytold/craft-contrib#56).
 
 | Candidate | Copies | Source (tests) | First consumers |
 |---|---|---|---|
@@ -698,82 +685,6 @@ one forked crate, and RFC-0032 (storytold/craft-contrib#50) proposes moving it i
 The other twelve apps' `crates/geom` are separate domain models (VectorCraft's and DesignCraft's share
 only `snap.rs`) and stay in the apps; a four-point homography solve exists in VectorCraft, LightCraft,
 PdfCraft and PhotoCraft.
-
-## Migrations onto crates that exist
-
-The apps also keep their own copies of runtime code that a craft-libs crate already holds. This RFC
-decides that each copy in the table below moves onto its crate. No new crate is needed. Each move is
-made in the three kinds of pull request of "How the code moves":
-
-1. A craft-libs pull request adds to the crate every case from the source of missing cases that the
-   crate's tests lack, with the case's original test name.
-2. One pull request per repository switches it to the crate and deletes its copy. The repository's
-   tests pass and skip as before, and the pull request lists both counts.
-3. A change of behavior that the switch brings, such as a different permission, retry or folder list,
-   is its own pull request with a test that fails without it.
-
-| Crate | Repositories that use it | Copies it replaces | Source of missing cases (tests) | First consumers |
-|---|---|---|---|---|
-| `craft-quit` | EffectCraft, PdfCraft, MaterialCraft, TextureCraft, craft-launcher | Their own `on_exit`: VectorCraft `apps/vectorcraft/src/app.rs:100`; PhotoCraft `crates/ui-egui/src/app.rs:250`; DesignCraft `apps/designcraft/src/main.rs:107`; LightCraft `apps/lightcraft/src/main.rs:185`; FilmCraft `crates/ui-egui/src/app.rs:507`; GridCraft `apps/gridcraft/src/main.rs:64`; WordCraft `apps/wordcraft/src/main.rs:131`; DeckCraft `apps/deckcraft/src/main.rs:52`; SoundCraft `apps/soundcraft/src/main.rs:103`; CADCraft `apps/cadcraft/src/main.rs:127`; FigCraft `apps/figcraft/src/main.rs:132`; AniCraft `src/app.rs:3656`; Craft Anything `crates/ui-egui/src/lib.rs:2233` | The crate's own tests | DeckCraft and CADCraft |
-| `craft-dialogs` | DesignCraft, MaterialCraft, TextureCraft | Direct `rfd` dependencies: VectorCraft `apps/vectorcraft/Cargo.toml:31`; PhotoCraft `apps/photocraft/Cargo.toml:47`; LightCraft `apps/lightcraft/Cargo.toml:44`; FilmCraft `apps/filmcraft/Cargo.toml:35`; EffectCraft `apps/effectcraft/Cargo.toml:24`; PdfCraft `crates/ui-egui/Cargo.toml:47`; GridCraft `apps/gridcraft/Cargo.toml:40`; WordCraft `apps/wordcraft/Cargo.toml:90`; DeckCraft `apps/deckcraft/Cargo.toml:31`; SoundCraft `apps/soundcraft/Cargo.toml:38`; CADCraft `apps/cadcraft/Cargo.toml:45`; FigCraft `apps/figcraft/Cargo.toml:31`; AniCraft `Cargo.toml:54`; craft-launcher `apps/artcraft-launcher/Cargo.toml:65`; Craft Anything `apps/craft-anything/Cargo.toml:23` | EffectCraft `apps/effectcraft/src/file_dialogs.rs` (5) and WordCraft `apps/wordcraft/src/file_dialogs.rs` (5) | EffectCraft and WordCraft |
-| `craft-atomic` | DesignCraft (`Cargo.toml:99`, `crates/engine/Cargo.toml:49`; `crates/engine/src/atomic.rs:1-18` wraps `craft_atomic::atomic_write` and `atomic_write_with`) | VectorCraft `crates/format/src/atomic.rs`; PhotoCraft `crates/format/src/atomic.rs`; LightCraft `crates/catalog/src/safe_file.rs`; FilmCraft `crates/format/src/atomic.rs`; EffectCraft `crates/engine/src/settings/config.rs`; PdfCraft `crates/platform/src/staging.rs`; DeckCraft `crates/ui-egui/src/settings.rs` and `crates/engine/src/recovery.rs`; SoundCraft `crates/engine/src/io.rs`; CADCraft `crates/engine/src/atomic_write.rs`; FigCraft `crates/format/src/lib.rs`; AniCraft `crates/engine/src/recovery.rs`; MaterialCraft `crates/formats/src/file.rs`; TextureCraft `crates/formats/src/lib.rs`; craft-launcher `crates/native/src/paths.rs`; Craft Anything `crates/platform/src/fs.rs`; and further private copies in the same repositories | PhotoCraft `crates/format/src/atomic.rs` (39) | VectorCraft and FilmCraft |
-| `craft-font-catalog` | WordCraft (`Cargo.toml:33`, `crates/engine/Cargo.toml:46`, used at `crates/engine/src/packs/store.rs:7`); FigCraft (`Cargo.toml:50`, `crates/engine/Cargo.toml:40`, `crates/text/Cargo.toml:31`; `crates/text/src/fontdb.rs:1330` takes the Linux and BSD font folders from `craft_font_catalog::font_dirs`) | Installed-font discovery: VectorCraft `crates/text/src/fontdb/dirs.rs`; PhotoCraft and FilmCraft `crates/text/src/fonts.rs`; DesignCraft `crates/fonts/src/fontdb/system.rs`; EffectCraft `crates/text/src/font_dirs.rs`; PdfCraft `crates/render/src/system_font.rs`; GridCraft `crates/ui-egui/src/fonts.rs`; WordCraft `crates/fonts/src/fontdb/names.rs:210` (`system_font_dirs`); DeckCraft `crates/fonts/src/fontdb.rs`; CADCraft `crates/fonts/src/ttf.rs`; FigCraft's macOS and Windows folders in `crates/text/src/fontdb.rs:1300-1325`; TextureCraft `crates/formats/src/fonts.rs` | FigCraft `crates/text/src/fontdb_tests.rs` (30), for the macOS and Windows cases | DeckCraft and WordCraft (`crates/fonts`) |
-| `craft-menu` | PdfCraft, FigCraft, MaterialCraft, TextureCraft | Direct `muda` dependencies: VectorCraft `apps/vectorcraft/Cargo.toml:71`; PhotoCraft `apps/photocraft/Cargo.toml:71`; DesignCraft `apps/designcraft/Cargo.toml:48`; LightCraft `apps/lightcraft/Cargo.toml:50`; FilmCraft `apps/filmcraft/Cargo.toml:51`; EffectCraft `apps/effectcraft/Cargo.toml:51`; GridCraft `apps/gridcraft/Cargo.toml:54`; SoundCraft `apps/soundcraft/Cargo.toml:45`; CADCraft `apps/cadcraft/Cargo.toml:52`; Craft Anything `crates/ui-egui/Cargo.toml:42` | The crate's own tests | CADCraft and GridCraft |
-| `craft-i18n` | Every app through `craft-ui`; PdfCraft, PhotoCraft, WordCraft and TextureCraft also from their UI crate | TSV catalogs with an app `tl!` macro: VectorCraft `crates/ui-egui/src/lib.rs:19`, `crates/ui-egui/src/i18n.rs` and 28 catalogs in `crates/ui-egui/src/i18n/`; CADCraft `crates/ui-egui/src/i18n.rs:433` and 18 catalogs; FilmCraft `crates/ui-egui/src/lib.rs:20` and 16 catalogs; craft-launcher `crates/ui-egui/src/lib.rs:13` and 12 catalogs in `crates/ui-egui/src/i18n/`. Rust tables: `crates/ui-egui/src/i18n.rs` in DesignCraft, GridCraft, EffectCraft, LightCraft, FigCraft and MaterialCraft | VectorCraft `crates/ui-egui/src/i18n/tests.rs` (122) | CADCraft and FilmCraft |
-| `craft-cms` | PhotoCraft, DesignCraft, PdfCraft | ICC code: VectorCraft `crates/color/src/cms.rs` and `crates/color/src/cms/` (`icc.rs`, `display.rs`, `generic.rs`, `lab.rs`); EffectCraft `crates/color/src/icc.rs`; FigCraft `crates/color/src/icc.rs` (a profile writer); TextureCraft `crates/formats/src/icc.rs`; LightCraft `crates/codecs/src/icc.rs` | VectorCraft `crates/color/src/cms/tests.rs` and `tests_icc.rs` (40) | EffectCraft (7) and LightCraft (6) |
-| `craft-settings` | FigCraft (`Cargo.toml:57`, `apps/figcraft/Cargo.toml:24`) | Settings stores: VectorCraft `apps/vectorcraft/src/prefs.rs`; LightCraft `apps/lightcraft/src/prefs.rs` (`ui.json`, with damaged files set aside at `:79`); EffectCraft `crates/engine/src/settings/config.rs`; DeckCraft `crates/ui-egui/src/settings.rs`; AniCraft `src/prefs.rs` | VectorCraft `apps/vectorcraft/src/prefs.rs` (16) | DeckCraft and LightCraft |
-| `craft-fonts-build` | Every app through `craft-ui` only | `build.rs` readers of `CRAFT_FONTS_DIR`: VectorCraft `crates/text/build.rs:79`; PhotoCraft `crates/text/build.rs:66`; DesignCraft `crates/fonts/build.rs:30`; LightCraft `crates/engine/build.rs:64`; FilmCraft `crates/text/build.rs:56`; PdfCraft `crates/fonts/build.rs:41`; GridCraft `crates/ui-egui/build.rs:78`; WordCraft `crates/fonts/build.rs:47`; DeckCraft `crates/fonts/build.rs:83`; CADCraft `crates/fonts/build.rs:41`; FigCraft `crates/text/build.rs:131`; TextureCraft `crates/ui-egui/build.rs:49`; Craft Anything `crates/ui-egui/build.rs:83` (each `fn craft_fonts`); AniCraft `build.rs:38` (`discover`) | GridCraft `crates/ui-egui/src/craft_fonts_policy.rs` (8) | DesignCraft and CADCraft |
-| `craft-xlsx` | DesignCraft | GridCraft `crates/xlsx` (`gridcraft-xlsx`, `Cargo.toml:22`), which shares nine file names with craft-libs `crates/xlsx/src` (`lib.rs`, `drawing.rs`, `package.rs`, `pivot.rs`, `richdata.rs`, `styles.rs`, `testing.rs`, `write.rs`, `xlsb.rs`) and depends on `craft-xls` (`Cargo.toml:43`) but not on `craft-xlsx` | `gridcraft-xlsx`'s `crates/xlsx/src/tests.rs` and `crates/xlsx/src/tests/` | GridCraft and `craft-xlsx` |
-| `craft-raw` | PhotoCraft, LightCraft | LightCraft `crates/raw` (`lightcraft-raw`, `Cargo.toml:45`), which depends on `craft-raw` (`crates/raw/Cargo.toml:13`) since storytold/lightcraft#4244 removed its `crates/raw/src/vendor/` decoders, and keeps 7 files with the same names as files in `craft-raw`'s `crates/raw/src` (5 modules besides `lib.rs` and `tests.rs`: `dngwrite.rs`, `gaintable.rs`, `opcodes.rs`, `profile.rs` and `semantic.rs`) | LightCraft `crates/raw/tests/` (21 files) | LightCraft and `craft-raw` |
-| `craft-metadata` | LightCraft | LightCraft `crates/meta` (`lightcraft-meta`, `Cargo.toml:47`), which depends on `craft-metadata` (`crates/meta/Cargo.toml:13`) since storytold/lightcraft#4244 and keeps `exif.rs`, `focus.rs`, `iptc.rs` and `xmp.rs`, the same file names as in craft-libs `crates/metadata/src` | LightCraft `crates/meta/tests/` and the modules' own tests | LightCraft and `craft-metadata` |
-| `craft-video` (`dnx` feature) | FilmCraft, EffectCraft, DeckCraft, SoundCraft | FilmCraft `crates/dnx` (`filmcraft-dnx`, `Cargo.toml:22`), whose eight modules have the same file names as craft-libs `crates/video/src/dnx/` (`bits.rs`, `dct.rs`, `decode.rs`, `encode.rs`, `ffmpeg_probe.rs`, `header.rs`, `spec_tables.rs`, `tables.rs`) | FilmCraft `crates/dnx/tests/it` (7 files) | FilmCraft and `craft-video` |
-| `craft-xfl` | AniCraft (`Cargo.toml:35`, `crates/xfl/Cargo.toml:16`) | AniCraft `crates/xfl/src/edges.rs`, the edge-string parser that craft-libs `crates/xfl/src/edges.rs` also holds | AniCraft `crates/xfl/src/tests.rs` and craft-libs `crates/xfl/tests/support/fla.rs` | AniCraft and `craft-xfl` |
-
-- **craft-quit.** VectorCraft, MaterialCraft and EffectCraft each have an unsaved-changes prompt.
-- **craft-dialogs.** EffectCraft's guarded `apps/effectcraft/src/file_dialogs.rs` is the closest to it.
-- **craft-atomic, then craft-settings.** The copies of a temporary-file, flush and rename write differ in
-  Windows retries, symlink handling, permissions and folder sync. DesignCraft already writes through
-  `craft-atomic`, and `craft-settings` is used by FigCraft only. craft-launcher
-  `crates/native/src/paths.rs:132`, CADCraft `crates/engine/src/atomic_write.rs:282` and `:320`, and
-  CADCraft `apps/cadcraft-cli/src/lib.rs:171` are the tests `craft-atomic` passes before a repository
-  switches.
-- **craft-font-catalog and craft-ui's `UiFonts`.** WordCraft uses `craft-font-catalog` in
-  `crates/engine` and keeps its own folder list in `crates/fonts`. FigCraft takes its Linux and BSD
-  folders from the crate and keeps its macOS and Windows folders. No app uses
-  `craft_ui::fonts::UiFonts`; DeckCraft, MaterialCraft, TextureCraft and VectorCraft define their own
-  types of that name. VectorCraft's
-  `crates/text/src/fontconfig.rs` and `suitcase.rs` have the same module names as
-  `craft-font-catalog`'s.
-- **craft-i18n.** VectorCraft, CADCraft, FilmCraft and craft-launcher keep TSV catalogs with their own
-  `tl!` macro, and DesignCraft, GridCraft, EffectCraft, LightCraft, FigCraft and MaterialCraft keep Rust
-  tables. Open RFC-0011 (storytold/craft-contrib#15) moves language data to craft-i18n, and these
-  switches follow it if it is accepted.
-- **craft-cms.** `craft-cms`, VectorCraft and FigCraft use moxcms 0.8. LightCraft's `Cargo.toml` names
-  moxcms 0.9 (`:94`), and its lock holds only 0.8.1.
-- **craft-fonts-build.** The fourteen `build.rs` readers in the table switch to it with the embedded font
-  list unchanged, and each then passes the values from the crate's table to `skip::craft_fonts`.
-- **Format crates that an app also keeps.** The `craft-xlsx`, `craft-raw`, `craft-metadata`,
-  `craft-video` and `craft-xfl` rows follow the porting rule in "How the code moves": the app's tests
-  are compared with the crate's, every case the crate lacks is ported to the crate first, and the app
-  then switches and deletes its copy. WordCraft's `wordcraft-docx` (`crates/docx/src/lib.rs` delegates to
-  `craft-docx`) and PdfCraft's `pdfcraft-cos` (`crates/cos/src/lib.rs` is `pub use craft_pdf::cos::*;`)
-  already use their craft-libs crates, so only their test suites move.
-
-Open craft-libs pull requests change these crates, and each would change what an app's switch is
-tested against. A switch onto one of these crates merges with the pull requests on that crate or waits
-for them, as in "Defaults this RFC takes", item 12:
-
-- `craft-atomic` and `craft-settings`: storytold/craft-libs#558 (dylanmtaylor) changes
-  `crates/atomic/src/lib.rs` and `crates/settings/src/recovery.rs` to give a replaced file's group bits
-  only to its group, which bears on the permissions in which the copies differ.
-  storytold/craft-libs#576 (CypherNaught-0x, draft) adds transactional updates to `craft-settings`, and
-  #515 (SDG-Den, draft) adds a settings overlay and a shared palette.
-- `craft-font-catalog`: aiongg's drafts storytold/craft-libs#376, #381, #382, #383, #385 and #386 rework
-  `crates/font-catalog` (document font scopes, an app module, a face cache, a font store and
-  manager), and #377 (aiongg, draft) adds a `craft-ui` system font fallback over the catalog. All seven
-  conflict with `main`.
-- `craft-menu`: storytold/craft-libs#501 (ahmedhosnypro, draft) mirrors the menu bar for right-to-left
-  languages.
 
 ## Defaults this RFC takes
 
@@ -919,10 +830,9 @@ for them, as in "Defaults this RFC takes", item 12:
 - The source of each part's code and its first consumers.
 - The rules for every crate, including the reading of required variables.
 - The move plan and what stays in the apps.
-- The migrations onto crates that exist: each app copy in that section's table moves onto its
-  craft-libs crate, with the missing cases ported to the crate first.
 
-The new crates under "Candidates for later RFCs" are not decided here.
+The new crates under "Candidates for later RFCs" and the migrations of RFC-0036
+(storytold/craft-contrib#56) are not decided here.
 
 The affected repositories are craft-libs and every Craft application with a copy listed above:
 VectorCraft, PhotoCraft, DesignCraft, LightCraft, FilmCraft, EffectCraft, PdfCraft, GridCraft, WordCraft,
