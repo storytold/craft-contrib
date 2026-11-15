@@ -178,7 +178,7 @@ storytold/craft-libs#9 adds a root `xtask` package to craft-libs.
 | `pdf-deps` | 4 | VectorCraft, DesignCraft, EffectCraft and DeckCraft pin `craft-pdf` to four different craft-libs revisions: `9be9a637`, `40525913`, `47107f66` and `63196e66`. |
 
 The craft-common-actions `gate.yml` sets up the runner and runs `cargo xtask ci` (`:15-19`), checks
-that `Cargo.lock` did not change (`:358-360`), sets `CRAFT_FONTS_DIR` and, when the caller asks,
+that `Cargo.lock` did not change (`:337-340` at `5b4eeb2323`, read again on 2026-11-15), sets `CRAFT_FONTS_DIR` and, when the caller asks,
 `CRAFT_FONTS_REQUIRED=1` (`:183-187`). It does not define the gate's steps.
 
 ### Shared homes that exist
@@ -476,8 +476,7 @@ craft-common-actions keeps runner setup, caching, nextest installation, the lock
 - **Licenses.** Every dependency is on the house-rules license allowlist as it stands. `tempfile`,
   `png`, `proptest`, `sha2`, `serde_json` and `log` are already dependencies of craft-libs crates or of
   the apps. `craft-xtask` takes `serde_json` and, through `fetch`, `sha2`, which the apps' `xtask`
-  manifests already name. If open RFC-0027 (storytold/craft-contrib#41) is accepted, the rule follows
-  its allowlist.
+  manifests already name. The allowlist is the one RFC-0027 (storytold/craft-contrib#41) sets.
 - **Admission.** Each module's README row names at least two Craft applications that consume it, as
   craft-libs `AGENTS.md:61` requires and as open RFC-0009 (storytold/craft-contrib#10) proposes. Each
   crate's README has an Origin table (source repository, path and SHA of each module's code) and a
@@ -669,8 +668,8 @@ craft-libs already has a crate for is the subject of RFC-0036 (storytold/craft-c
 - **Browser downloads in web builds.** Each copy makes a Blob, an object URL, a hidden `<a download>`
   and a timed revoke, with revoke delays of 5, 10 or 60 seconds and its own MIME table. DeckCraft's and
   SoundCraft's copies differ only in the MIME table. `craft-web-host` has a host-save hook and no
-  download helper. Open RFC-0023 (storytold/craft-contrib#39) proposes a web runtime for the apps, and
-  this candidate is left to it.
+  download helper. RFC-0023 (storytold/craft-contrib#39) sets out a web runtime for the apps, and this
+  candidate is left to it.
 - **macOS open-documents handler.** The nine apps queue the files that Finder sends in an
   open-documents event.
   `craft-platform` has no handler.
@@ -756,26 +755,25 @@ PdfCraft and PhotoCraft.
     code, and FilmCraft's switch merges with them or waits. storytold/filmcraft#1794 stays open as its
     author left it. storytold/designcraft#1984 and #2000 are left as they are. The LightCraft stack from
     storytold/lightcraft#3083 is the source of `deadline`'s later part.
-    storytold/craft-libs#504 (el-j, a draft that conflicts with `main`) adds a `crates/testkit` package
-    named `craft-testkit` whose `lib.rs` re-exports `craft_media_testkit` and adds `skip(what, reason)`,
-    and a `.github/workflows/testkit.yml` that runs fmt, clippy, the tests and a wasm32 check on Ubuntu
+    storytold/craft-libs#504 (el-j, a draft closed without merging) added a `crates/testkit` package
+    named `craft-testkit` whose `lib.rs` re-exported `craft_media_testkit` and added `skip(what, reason)`,
+    and a `.github/workflows/testkit.yml` that ran fmt, clippy, the tests and a wasm32 check on Ubuntu
     and Windows, with ffmpeg installed on Ubuntu. Its wrapper and `testkit.yml` are not carried forward:
     `craft-testkit` comes from storytold/craft-libs#1373 (which supersedes #163) and the modules this
-    RFC lists, and #504's video
-    crates switch to `craft-testkit` after it lands. Open app pull requests also change source files
-    this RFC moves:
-    - storytold/photocraft#14595 (davidmann4, draft) makes `gpu_lock()` in `crates/testkit/src/gpu.rs`
-      keep a wgpu Vulkan instance on Linux, which adds a wgpu dependency. PhotoCraft's switch keeps the
-      kept instance in `photocraft-testkit` around `serial::gpu_lock`, as it does for
-      storytold/photocraft#10865.
+    RFC lists.
+    storytold/photocraft#14595 (davidmann4), merged on 2026-11-15, made `gpu_lock()` keep a wgpu Vulkan
+    instance on Linux, which adds a wgpu dependency to `photocraft-testkit`; on `main` at `dd768fcd7e`,
+    `crates/testkit/src/gpu.rs` holds the kept instance and `gpu_lock` is at `:36`. PhotoCraft's switch
+    keeps the kept instance in `photocraft-testkit` around `serial::gpu_lock`, as it does for
+    storytold/photocraft#10865. storytold/vectorcraft#7203 (dotCooCoo), merged on 2026-11-14, changed
+    `crates/testkit/src/strategies.rs`, the source of `geom`. Open app pull requests also change source
+    files this RFC moves:
     - storytold/lightcraft#3710 (THEtheChad, draft) rewrites `xtask/src/ci.rs` (+144/-22), which runs
       LightCraft's gate steps with `ci_lock` and `ci_report`, the sources of `runner`'s lock held across
       processes and its JSON report.
     - storytold/wordcraft#6247 (NibrasAz7) changes `xtask/src/stats.rs`.
     - storytold/vectorcraft#1437 (EricKuck) adds `cargo xtask cleanroom` and changes
       `xtask/src/brands.rs`, the source of `names`.
-    - storytold/vectorcraft#7203 (dotCooCoo) changes `crates/testkit/src/strategies.rs`, the source of
-      `geom`.
     - storytold/lightcraft#3086 (THEtheChad, draft) changes `xtask/src/ci.rs`, `xtask/src/test.rs` and
       `.config/nextest.toml`, and storytold/lightcraft#3079 (THEtheChad) changes `xtask/src/ci.rs` and
       `xtask/src/test.rs`. Both change LightCraft's test caps, which `runner` takes in.
@@ -805,7 +803,7 @@ PdfCraft and PhotoCraft.
 
     The `runner`, `stats` and `names` switches in LightCraft, WordCraft and VectorCraft merge with these
     pull requests or wait for them, LightCraft's `runner` switch does the same for #3086, #3079, #3099,
-    #3102, #3654, #3118 and #4167, and `geom` takes `strategies.rs` as it stands after #7203 and #817.
+    #3102, #3654, #3118 and #4167, and `geom` takes `strategies.rs` as it stands on `main`, after #817.
     PdfCraft's and PhotoCraft's `version` switches merge with storytold/pdfcraft#6188 and
     storytold/photocraft#10189 or wait for them, and the `version` pull request in craft-libs credits
     both as the existing fixes. GridCraft's and FilmCraft's `version` switches do the same for #2784 and
@@ -813,10 +811,12 @@ PdfCraft and PhotoCraft.
     EffectCraft's `pins` switch for its five `pdf_deps.rs` pull requests, and WordCraft's and
     GridCraft's `stats` switches for #6235 and #1803.
 
+    storytold/craft-libs#1112 (dylanmtaylor), merged on 2026-11-14, locks the workflow actions in
+    `media.yml`, `audio.yml`, `video.yml`, `formats.yml` and other workflows through `actions.lock`. The
+    path filters of `media.yml`, `audio.yml` and `video.yml` are still at `:6` and `:8` (craft-libs
+    `828b07f3c9`), so the CI-only pull request of step 7 of the craft-libs order is unchanged.
+
     Open craft-libs pull requests also change files that this RFC moves or gates:
-    - storytold/craft-libs#1112 (dylanmtaylor) rewrites `media.yml`, `audio.yml`, `video.yml` and
-      `formats.yml`, which get new path filters in the CI-only pull request of step 7 of the craft-libs
-      order and the `craft-testkit` wasm32 row in its own pull request.
     - storytold/craft-libs#1309 (regendorf-ux) and #1277 (DesignsByRay) change `crates/pdf/src/cos.rs`,
       where `cos::testkit` is declared (`:23-24`).
     - storytold/craft-libs#1337, #1330, #1323, #1263 and #1166 (keithcsqueensu) change
@@ -837,8 +837,7 @@ PdfCraft and PhotoCraft.
     downloads, and #220 (dylanmtaylor) locks the workflow actions through a lockfile. The `gate.yml`
     line numbers in "What exists" are read again before the `runner` pull request.
 
-    The `test-support` pull requests for `craft-pdf` and `craft-xlsx`, the path-filter change and the
-    `fixtures` move of `crates/audio/tests/codecs/testkit.rs` merge with these pull requests or wait for
+    The `test-support` pull requests for `craft-pdf` and `craft-xlsx` and the `fixtures` move of `crates/audio/tests/codecs/testkit.rs` merge with these pull requests or wait for
     them. The `input` module follows whichever egui revision `craft-ui` has when it lands.
 13. **Command-line conventions.** Open RFC-0012 (storytold/craft-contrib#18) has each CLI's `main` pass
     its arguments and output streams to a library `run(args, out, err) -> exit code` that tests call
