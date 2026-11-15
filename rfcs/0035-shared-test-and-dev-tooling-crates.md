@@ -711,7 +711,9 @@ PdfCraft and PhotoCraft.
    geometry assertions and proptest strategies (wdunn001/craft-libs branch `shared-geometry-crates`,
    `crates/testkit`, depending on `craft-geom`, `kurbo` and `proptest`). This RFC adds those helpers as a
    `geom` module of the same crate behind a `geom` feature. Whichever RFC's crate lands first creates
-   `craft-testkit`, and the other adds its modules to it. `craft-xtask` is the name
+   `craft-testkit`, and the other adds its modules to it. Whichever of RFC-0030 and RFC-0035 lands
+   first, the geometry code sits behind the `geom` feature, so `craft-testkit`'s default build depends
+   on no craft-libs crate. `craft-xtask` is the name
    storytold/craft-libs#138 uses.
 2. **One crate with features.** `craft-testkit` is one crate, and a module with a dependency sits behind
    a feature.
