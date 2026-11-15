@@ -7,16 +7,23 @@ Related issues: [storytold/effectcraft#805] (hardware encoding), [storytold/effe
 (NVENC), [storytold/effectcraft#804] (hardware decoding), [storytold/effectcraft#2240] (slow
 export).
 
+**Changes after review (2026-11-15).** The safety claim is narrowed to hardware video calls (D1).
+Starting the helper needs the user's consent and it is found only in the app's install folder
+(D2). Video gets its own frame format, limits and version check (D3). A failed hardware export
+stops with a clear error and never replaces an existing file (D5). Decoding fallback rebuilds
+the decoder's state (D6). Each GPU vendor's API and the choice between two GPUs are named (D7).
+The plan has pass/fail gates, and the open questions are split into decided and still open.
+
 ## In short
 
 - Video exports are slow because all video decoding and encoding runs on the CPU. The GPU's
   built-in video engine is never used.
-- Using it means calling the graphics driver. A driver bug can crash the app and lose unsaved
-  work, so EffectCraft has kept driver code out.
-- Proposal: run the driver code in a **separate helper program**, the way EffectCraft already runs
-  native plug-ins. If the driver crashes, only the helper stops; the app keeps running and falls
-  back to its own encoder.
-- It is opt-in, and nothing changes for anyone who doesn't turn it on.
+- Using it means calling the hardware video parts of the graphics driver. A bug there can crash
+  the app and lose unsaved work, so EffectCraft has kept those calls out.
+- Proposal: make those calls in a **separate helper program**, the way EffectCraft already runs
+  native plug-ins. If they crash or hang, only the helper stops; the app keeps running and the
+  export ends with a clear error.
+- It is off by default, and nothing changes for anyone who doesn't turn it on.
 
 ## Affected apps
 
@@ -46,76 +53,128 @@ How much it could help:
 | Same export, Mac hardware encoder ([storytold/effectcraft#1840]) | 15.3 frames per second |
 | Same export, NVIDIA RTX 3090 / AMD RX 5500 ([storytold/effectcraft#1840]) | 11.6 / 5.0 frames per second |
 
+These numbers come from in-process code. They show why the work is worth doing, but they don't
+prove the helper will be as fast. Phase 1 measures that (see Plan).
+
 ## What exists
 
 - **FilmCraft already uses the video engine.** Its [ADR 0001][filmcraft-adr] allows `unsafe`
   code in one crate, `filmcraft-platform`, which supports hardware decoding on every desktop
-  platform and hardware encoding on Mac and NVIDIA. AMD encoding on Linux is still in review
-  ([storytold/filmcraft#1612]).
+  platform and hardware encoding on Mac and NVIDIA. VA-API encoding on Linux is in review
+  ([storytold/filmcraft#1612], so far tested on AMD).
 - **EffectCraft declined it in process.** [storytold/effectcraft#819] tried to bring that crate
   into EffectCraft. It was declined to keep driver code out of the app, for the same reason as
   [storytold/effectcraft#498]: a crash inside a driver can't be caught, and the user loses their
   work. [storytold/effectcraft#1840] takes the same approach and is waiting on a rebase.
 - **EffectCraft already runs risky native code out of process.** Its [ADR 0001][effectcraft-adr]
-  runs native plug-ins as separate helper programs. If one crashes or hangs, it is stopped and
-  restarted, and after 3 crashes it is turned off.
+  runs native plug-ins as separate helper programs. They start only when the user asks, and if
+  one crashes or hangs, it is stopped and restarted, and after 3 crashes it is turned off.
 - **The suite's direction fits.** [RFC-0022](0022-gpu-layer.md) keeps wgpu as the GPU baseline and
   puts vendor-specific acceleration behind a seam in a leaf crate. A helper program is that seam
   for video.
 
-This RFC proposes running hardware video the same way EffectCraft runs native plug-ins.
-
 ## Decision
 
-- **D1 No driver code inside the app.** A helper program, `effectcraft-helper-video`, talks to the
-  driver. The app starts it and sends it work. The app itself keeps `unsafe_code = "forbid"`. The
-  helper is built from FilmCraft's existing code and released separately from the app.
-- **D2 Reuse EffectCraft's plug-in helper system.** The helper is found, started, timed out,
-  restarted and blocklisted exactly like effect helpers. Only new message types for video are
-  added.
-- **D3 Plug in at two points.** Exports get a helper-backed encoder next to the built-in ones.
+- **D1 Hardware video calls run outside the app.** A helper program, `effectcraft-helper-video`,
+  makes all hardware video encoding and decoding calls. The app keeps `unsafe_code = "forbid"`
+  and never loads those drivers. This is all the boundary does:
+  - The app still uses the GPU for compositing, so a GPU reset or a system-wide driver failure
+    can still affect it.
+  - A separate process is not a security sandbox.
+- **D2 The user decides when it runs, and only the right program runs.**
+  - Nothing starts the helper unless the user asks, the same consent effect helpers need today.
+    Opening a project that has Hardware Encoding set to Auto does not start it. Agents confined to
+    folders, and scripts without write and network permission, can't start it either.
+  - The helper is found only in the app's own install folder. Never from `PATH`, the current
+    folder, the settings folder or another folder the user can write to.
+  - The app checks the protocol and helper version in `hello`, before it sends any work. A
+    mismatch means the helper isn't used, and the message says which version to install.
+- **D3 Video gets its own frame format.** Effect helpers send images as float RGBA (16 bytes per
+  pixel: about 33 MB per 1080p frame, 133 MB at 4K). Video uses its own format instead, agreed in
+  `hello` as a separate capability, so existing effect helpers are unaffected:
+  - pictures are 8-bit 4:2:0 to start (about 3.1 MB per 1080p frame, 12.4 MB at 4K); 10-bit
+    comes later as another agreed format;
+  - each message gives every plane's offset, stride, size and byte length, plus the colour
+    information (primaries, transfer, matrix, range);
+  - the app owns every region of the exchange file. It says where the helper may write packets,
+    and checks every offset and length before reading;
+  - at most a few frames are in flight, with a cap on the bytes queued and in flight together,
+    so a slow GPU makes the export wait rather than use more memory;
+  - each job and frame has an id; `cancel` stops a job, and replies for a cancelled or old job
+    are ignored.
+- **D4 Plug in at two points.** Exports get a helper-backed encoder next to the built-in ones.
   Footage decoding gets a helper-backed decoder next to FilmCraft's.
-- **D4 Opt-in.** Each output module gets a **Hardware Encoding: Off / Auto** setting, Off at
-  first. Auto uses the helper only when it is installed and supports the export settings;
-  otherwise the built-in encoder runs and the render log says why. Default exports stay exactly as
-  they are today.
-- **D5 Fail gracefully.** No helper problem can stop the app or harm the project:
-  - before using the hardware, ask the driver what it supports, and skip it if unsupported;
-  - if the helper crashes, hangs or misbehaves, it is stopped. Decoding falls back to the
-    built-in decoder for that frame. An export restarts with the built-in encoder, and the log
-    says so;
-  - after 3 crashes the helper is turned off until the user retries in Settings;
-  - hardware-decoded pictures must match the built-in decoder's, or that file isn't decoded in
-    hardware.
-- **D6 Encoding first.** Exports spend the most CPU on encoding, and it is the simplest to
+- **D5 A failed hardware export fails cleanly.**
+  - Hardware and software output are never mixed in one file.
+  - A hardware export writes to a temporary file and replaces the destination only when it
+    finishes. A failed or cancelled export leaves any existing file as it was. (EffectCraft's
+    exports write straight to the destination today, so this is new.)
+  - In phase 1, a failure ends the export with a clear error that says what failed. The format is
+    never changed silently.
+  - Automatic retry with the built-in encoder can come later, only with its tests. It would start
+    the whole export again from a fresh temporary file, at most once, and keep cancellation
+    working. EffectCraft has built-in encoders for both H.264 and HEVC, so both could retry.
+    (FilmCraft has no software HEVC encoder, so this doesn't carry over there.)
+  - Every frame has its own timeout. A GPU that stops answering ends the helper instead of making
+    the export look busy forever.
+  - After 3 crashes the helper is turned off until the user retries in Settings.
+- **D6 Decoding falls back by rebuilding state.** Video frames depend on earlier frames, so a
+  decoding failure can't be fixed by swapping one frame. As FilmCraft's fallback does, the
+  built-in decoder replays from the last restart point and drops pictures already returned,
+  keeping the order, timestamps, seeks, flushes and colour information right. Whether hardware
+  pictures match the built-in decoder's is checked with fixture files and the hardware tests, not
+  by decoding every frame twice. A stream type that fails those checks isn't decoded in hardware.
+- **D7 One API per vendor, and a clear choice between GPUs.**
+  - Linux: VA-API for AMD and Intel (through their Mesa / Intel drivers), NVENC / NVDEC for
+    NVIDIA. Intel on Linux uses the same VA-API path but is untested so far.
+  - Windows: NVENC for NVIDIA; AMD and Intel come in phase 3. macOS: VideoToolbox.
+  - `hello` reports each device, its driver and API, and what it can encode and decode.
+  - When two GPUs can do the same codec (a laptop with integrated and discrete graphics), Auto
+    picks one by a fixed rule and the render log says which.
+- **D8 Safe start-up inside the helper.** The helper starts its hardware APIs (CUDA, VA-API and
+  others) on one thread, in a fixed order, before it accepts any work. Starting NVENC and VA-API
+  at the same time on two threads can deadlock with NVIDIA's VA-API driver (found while
+  investigating [storytold/filmcraft#4083]).
+- **D9 Encoding first.** Exports spend the most CPU on encoding, and it is the simplest to
   connect: frames go one way and there is no seeking.
 
 ## Plan
 
-| Phase | What | Notes |
+| Phase | What | Done when |
 | --- | --- | --- |
-| 1 | H.264 / HEVC hardware encoding in EffectCraft | Mac and NVIDIA code exists in FilmCraft; AMD on Linux is in [storytold/filmcraft#1612] |
-| 2 | Hardware decoding, for export and preview | Code and measurements exist in [storytold/effectcraft#819] |
-| 3 | AMD encoding on Windows | Not in FilmCraft yet (Media Foundation or AMF) |
+| 1 | H.264 / HEVC hardware encoding in EffectCraft | The gates below pass. Mac and NVIDIA code exists in FilmCraft; VA-API is in [storytold/filmcraft#1612] |
+| 2 | Hardware decoding, for export and preview | D6's fallback and fixture checks pass. Code and measurements exist in [storytold/effectcraft#819] |
+| 3 | AMD and Intel encoding on Windows | Not in FilmCraft yet (Media Foundation or AMF) |
+
+**Gates for phase 1:**
+
+- **Tests with a stand-in helper, in CI on every platform:** a crash, a hang, a garbage reply, a
+  reply that's too large, a protocol version mismatch, cancellation, a missing helper, a lost GPU
+  device, and a failure while an earlier export already exists at the destination.
+- **Real hardware reports** for each tested setup record the backend and driver, codec and bit
+  depth, quality settings, end-to-end wall time and peak memory, including the frame copies.
+  Reviewers have offered to test on Linux with NVIDIA and AMD, including a laptop with both. Intel
+  and sandboxed (Flatpak) setups still need testers.
 
 ## Costs and trade-offs
 
 - **Nothing changes without the helper.** The app, the web build and default exports stay the
   same.
-- **A copy per frame.** Each frame is passed to the helper and back: about 3 MB at 1080p, 12 MB at
-  4K. Phase 1 measures this; it should be small next to the 165 ms of encoding it saves.
+- **A copy per frame.** Each frame is passed to the helper and back: about 3.1 MB at 1080p,
+  12.4 MB at 4K (D3). Phase 1 measures this against the encoding time it saves.
 - **Output varies by machine.** Hardware encoders produce different files on different GPUs and
   drivers, and often lower quality at the same file size. The render log records which encoder,
   GPU and driver were used.
-- **More to release and test.** The helper needs its own builds and signing on each platform. CI
-  can test the helper system with a stand-in helper, but not real GPUs, so a manual test list
-  (NVIDIA, AMD and Intel on Windows and Linux, plus Apple silicon) is kept with the helper.
+- **More to release and test.** The helper needs its own builds, signing and version on each
+  platform, and a person who owns them. Sandboxed Linux packages (Flatpak) need GPU access and a
+  matching driver extension, and hardware encoding there is often unreliable, so they are tested
+  separately, not assumed to work.
 
 ## Other options considered
 
 | Option | Why not (for now) |
 | --- | --- |
-| `filmcraft-platform` inside EffectCraft ([storytold/effectcraft#819], [storytold/effectcraft#1840]) | Simplest and fastest, but declined in [storytold/effectcraft#819]. If maintainers prefer it after all, [storytold/effectcraft#1840]'s settings and CLI work can be reused |
+| `filmcraft-platform` inside EffectCraft ([storytold/effectcraft#819], [storytold/effectcraft#1840]) | Simplest and fastest, but declined in [storytold/effectcraft#819] |
 | Our own GPU encoder in shaders | No driver code, but most encoding steps can't run in parallel, so it's months of work for a small gain |
 | ffmpeg as a separate program | The apps allow ffmpeg only for tests, never shipped |
 | Doing nothing | Exports stay CPU-bound and strong GPUs stay idle |
@@ -131,32 +190,39 @@ This RFC proposes running hardware video the same way EffectCraft runs native pl
 
 ## Technical notes (EffectCraft)
 
-- **Messages (sketch).** `hello` lists what the machine supports. Encoding:
-  `encode.open {codec, width, height, rate, bitrate, colour}` → `encode.frame` → packets →
-  `encode.flush` → `encode.close`. Decoding: `decode.open {codec, sample entry}` →
-  `decode.sample` → picture. Pictures and packets travel through the effect helpers' frame
-  exchange file, never through the pipe. The full protocol would go in EffectCraft's
-  `docs/external-helpers.md`.
+- **Messages (sketch).** `hello` agrees the protocol version and video capabilities, and lists
+  devices (D7). Encoding: `encode.open {codec, width, height, rate, bitrate, colour}` →
+  `encode.frame` → packets → `encode.flush` → `encode.close`. Decoding:
+  `decode.open {codec, sample entry}` → `decode.sample` → picture. Both have `cancel`. The full
+  protocol would go in EffectCraft's `docs/external-helpers.md`.
 - **Encoder seam.** `crates/export/src/encode.rs`, where `movie` picks the encoder. H.264 frames
-  already arrive there as 4:2:0 planes, so the helper gets exactly what the built-in encoder gets.
+  already arrive there as 4:2:0 planes, the format D3 sends to the helper.
 - **Decoder seam.** `MediaPool` in `crates/media/src/pool.rs`, where it opens FilmCraft's decoder
   today.
-- **Limits.** The crash limit and timeouts are the effect-helper ones (`effectcraft-helper-host`).
-  Export settings the hardware can't handle (for example HDR, odd sizes or non-square pixels) are
+- **Output file.** `crates/export/src/out.rs` creates the destination directly today. D5's
+  temporary file and rename go there.
+- **Limits.** The crash limit is the effect-helper one (`effectcraft-helper-host`). Export
+  settings the hardware can't handle (for example HDR, odd sizes or non-square pixels) are
   declined up front, as FilmCraft does.
 
-## Questions for the maintainers
+## Decided in review
 
-1. Is a separate helper process the right approach, or would you rather have it inside the app?
-2. Can the installer include the helper, or should it be a separate optional download?
-3. Where should the helper's code live (FilmCraft, craft-libs or its own repository), and who
-   builds and signs it?
-4. If the helper fails during an export, should the export restart with the built-in encoder
-   (D5), or stop with an error, as FilmCraft does?
-5. Encoding first (D6), or decoding first, since [storytold/effectcraft#819]'s code already
-   exists?
-6. Hardware Encoding Off by default, or Auto once the manual tests pass?
-7. How should this work together with [storytold/effectcraft#1840] and its author?
+- A separate helper process, not in-process.
+- Hardware encoding first, then decoding.
+- Hardware Encoding **Off by default**.
+- In phase 1 a failed hardware export ends with a clear error (D5).
+- The helper is a **separately versioned, optional** program with an app/helper compatibility
+  check (D2), not part of the default install at first.
+- It reuses FilmCraft's backend; it does not fork it.
+
+## Still open
+
+1. Who builds, signs and releases the helper?
+2. Where does its code live (FilmCraft, craft-libs or its own repository)? To be decided with
+   FilmCraft's maintainers.
+3. What fixed rule should Auto use to pick between two GPUs (D7)?
+4. How does this work together with [storytold/effectcraft#1840]? Its author is to be contacted
+   before any settings or CLI work is duplicated.
 
 [effectcraft-adr]: https://github.com/storytold/effectcraft/blob/main/docs/adr/0001-external-effect-helpers.md
 [filmcraft-adr]: https://github.com/storytold/filmcraft/blob/main/docs/adr/0001-platform-ffi.md
@@ -170,3 +236,4 @@ This RFC proposes running hardware video the same way EffectCraft runs native pl
 [storytold/effectcraft#3624]: https://github.com/storytold/effectcraft/issues/3624
 [storytold/effectcraft#3648]: https://github.com/storytold/effectcraft/pull/3648
 [storytold/filmcraft#1612]: https://github.com/storytold/filmcraft/pull/1612
+[storytold/filmcraft#4083]: https://github.com/storytold/filmcraft/pull/4083
