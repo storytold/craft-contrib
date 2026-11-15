@@ -14,9 +14,9 @@ storytold/deckcraft#743, storytold/deckcraft#1380, storytold/photocraft#8805, st
 
 Three new craft-libs crates, `craft-mesh-ops`, `craft-pbr` and `craft-raster3d`, and the existing
 `craft-texture` hold the 3D code that several apps now carry separately. Each crate is filled from the app whose code already
-has tests for that part. The crates add no importer or decoder. They read the output of `craft-mesh`,
-`craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`. VectorCraft is a planned
-consumer.
+has tests for that part. The crates add no importer or decoder of their own. They read the output of
+`craft-mesh`, `craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`, and the decoding
+features of `craft-texture` call those format crates. VectorCraft is a planned consumer.
 
 ## What exists
 
