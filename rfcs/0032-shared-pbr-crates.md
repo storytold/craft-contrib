@@ -172,8 +172,9 @@ Asset export writes the material's roughness and metallic factors. The vector ti
 4. **Material content.** A comment on storytold/craft-libs#115 keeps 3D materials as app content
    (<https://github.com/storytold/craft-libs/issues/115#issuecomment-6171165239>). The crates hold code
    only. Material libraries and other assets stay in the apps.
-5. **MikkTSpace.** The `mikktspace` 0.3.0 crate declares `MIT/Apache-2.0`. If its source files carry a
-   Zlib notice, its use waits for RFC-0027 (#41), because the license allowlist does not include Zlib.
+5. **MikkTSpace.** The `mikktspace` 0.3.0 crate declares `MIT/Apache-2.0`. `MIT`, `Apache-2.0` and,
+   since RFC-0027 (#41), `Zlib` are on the license allowlist in `standards/house-rules-rust.md`, so
+   the crate is allowed whether or not its source files carry a Zlib notice.
 6. **Consumers.** Each crate names at least two consuming apps in its README, which meets the craft-libs
    rule that a crate is useful to more than one app.
 7. **Other contributors' work.** This RFC changes no open pull request. When storytold/deckcraft#743,
