@@ -35,6 +35,12 @@ Dependencies and assets use SPDX identifiers. An expression is allowed when ever
 - `Apache-2.0 WITH LLVM-exception`
 - `LicenseRef-Public-Domain`
 
-`MPL-2.0` is allowed for third-party dependencies used unmodified; vendoring, patching or copying its code needs a maintainer's approval. `MPL-2.0+` counts as `MPL-2.0`.
+`MPL-2.0` is allowed for third-party dependencies used unmodified. `MPL-2.0+` counts as `MPL-2.0`. Its copyleft applies file by file:
+
+- Depending on an unmodified MPL-2.0 crate needs no separate process or library. Our code that uses it keeps its own licence.
+- Do not copy MPL-2.0 code into our own files: that file would become MPL-2.0. Copying, vendoring or patching it, including through a `[patch]` entry in `Cargo.toml`, needs a maintainer's approval first.
+- A patched MPL-2.0 file's source must be published under MPL-2.0. Keep the patch in a public repository and link it in the pull request.
+- A pull request that adds an MPL-2.0 dependency names the crate and the apps that ship it.
+- A package that ships MPL-2.0 code tells users where to get that code's source. Do not drop licence or notice files.
 
 `LicenseRef-Storyteller-Trademark` is not in this list. It covers Storyteller brand marks only, where a repository already says so.
