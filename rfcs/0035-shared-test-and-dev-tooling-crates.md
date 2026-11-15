@@ -29,7 +29,8 @@ storytold/photocraft#10189, storytold/designcraft#1980.
 The family has four parts:
 
 1. `craft-testkit`, a new test-support crate. Its core modules use `std` and one small dependency: `temp`,
-   `skip`, `oracle`, `fixtures`, `serial`, `bin`, `deadline`, `rng`, `hostile`, `fonts` and `guards`.
+   `skip`, `oracle`, `fixtures`, `serial`, `bin`, `deadline`, `growth`, `rng`, `hostile`, `fonts` and
+   `guards`.
    Its feature modules add one dependency each: `image` (PNG), `prop` (proptest), `corpus` (SHA-256),
    `mcp` (JSON) and `log`. A `geom` feature adds `craft-geom`, `kurbo` and `proptest` for the geometry
    assertions and strategies of RFC-0030.
@@ -46,7 +47,8 @@ The family has four parts:
 The `guards` module is the one storytold/craft-libs#139 proposes. It comes from
 storytold/craft-libs#1373, which supersedes zachshallbetter's storytold/craft-libs#163 and keeps his
 commit with its authorship. The time-scaled waits and the watchdog of `deadline` come from THEtheChad's
-LightCraft pull requests and are added after they merge.
+LightCraft pull requests and are added after they merge. The `growth` module follows addibble's
+suggestion in the review of this RFC.
 
 The section "Candidates for later RFCs" lists runtime code that the apps also duplicate, as candidates
 for later RFCs. The apps' copies of runtime code that a craft-libs crate already holds are the subject
@@ -212,7 +214,7 @@ that `Cargo.lock` did not change (`:337-340` at `5b4eeb2323`, read again on 2026
 
 | Part | Holds | Dependencies | wasm32 |
 |---|---|---|---|
-| `craft-testkit` | Core modules for every test: folders, skips, programs, fixtures, locks, binaries, deadlines, random input, hostile input, test fonts and source guards | `std`; `tempfile` 3 for `temp` | `rng`, `fonts`, `hostile`'s mutators and `guards` (except `rust_sources`) build for `wasm32-unknown-unknown`; the rest is native only |
+| `craft-testkit` | Core modules for every test: folders, skips, programs, fixtures, locks, binaries, deadlines, growth checks, random input, hostile input, test fonts and source guards | `std`; `tempfile` 3 for `temp` | `growth`, `rng`, `fonts`, `hostile`'s mutators and `guards` (except `rust_sources`) build for `wasm32-unknown-unknown`; the rest is native only |
 | `craft-testkit` features | `image`, `prop`, `corpus`, `mcp`, `log`, `geom` | `png` 0.18, `proptest`, `sha2`, `serde_json`, `log`; `craft-geom` and `kurbo` for `geom` | `image` builds for wasm32 |
 | `craft_ui::testing` | Headless egui input, screenshot folders, and the existing IME and dock helpers | egui and egui_kittest, behind `screen-testing` | Native only |
 | Format crates' `test-support` | Fixture writers for the formats each crate reads | The crate's own dependencies | As the crate |
@@ -252,6 +254,7 @@ dependency, as FilmCraft's does with `filmcraft-testkit` and PdfCraft's with `pd
 | `serial` | `TestLock`, a const-constructible lock (`static L: TestLock = TestLock::new(); let _g = L.hold();`) that recovers from poisoning and can be held again by the thread that holds it. `gpu_lock()` is one predefined instance, and `hold_gpu_lock()` keeps it until the thread ends. | PhotoCraft `crates/testkit/src/gpu.rs`; DeckCraft `crates/ui-egui/src/gpu_lock.rs`; EffectCraft `crates/ui-egui/tests/it/gpu_test.rs:3-7` and `crates/gpu/src/tests.rs:193-206` (thread-held); PdfCraft `apps/pdfcraft/src/tests.rs:48-53` (poison recovery) | PhotoCraft, DeckCraft, EffectCraft, PdfCraft, WordCraft, LightCraft, AniCraft; the test locks of VectorCraft, CADCraft, FilmCraft and the other repositories in "Helpers copied" |
 | `bin` | `bin_path!(name)` expands in the calling test and reads `NEXTEST_BIN_EXE_<name>` with underscores, then with hyphens, then the runtime `CARGO_BIN_EXE_<name>`, then Cargo's compile-time value. A test run from an extracted nextest archive gets the extracted path from `NEXTEST_BIN_EXE_<name>`, and a compile-time path that no longer exists fails the test with a message that names the variables read, instead of OS error 2. The case of storytold/craft-common-actions#225 (storytold/pdfcraft#7173 closed on the same point) is one of the module's tests. `run(path, args, env, max_output) -> Output` runs it and returns an error when stdout or stderr exceeds `max_output` bytes, a limit with a documented default. | SoundCraft `apps/soundcraft-cli/tests/common.rs:7-9` (both spellings); VectorCraft `apps/vectorcraft-cli/tests/it/main.rs:12-15` (runtime lookup) | SoundCraft, VectorCraft, EffectCraft, FilmCraft, LightCraft, PhotoCraft, DeckCraft; the `run` and `cli` helpers in CADCraft, DeckCraft, FilmCraft, GridCraft, PdfCraft, SoundCraft, TextureCraft and WordCraft |
 | `deadline` | `with_deadline(limit, label, f)` runs `f` on its own thread and fails the test with the label when the limit passes. `wait_until(limit, what, cond)` polls a condition. Both read an optional limit variable that the caller names. | FilmCraft `deadline.rs:19-23`; `craft-media-testkit` `with_deadline`; PhotoCraft `crates/ui-egui/src/canvas/paint_thread_tests.rs:45` (`wait_until`) | LightCraft (`crates/engine/src/demo/tests.rs:31`), GridCraft (`crates/math/src/lib.rs:675-687`), FilmCraft, Craft Anything (`standin_tools/tests.rs:38`), `craft-media-testkit`; `wait_until` in PhotoCraft, EffectCraft, FilmCraft and LightCraft |
+| `growth` | `assert_linear(what, n, make, count)` builds inputs with `make(n)` and `make(scale * n)` (making them is not counted), counts the steps of a run on each with the caller's `count` closure, fails when the run at `n` counted no steps, and fails when the larger input took more than the limit times the steps. `assert_linear` uses WordCraft's scale of 8 and limit of 12 (`1.5 * SCALE`) as documented defaults, and `assert_linear_with(Linear { scale, limit }, what, n, make, count)` takes both as parameters, as `fixtures` pairs `generate` with `generate_with`. It fails the test for a scale below 2 or a limit of `scale * scale` or more, which could not tell a linear walk from a quadratic one. The step counters stay in each crate (WordCraft `crates/doc/src/work.rs` and `crates/layout/src/work.rs`, VectorCraft's `*_WORK` thread-locals in `crates/pathops/src/addons/cleanup.rs`). It counts steps and reads no clock. | WordCraft `assert_linear_steps` (`crates/layout/src/tests/linear.rs:26-33`, `SCALE = 8` at `crates/layout/src/tests.rs:854`, wordcraft `bc0e51ee4d`) | WordCraft (`wordcraft-layout`, `wordcraft-doc`), VectorCraft (`pathops`) |
 | `rng` | `XorShift64` (`x ^= x << 13; x ^= x >> 7; x ^= x << 17`) and `XorShift64Star`, each seeded, with `next`, `below`, `byte` and `fill`. A suite that switches keeps the generator it uses today, so its inputs do not change. | FilmCraft `crates/dnx/tests/it/fuzz_hostile.rs:9-20` (xorshift64, `next` and `below`) and its craft-libs port `crates/video/tests/dnx/fuzz_hostile.rs`; craft-libs `crates/jpeg/tests/mutation.rs:28-46` (xorshift64\*, with `byte`) | craft-libs `video` (nine `fuzz_hostile.rs` suites) and `jpeg` (`tests/mutation.rs`), FilmCraft, GridCraft, FigCraft |
 | `hostile` | `hammer(bytes, parse)`: every truncation, seeded byte flips and extreme-value overwrites, each run under `catch_unwind` and `with_deadline`, with a run-count multiplier read from a variable the caller names. | `craft-media-testkit` `hostile.rs` | CADCraft (`crates/fonts/src/shx/tests.rs:254-272`), TextureCraft (`crates/formats/src/mesh_import/tests.rs:419-435`), craft-libs `mesh` (`src/tests.rs:20`), `craft-media-testkit` |
 | `fonts` | `rename_family(bytes, from, to)` for equal-length names in the UTF-16BE and ASCII name records, and `collection(faces)`, which builds a TTC. The caller supplies the font bytes. The source `rename` asserts that the names have the same length (`:66`), and `collection` indexes the table directory without bounds checks (`:92-96`). `rename_family` returns an error for names of different lengths, and `collection` returns an error for a face shorter than its table directory, each with a test. | VectorCraft `crates/text/src/tests/sysfonts.rs:64-101` (`rename` and `collection`) | VectorCraft (`text` and `testkit`), DesignCraft (`crates/fonts/src/fontdb/tests/sysfonts.rs:68`), WordCraft (`crates/fonts/src/fontdb/tests/sysfonts.rs:11-16`, `crates/fonts/src/fontdb/user/tests.rs:6`) |
@@ -458,7 +461,7 @@ craft-common-actions keeps runner setup, caching, nextest installation, the lock
   the caller (`or_skip!`, `require_ffprobe!`, `assert_similar!`, `bin_path!`) and in `with_deadline`,
   `wait_until`, `skip` with a required variable, `skip::craft_fonts` with a required value,
   `corpus::pinned`, `fixtures::generate` and `generate_with` under the required rule, and
-  `hostile::hammer`, each of which carries a documented `#[allow(clippy::panic)]`.
+  `hostile::hammer` and `growth::assert_linear` and `assert_linear_with`, each of which carries a documented `#[allow(clippy::panic)]`.
   The crate root otherwise copies the `deny` attribute of Rust house rule 1
   (`standards/house-rules-rust.md`).
 - **Clock.** No helper returns elapsed time for a test to assert on. `deadline` uses the clock only to
@@ -578,7 +581,7 @@ The craft-libs pull requests go in this order:
    storytold/craft-libs#163, which conflicts with `main`, as FredApps noted in a review comment on
    2026-11-01. #1373 keeps zachshallbetter's commit from #163 with his authorship.
 2. The core modules, one pull request each: `temp`, `skip`, `serial`, `bin`, `deadline` (`with_deadline`
-   and `wait_until`), `oracle`, `fixtures`, `rng`, `hostile`, `fonts`.
+   and `wait_until`), `growth`, `oracle`, `fixtures`, `rng`, `hostile`, `fonts`.
 3. The feature modules: `image`, `prop`, `log`, `corpus`, `mcp`.
 4. `craft_ui::testing::input` and `snapshot`.
 5. The format crates' `test-support` renames and `craft-pdf`'s `testing::Pdf`, one crate per pull request.
