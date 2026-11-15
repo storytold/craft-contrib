@@ -237,7 +237,7 @@ dependency, as FilmCraft's does with `filmcraft-testkit` and PdfCraft's with `pd
 | Module | Contents | Comes from | First consumers |
 |---|---|---|---|
 | `temp` | `TempDir`: a folder made by `tempfile::Builder` with a tag prefix and a random suffix, mode 0o700 and an owner check on Unix, removed with its contents on drop, also when the test panics. A folder it did not make is never emptied or reused. The symlink and owner checks apply to the created folder, not to the components of `std::env::temp_dir()`, and `TempDir::path()` returns the canonicalized path, so a test that compares paths sees `/private/var` on macOS (storytold/vectorcraft#6859). The module's tests include a temp root reached through a symlink. `TempDir::file(name)` joins a file name. | VectorCraft `crates/testkit/src/lib.rs` (checks); `craft-media-testkit` `private_dir()`; CADCraft `tests/support/temp_dir.rs`; the `ScratchDir` of storytold/pdfcraft#6124 | LightCraft, PdfCraft, PhotoCraft, WordCraft, CADCraft, FigCraft, MaterialCraft, DeckCraft, VectorCraft, `craft-media-testkit` |
-| `skip` | `skip(reason, required_var)` prints the skip line and returns, or fails the test when the variable is `1`. `or_skip!` binds a value or returns under the same rule. `craft_fonts(present: bool, required: bool)` takes both values from the caller. Today every first consumer passes its own build constant or `option_env!` value (PhotoCraft `crates/text/build.rs:66`, LightCraft `crates/engine/build.rs:64`, DeckCraft `crates/fonts/src/tests.rs:345-350`, GridCraft `crates/ui-egui/build.rs:52-55`), and a repository that switches to `craft-fonts-build` passes the `present` and `required` values from that crate's generated table instead. `craft_fonts_cover(text)` checks coverage as GridCraft's `font_setup.rs:266` does. | LightCraft `lib.rs`; `pdfcraft-oracle` `or_skip!`; FilmCraft `require_*!` macros; `craft-media-testkit` `skip()`; GridCraft `crates/ui-egui/src/theme/font_setup.rs:222-266` | LightCraft, PdfCraft, FilmCraft, DeckCraft, EffectCraft, PhotoCraft, CADCraft, DesignCraft, GridCraft, VectorCraft; craft-libs `aep`, `crw` and `print` tests |
+| `skip` | `skip(reason, required_var)` prints the skip line and returns when the variable is unset or empty, fails the test when it is `1`, and fails the test with a message naming the variable and the accepted value `1` for any other value. `or_skip!` binds a value or returns under the same rule. `craft_fonts(present: bool, required: bool)` takes both values from the caller. Today every first consumer passes its own build constant or `option_env!` value (PhotoCraft `crates/text/build.rs:66`, LightCraft `crates/engine/build.rs:64`, DeckCraft `crates/fonts/src/tests.rs:345-350`, GridCraft `crates/ui-egui/build.rs:52-55`), and a repository that switches to `craft-fonts-build` passes the `present` and `required` values from that crate's generated table instead. `craft_fonts_cover(text)` checks coverage as GridCraft's `font_setup.rs:266` does. | LightCraft `lib.rs`; `pdfcraft-oracle` `or_skip!`; FilmCraft `require_*!` macros; `craft-media-testkit` `skip()`; GridCraft `crates/ui-egui/src/theme/font_setup.rs:222-266` | LightCraft, PdfCraft, FilmCraft, DeckCraft, EffectCraft, PhotoCraft, CADCraft, DesignCraft, GridCraft, VectorCraft; craft-libs `aep`, `crw` and `print` tests |
 | `oracle` | `find(program, version_arg)`: an explicit path from a variable (a wrong path is an error), then `PATH` with `.exe` on Windows, then known install folders. `find_in(path_var, path_list)` keeps FilmCraft's injectable form for the module's own tests. Results are cached per process with the version. The version output is read up to a byte limit. `ffmpeg_supports_format` and `require_ffprobe!` come along. | `craft-media-testkit` `lib.rs`; FilmCraft `oracle.rs:41`, `:147-181`; `pdfcraft-oracle` `lib.rs:127` | `craft-media-testkit`, `pdfcraft-oracle`, `filmcraft-testkit`, EffectCraft (`crates/opusenc/tests/it/ffmpeg.rs:12-16` and 13 test files that call ffmpeg or ffprobe), SoundCraft (`crates/video/src/tests.rs:327-332`); craft-libs `crates/pdf/tests/cos/oracle.rs` |
 | `fixtures` | A collision-free sibling temporary path, publication by rename that reuses a complete concurrent winner, `generate` and `generate_with` under the required-program rule, and `FIXTURE made`, `cached` and `skipped` lines. The root comes from a variable or `<workspace>/target/fixtures`. | FilmCraft `fixtures.rs:56-89` (winner reuse); `craft-media-testkit` `lib.rs:274-289` (required rule) | FilmCraft, EffectCraft (`crates/media/tests/it/footage.rs:19-84`), `craft-media-testkit`; craft-libs `crates/video/tests/vp8/common/mod.rs:75-78` and `crates/audio/tests/codecs/testkit.rs` |
 | `serial` | `TestLock`, a const-constructible lock (`static L: TestLock = TestLock::new(); let _g = L.hold();`) that recovers from poisoning and can be held again by the thread that holds it. `gpu_lock()` is one predefined instance, and `hold_gpu_lock()` keeps it until the thread ends. | PhotoCraft `crates/testkit/src/gpu.rs`; DeckCraft `crates/ui-egui/src/gpu_lock.rs`; EffectCraft `crates/ui-egui/tests/it/gpu_test.rs:3-7` and `crates/gpu/src/tests.rs:193-206` (thread-held); PdfCraft `apps/pdfcraft/src/tests.rs:48-53` (poison recovery) | PhotoCraft, DeckCraft, EffectCraft, PdfCraft, WordCraft, LightCraft, AniCraft; the test locks of VectorCraft, CADCraft, FilmCraft and the other repositories in "Helpers copied" |
@@ -305,8 +305,10 @@ Cargo set. Each app passes the names it uses today, such as `FILMCRAFT_REQUIRE_O
 `cargo xtask fixtures` reads the `FIXTURE` lines, and LightCraft's `xtask/src/ci_report.rs` reads the
 skip log that `lightcraft-testkit` keeps writing on top of `skip`.
 
-A required variable counts as set only when its value is exactly `1`, as `craft-fonts-build` reads
-`CRAFT_FONTS_REQUIRED` and as `gate.yml` sets it. That reading changes behavior in `pdfcraft-oracle`
+A required variable has three readings. Unset or empty means skip. `1` means required, as
+`craft-fonts-build` reads `CRAFT_FONTS_REQUIRED` and as `gate.yml` sets it. Any other value fails with a
+message that names the variable and the accepted value, so a value such as `true`, `yes` or `0` that a
+copy read as required today fails loudly instead of turning into a skip. That reading changes behavior in `pdfcraft-oracle`
 and its craft-libs port (any value), `filmcraft-testkit` and `craft-media-testkit` (`1`, `true`, `yes`
 or `on`), VectorCraft's Affinity corpus (any value except `0`), Craft Anything's `build.rs` (anything
 but empty or `0`), and the `build.rs` readers that test `var_os("CRAFT_FONTS_REQUIRED").is_some()`:
@@ -319,7 +321,11 @@ in PhotoCraft `crates/ui-egui/tests/it/camera_raw_localization.rs:132`, DesignCr
 `crates/fonts/src/fontdb/scoped.rs:462` and `crates/ui-egui/src/canvas/tests.rs:2889`, and LightCraft
 `xtask/src/web.rs:56`, and `PHOTOCRAFT_CORPUS_STRICT` in PhotoCraft `crates/io/tests/it/corpus.rs:430`.
 FilmCraft's `crates/text/build.rs:23` already reads exactly `1`. Each of these repositories changes its
-reading in its own pull request and checks that its workflows set the variable to `1`.
+reading in its own pull request and checks that its workflows set the variable to `1`. The one value that
+goes from failing to skipping is an empty one, in the readers that count an empty value as set
+(`pdfcraft-oracle` and its port, VectorCraft's Affinity corpus and the `var_os(...).is_some()`
+readers), so each such pull request lists every workflow and local setting that sets the variable to an
+empty value.
 
 craft-testkit has no helper that changes the process environment. No test in the Craft repositories
 calls `std::env::set_var` (the one call, VectorCraft `apps/vectorcraft/src/cursor_theme.rs:142`, is app
@@ -546,8 +552,9 @@ Each move is made in three kinds of pull request:
    listed above, is its own pull request. Each such pull request includes a test that fails without the
    change and lists the tests or gate steps whose result changes. A switch of a flat-table repository
    to `layers` lists every new violation the shared engine reports, with an exception or a fix for
-   each. A change to a required variable's reading names each workflow that now fails instead of
-   skipping. A switch to the shared `assets` list lists every file that the union list newly flags,
+   each. A change to a required variable's reading names each workflow and local setting whose result
+   changes: each that now fails instead of skipping, each value that now fails with the message about
+   the accepted value, and each empty value that now skips instead of failing. A switch to the shared `assets` list lists every file that the union list newly flags,
    with the `ASSETS.md` row or the exclusion it adds for each. A switch to `prop::config` names each
    suite whose seed changes from random to pinned, and keeps a variable or a CI step that still runs
    that suite with random seeds. A switch to `names` lists every literal that the shared scanner newly
@@ -709,7 +716,8 @@ PdfCraft and PhotoCraft.
 6. **Temporary folders.** `temp` wraps `tempfile`, which FilmCraft's testkit and storytold/filmcraft#4681
    already use, and adds the mode and owner checks. RFC-0015's `confine` crate keeps its escape tests and
    may use `temp` in them.
-7. **Required variables.** A required variable is set when its value is exactly `1`.
+7. **Required variables.** Unset or empty means skip, `1` means required, and any other value fails
+   with a message naming the variable and the accepted value.
 8. **Testkit layer class.** The class stays in DesignCraft, DeckCraft, CADCraft and WordCraft, and
    `craft-testkit` fills it. This settles the question storytold/designcraft#1980 leaves open.
 9. **storytold/craft-libs#115.** Its testkit entry names a corpus manifest, large-file fixtures and a
