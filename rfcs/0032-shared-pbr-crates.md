@@ -12,8 +12,8 @@ storytold/deckcraft#743, storytold/deckcraft#1380, storytold/photocraft#8805, st
 
 ## Summary
 
-Four new craft-libs crates hold the 3D code that several apps now carry separately: `craft-mesh-ops`,
-`craft-texture`, `craft-pbr` and `craft-raster3d`. Each crate is filled from the app whose code already
+Three new craft-libs crates, `craft-mesh-ops`, `craft-pbr` and `craft-raster3d`, and the existing
+`craft-texture` hold the 3D code that several apps now carry separately. Each crate is filled from the app whose code already
 has tests for that part. The crates add no importer or decoder. They read the output of `craft-mesh`,
 `craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`. VectorCraft is a planned
 consumer.
@@ -151,8 +151,8 @@ here.
    leaves normals, tangents and UVs to the apps. If the `craft-mesh` maintainers prefer it inside
    `craft-mesh`, the same code moves there behind features.
 3. **The format program.** storytold/craft-libs#778 names no texture, shading or rasterizer crate, so
-   the four crates are proposed outside it. If a crate with the same contents is added under #778, this
-   design uses that crate.
+   the three new crates are proposed outside it. If a crate with the same contents is added under #778,
+   this design uses that crate.
 4. **Material content.** A comment on storytold/craft-libs#115 keeps 3D materials as app content
    (<https://github.com/storytold/craft-libs/issues/115#issuecomment-6171165239>). The crates hold code
    only. Material libraries and other assets stay in the apps.
@@ -169,7 +169,8 @@ here.
 
 ## What this RFC decides
 
-- The four crates, their names and their boundaries, as listed in "The crates".
+- The three new crates, the contents that `craft-texture` gains, and the names and boundaries of all
+  four, as listed in "The crates".
 - The source of each crate's code.
 - The mesh input, the material, the shared sRGB pair and the Smith-Schlick GGX default.
 
