@@ -54,6 +54,10 @@ of RFC-0036 (storytold/craft-contrib#56), which is related work and is not decid
 
 ## What exists
 
+This section is a non-normative record as of 2026-11-14, as RFC-0023's "Reference implementations,
+non-normative" section is. It is not updated after this RFC is accepted, and a renamed file, a changed
+count or a consumer that drops out does not change what the RFC decides.
+
 The listings below were read on 2026-11-14 at vectorcraft `460d211995`, photocraft `0d3b1e8523`,
 designcraft `8b169f8ee7`, lightcraft `487833ad19`, filmcraft `e4ab3c6a99`, effectcraft `f029bbadb2`,
 pdfcraft `346d803080`, gridcraft `c2aba7a3f4`, wordcraft `f8c66d0692`, deckcraft `b0c77ebd6a`,
@@ -225,6 +229,11 @@ The parts depend on each other in one direction:
 - `craft_ui::testing` and the format crates' `test-support` modules do not depend on `craft-testkit`.
 - `craft-xtask`'s `fetch` feature depends on `craft-testkit` with the `corpus` feature, for the manifest
   parser that `fetch` shares with `corpus`.
+
+The "Comes from" and "First consumers" columns of the module tables below, and the sources and first
+consumers named under "UI test support in craft-ui" and "Test fixtures in the format crates", are a
+non-normative record as of 2026-11-14. Each crate's README keeps the current Origin and Migration
+tables (see "Admission" under "Rules for every crate").
 
 ## craft-testkit
 
@@ -435,6 +444,9 @@ craft-common-actions keeps runner setup, caching, nextest installation, the lock
 
 ## Rules for every crate
 
+- **Required variables.** Each helper that reads a required variable treats an unset or empty value as
+  skip and `1` as required, and fails with a message naming the variable and the accepted value for any
+  other value. "Variables and printed lines" lists the copies whose reading changes.
 - **Dependency kind.** Apps and craft-libs crates take `craft-testkit`, `craft-ui`'s test features and
   the format crates' `test-support` under `[dev-dependencies]`. `craft-media-testkit`, `craft-xtask`'s
   `fetch` feature and an app's `xtask` take `craft-testkit` as a normal dependency. `craft-xtask` is a
@@ -487,7 +499,7 @@ craft-common-actions keeps runner setup, caching, nextest installation, the lock
 
 ## Faults in the current copies
 
-The shared code holds the fixed form of each of these. Each repository takes the fix in its own pull
+This list is a non-normative record as of 2026-11-14, like "What exists". The shared code holds the fixed form of each of these. Each repository takes the fix in its own pull
 request with a test that fails without it, as item 3 of "How the code moves" says, before or after its
 switch.
 
@@ -732,7 +744,9 @@ PdfCraft and PhotoCraft.
     #6840, #6977, #7281, #2777, #3028; storytold/deckcraft#874; storytold/cadcraft#1587) wait until one
     merges and a second app has a merged copy. The four different `craft-pdf` revisions in the `pins`
     tables are for the PDF crate's maintainers to settle.
-12. **Other contributors' work.** This RFC changes no open pull request. storytold/pdfcraft#6124,
+12. **Other contributors' work.** This RFC changes no open pull request. A switch whose source files an
+    open pull request changes merges with that pull request or waits for it. The pull request lists in
+    this item and in item 11 are a non-normative record as of 2026-11-14. storytold/pdfcraft#6124,
     #5923, storytold/filmcraft#4681, storytold/photocraft#13266 and storytold/texturecraft#254 make test
     folders private, and each repository switches to `temp` after its pull request merges.
     storytold/photocraft#10865, storytold/filmcraft#3805 and storytold/lightcraft#3519 change GPU test
@@ -834,13 +848,15 @@ PdfCraft and PhotoCraft.
 ## What this RFC decides
 
 - The family: `craft-testkit` and its modules and features, the `craft_ui::testing` additions, the
-  `test-support` rule for format crates, and `craft-xtask` and its modules, with their boundaries.
-- The source of each part's code and its first consumers.
-- The rules for every crate, including the reading of required variables.
-- The move plan and what stays in the apps.
+  `test-support` rule for format crates, and `craft-xtask` and its modules.
+- The boundaries: the one-way dependencies under "The family", and what stays in the apps.
+- "Rules for every crate", including the reading of required variables.
+- The three kinds of pull request in "How the code moves".
 
-The new crates under "Candidates for later RFCs" and the migrations of RFC-0036
-(storytold/craft-contrib#56) are not decided here.
+The inventories, the sources and first consumers of each part, the order of the craft-libs pull
+requests and the lists of open pull requests are a record and a plan, not decisions. The new crates
+under "Candidates for later RFCs" and the migrations of RFC-0036 (storytold/craft-contrib#56) are not
+decided here.
 
 The affected repositories are craft-libs and every Craft application with a copy listed above:
 VectorCraft, PhotoCraft, DesignCraft, LightCraft, FilmCraft, EffectCraft, PdfCraft, GridCraft, WordCraft,
