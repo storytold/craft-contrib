@@ -47,6 +47,12 @@ materialcraft `31330629`, pdfcraft `0f22627b` and vectorcraft `08b6cfd3`.
 Open pull requests add further renderers: storytold/deckcraft#743, storytold/deckcraft#1380 and
 storytold/photocraft#8805. storytold/cadcraft#1796 asks for a CPU renderer for RENDER.
 
+Since that reading, storytold/craft-libs#1216 (merged on 2026-11-14) has added `craft-texture` with
+MaterialCraft's image planes, sampling and sRGB helpers. No app depends on it yet. Three open pull
+requests extend it: storytold/craft-libs#1400 (tests of the sRGB pair), storytold/craft-libs#1403
+(height to normal and ORM packing) and storytold/craft-libs#1429 (decoding PNG, TIFF, Radiance HDR and
+OpenEXR). These facts were checked on 2026-11-15 at craft-libs `8503f24c`.
+
 ## The crates
 
 | Crate | Contents | Comes from | First consumers |
@@ -118,8 +124,9 @@ Each move is made in three kinds of pull request:
 
 The order follows the dependencies:
 
-1. `craft-mesh-ops` and `craft-texture` are added, and TextureCraft and MaterialCraft switch to the one
-   copy of their shared geometry code.
+1. `craft-mesh-ops` is added, and TextureCraft and MaterialCraft switch to the one copy of their shared
+   geometry code. `craft-texture`, which storytold/craft-libs#1216 added, gains the rest of the
+   contents listed in "The crates", and MaterialCraft switches to it.
 2. `craft-pbr` is added with the environment prefilter from their `ibl.rs`, and both apps switch to it.
    EffectCraft's BRDF moves into the same crate.
 3. `craft-raster3d` is added, and EffectCraft switches its renderer to it.
