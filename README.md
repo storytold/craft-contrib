@@ -16,3 +16,11 @@ the short form of [standards/accessibility.md](standards/accessibility.md)
 [standards/time.md](standards/time.md). The rules for other companies' names are
 [standards/naming.md](standards/naming.md)
 ([RFC-0029](rfcs/0029-other-companies-names.md)). Propose a change to those files here.
+
+## Apple proposals under review
+
+[RFC-0041](rfcs/0041-native-apple-shells.md) proposes a scoped Swift/Rust native
+host exception, coordinated with the existing mobile and shared-library proposals.
+[RFC-0042](rfcs/0042-apple-distribution-lanes.md) separately proposes opt-in Apple
+validation/distribution lanes and Mac App Store readiness gates. Neither is adopted
+policy before maintainer review; no app instruction blocks or releases change here.
