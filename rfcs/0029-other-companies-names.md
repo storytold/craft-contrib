@@ -1,7 +1,5 @@
 # RFC-0029: Using other companies' names
 
-Updated by: [RFC-0040](0040-shared-names-list.md)
-
 This RFC sets one rule for when the Craft apps use names that belong to other companies, so the answer is the same in every app and easy to check.
 
 This is a conservative naming policy, not legal advice or trademark clearance. It keeps our own features under our own names, and sends unclear cases to an owner.
@@ -74,6 +72,17 @@ These show how the rule applies. They are policy choices, not findings that a na
 | `Lumetri Color` in FCPXML, `Camera Raw Filter` in a Photoshop action | Only as interoperability or document context | Stable interchange names and document-owned text | — |
 | "Opens PSD files" | Only as a statement | Factual compatibility, in help and import messages | — |
 | "Figma-class" | No | Comparison in product copy | Describe our feature directly |
+| Content-Aware Fill, Content-Aware Scale, Content-Aware Move, and "Content-Aware" as a fill, patch, healing or crop mode | No | One company's distinctive phrase | Not chosen yet (PhotoCraft) |
+| Generative Fill, Generative Expand, Generate Image, Generate Background, Generate Similar, Generative Upscale | No | Adobe feature names | Not chosen yet (PhotoCraft) |
+| Neural Filters, and its filter names (Smart Portrait, Super Zoom, Landscape Mixer, Makeup Transfer and others) | No | Adobe feature names | Not chosen yet (PhotoCraft) |
+| Firefly, Sensei, Lightroom, Bridge, Adobe Stock, Adobe Fonts, Creative Cloud, ExtendScript, UXP | No | Adobe product and technology names | Not chosen yet (PhotoCraft) |
+| Photomerge, Puppet Warp, Face-Aware Liquify | No | Coined word; one company's distinctive phrases | Not chosen yet (PhotoCraft) |
+| Merge to HDR Pro, Contact Sheet II | No | Product-style suffix ("Pro", "II") | Not chosen yet (PhotoCraft) |
+| Adobe World-Ready Composer, Adobe Every-line Composer, Adobe Single-line Composer | No | Company prefix | Middle Eastern & South Asian Composer (PhotoCraft); others not chosen yet |
+| "Paths to Illustrator" as an export label | No | Our command's label names another product | Name the file it writes (PhotoCraft) |
+| "{set} (Photoshop)", "steps with no Photoshop equivalent" on imported actions | Prefer the format | Our wording, not the document's | Name the file type the data came from (PhotoCraft) |
+| Smart Object, Smart Filters, Smart Sharpen, Magic Wand, Magic Eraser, Spot Healing Brush, Select Subject, Liquify, Vanishing Point and similar | Only after the check | Ordinary words one company also uses for its version; a family (`Smart …`, `Magic …`) can be checked once | — |
+| Adobe RGB (1998), `%!PS-Adobe-`, Photoshop PDF/Raw/EPS format names, Camera Raw `.xmp` settings | Only for the format or data | Colour space, file header, format names and interchange data we read or write | — |
 
 Names apps have left for this RFC (for example Warp Stabilizer, Roto Brush and AudioSuite) are decided by each app under the rule above.
 
