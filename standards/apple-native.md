@@ -56,6 +56,11 @@ in a fork.
 
 ## Required evidence
 
+Apply the [approved-native accessibility mapping](accessibility.md#approved-native-apple-hosts)
+without lowering RFC-0014's bar: real keyboard/accessibility focus, meaningful
+native trees and announcements, and keyboard-driven XCTest evidence alongside
+captures. A raster canvas or native controls alone do not prove accessibility.
+
 Rust operation tests, hosted native bridge tests and real native operational tests
 are complementary. Cover Files import/cancel/malformed recovery, render/zoom,
 mutation, save/export/reopen and sharing; check landscape, largest text, dirty-close

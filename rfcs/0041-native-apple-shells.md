@@ -2,7 +2,7 @@
 
 Status: Proposed; RFC number provisional until maintainers confirm it.
 
-Updates: [RFC-0006](0006-coding-agents.md).
+Updates: [RFC-0006](0006-coding-agents.md), [RFC-0014](0014-accessibility.md).
 
 Related: [RFC-0039 / storytold/craft-contrib#60](https://github.com/storytold/craft-contrib/pull/60),
 [RFC-0040 / storytold/craft-contrib#62](https://github.com/storytold/craft-contrib/pull/62),
@@ -50,6 +50,12 @@ not permanent claims about every future winit or AccessKit version.
    Rust retains document authorization, transformations, validation, history and
    serialization. No PDFKit replacement engine, JavaScript/TypeScript, webview,
    Tauri or Electron is introduced by this exception.
+   Preserve RFC-0014's WCAG 2.2 AA bar through the proposed
+   [native accessibility mapping](../standards/accessibility.md#approved-native-apple-hosts).
+   The same PR reconciles RFC-0014 and both canonical accessibility rule files:
+   real native focus, platform semantics/announcements and XCTest replace only
+   egui-specific mechanisms for an approved host, not their required outcomes.
+   Existing egui requirements and the non-blocking human-testing policy remain.
 3. Use generated, version-pinned bindings and typed bounded messages. Any necessary
    generated FFI `unsafe` must have a separate, narrowly documented audited boundary;
    this does not relax the general no-unsafe/no-panic rule.

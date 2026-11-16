@@ -1,22 +1,22 @@
 # Accessibility
 
-The craft apps draw their own interface with egui. People who use a screen reader or braille display, a magnifier, high contrast, large text, voice control or only a keyboard reach it only through what each app provides: its AccessKit tree, its keyboard focus and its colours. So accessibility is a requirement for every change to an app's interface, as never-crash is for every change to its code ([RFC-0014](../rfcs/0014-accessibility.md)).
+The craft apps use egui by default. People who use a screen reader or braille display, a magnifier, high contrast, large text, voice control or only a keyboard reach an interface through its accessibility tree, keyboard focus and colours. So accessibility is a requirement for every change to an app's interface, as never-crash is for every change to its code ([RFC-0014](../rfcs/0014-accessibility.md)). An individually maintainer-approved SwiftUI/UIKit host uses the [native Apple equivalents](#approved-native-apple-hosts) below; this does not approve a host or relax the egui requirements.
 
 Native apps and shared libraries that draw interface copy the short form of these rules, [house-rules-accessibility.md](house-rules-accessibility.md), into their `AGENTS.md`. Propose changes to either file here, not in a copy. Add each failure found in review or by testers to [Known failures](#known-failures).
 
 ## The bar
 
-The interface meets WCAG 2.2 level AA as applied to software by W3C's WCAG2ICT, the approach EN 301 549 (chapter 11) takes for software that public bodies buy. The web builds meet WCAG 2.2 AA directly. This covers people who use screen readers or braille, magnifiers, high contrast, large text, voice control or only a keyboard. Assistive technology reaches the apps only through AccessKit (UI Automation on Windows, NSAccessibility on macOS, AT-SPI on Linux), so that is what we build and test.
+The interface meets WCAG 2.2 level AA as applied to software by W3C's WCAG2ICT, the approach EN 301 549 (chapter 11) takes for software that public bodies buy. The web builds meet WCAG 2.2 AA directly. This covers people who use screen readers or braille, magnifiers, high contrast, large text, voice control or only a keyboard. For egui, assistive technology reaches the app through AccessKit (UI Automation on Windows, NSAccessibility on macOS, AT-SPI on Linux). An approved native Apple host exposes the same semantics through SwiftUI/UIKit accessibility elements and Apple's platform accessibility API. Both paths must be built and tested.
 
 ## Rules for every UI change
 
 WCAG success criteria are in parentheses.
 
 1. **Keyboard.** Every action works from the keyboard, in the order things appear, with no trap; freehand drawing is the exception WCAG allows. Esc closes a popup or dialog and puts focus back where it was. Alt or F10 moves focus into the menu bar or ribbon, and F6 between regions, where the platform does so. Single-key shortcuts can be turned off or remapped. (2.1.1, 2.1.2, 2.1.4, 2.4.3)
-2. **Real focus.** Keyboard navigation moves egui's focus (`request_focus`), never only a painted highlight, so screen readers and magnifiers follow it. Focus is visible in both themes and not hidden under other UI. (2.4.7, 2.4.11)
+2. **Real focus.** Keyboard navigation moves egui's focus (`request_focus`), or an approved native host's real keyboard focus with appropriate accessibility focus, never only a painted highlight, so screen readers and magnifiers follow it. Focus is visible in both themes and not hidden under other UI. (2.4.7, 2.4.11)
 3. **Name, role, state.** Every control exposes its role, a translated name that starts with its visible label, and its state and value: checked, pressed, selected, expanded, disabled. Shortcuts and access keys are set on the node, in the current platform's form. (2.5.3, 4.1.2)
-4. **Spoken feedback.** A change that happens away from focus, such as a toggle by shortcut, "Saved", a result count, an error or a finished export, is announced through a live region. Errors say in text what is wrong. Messages that close on their own can be read again. (2.2.1, 3.3.1, 4.1.3)
-5. **Drawn surfaces.** A page, canvas, grid, timeline or layer list publishes its content as AccessKit nodes: text with caret and selection, cells with their position, objects with their alt text, and the caret's place on screen for magnifiers. An editable surface is reported as editable. (1.1.1, 1.3.1, 4.1.2)
+4. **Spoken feedback.** A change that happens away from focus, such as a toggle by shortcut, "Saved", a result count, an error or a finished export, is announced through a live region or an approved native host's equivalent accessibility announcement. Errors say in text what is wrong. Messages that close on their own can be read again. (2.2.1, 3.3.1, 4.1.3)
+5. **Drawn surfaces.** A page, canvas, grid, timeline or layer list publishes its content as AccessKit nodes for egui, or native accessibility elements for an approved native host: text with caret and selection, cells with their position, objects with their alt text, and the caret's place on screen for magnifiers. An editable surface is reported as editable. (1.1.1, 1.3.1, 4.1.2)
 6. **Seeing.** Text has a contrast of at least 4.5:1, and controls and focus indicators at least 3:1, in light and dark themes. Colour is never the only signal. The app follows the system's high contrast, text size and reduced motion settings. (1.4.1, 1.4.3, 1.4.4, 1.4.11)
 7. **Pointer.** Anything done by dragging can also be done without dragging, unless the drag is the point, as in freehand drawing. Targets are at least 24 by 24 points or have that much space around them. (2.5.7, 2.5.8)
 
@@ -32,11 +32,21 @@ Record the observed behaviour in the app's parity docs, as WordCraft records typ
 
 ## Checks
 
-- A change that adds or changes a control, a dialog or a keyboard path adds or updates an egui_kittest test. The test drives it by keyboard and asserts on the accessibility tree: roles, names, states, where focus is after each step, and the announcement if there is one. Until the shared helpers for focus and announcements exist (storytold/craft-libs#437, part 4), a pull request that can't write such a test says so in its Accessibility section, and review doesn't block on it.
-- The built-in name check stays on. Turning it off (`with_accessibility_check(false)`) needs a comment saying why.
+- An egui change that adds or changes a control, a dialog or a keyboard path adds or updates an egui_kittest test. The test drives it by keyboard and asserts on the accessibility tree: roles, names, states, where focus is after each step, and the announcement if there is one. Until the shared helpers for focus and announcements exist (storytold/craft-libs#437, part 4), a pull request that can't write such a test says so in its Accessibility section, and review doesn't block on it. Approved native hosts use the equivalent checks below, not an exemption from testing.
+- The egui built-in name check stays on. Turning it off (`with_accessibility_check(false)`) needs a comment saying why.
 - Whenever an agent takes `ui.screenshot`, it also reads the accessibility tree of the same window and checks it against the rules above: through the control channel where it returns the tree, otherwise in a kittest test.
 - A test checks the contrast of new colours in both themes.
 - CI checks what the platform reports, not only the tree. A correct AccessKit tree can still reach screen readers wrong: AccessKit's Windows adapter reports every `Document` as read-only (storytold/wordcraft#3174), and NVDA finds headings only by a text attribute the adapter doesn't set. So CI reads the running app through the platform's accessibility API, with standard tools and no screen reader. On Windows that is a UI Automation scan with Axe.Windows (the rules engine of Accessibility Insights) and a few UI Automation client checks of what screen readers rely on: focus, names, read-only state, the text pattern and heading styles. These run as shared jobs in craft-common-actions, so contributors never install or run a screen reader. macOS and Linux follow when someone sets them up.
+
+## Approved native Apple hosts
+
+This mapping is proposed by [RFC-0041](../rfcs/0041-native-apple-shells.md) for individually approved SwiftUI/UIKit hosts only. It preserves RFC-0014's accessibility bar and does not change the existing egui/AccessKit/kittest path.
+
+- Use native keyboard navigation and accessibility focus, with modal confinement, dismissal and focus restoration. An accessibility label or painted selection alone is not real focus.
+- Expose roles/traits, localized names, values, enabled/selected state, reading order, text selection and correct editability through the native accessibility tree. Custom raster canvases still need meaningful accessible content; native chrome alone does not provide it.
+- Add or update XCTest coverage for each changed control, dialog or keyboard path, including hardware-keyboard traversal and focus restoration. Assert the native tree's names, roles/traits, states and values, and test announcement behavior where exposed. A test identifier is not an accessible name.
+- Inspect the same screen's native tree with XCTest or Accessibility Inspector alongside a native screenshot. Record platform/API checks, announcement-automation gaps and equivalent evidence explicitly in the PR's Accessibility section; do not silently substitute screenshot or tap-only tests. Future shared platform jobs remain separately implemented, not claimed by this policy.
+- Preserve contrast checks, 200% text-size/high-contrast readiness, reduced motion and non-drag alternatives on both device families. Record VoiceOver speech results separately: tree tests do not prove them. RFC-0014's human-testing label remains non-blocking for merge; release claims still need their own evidence.
 
 ## Known failures
 
