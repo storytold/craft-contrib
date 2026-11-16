@@ -65,6 +65,18 @@ not permanent claims about every future winit or AccessKit version.
 7. Unsupported desktop tools stay hidden and are tracked publicly with evidence.
    A feature-reduced beta must say so; it cannot satisfy another RFC's full-parity
    Stable criterion merely by changing its wording.
+8. Resolve native-resource and screenshot policy explicitly before adoption.
+   UIKit/SwiftUI uses OS-provided fonts and symbols by reference; these are not
+   open-licensed files that an app may copy into its assets. PdfCraft's stricter
+   asset policy currently also excludes their appearance in published captures.
+   This RFC requests an app-owner-reviewed, narrow exception for SDK-authorized
+   runtime chrome and genuine captures of that chrome, with provenance and the
+   platform terms distinguished from contributor-original content. It does not
+   authorize redistribution or relicensing of font/symbol files, third-party
+   screenshots, or proprietary document content. Until the app's own policy is
+   explicitly updated, publish only permitted document-canvas crops; keep full
+   native-chrome captures private. Accepting a language exception alone does not
+   override a stricter asset rule.
 
 ## User experience and maintenance impact
 
@@ -77,6 +89,10 @@ and a small native presentation adapter need not drag egui into a domain engine.
 This adds native UI/SDK maintenance and two device-family gates; it does not make
 mobile free to maintain. New shared native chrome should remove repeated adapters
 only after it preserves existing behavior and reduces measured maintenance work.
+Retaining native accessibility typography and standard OS controls avoids a
+second custom UI toolkit, but their publication/licensing boundary needs the
+explicit decision above. Replacing the whole OS chrome merely to obtain a
+misleadingly open-licensed screenshot is not the proposed solution.
 
 ## Rollout and acceptance
 
