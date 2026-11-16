@@ -27,7 +27,7 @@ explicitly; this PR does not edit another contributor's pending RFC branch.
 
 There are now two materially different sources of evidence:
 
-- [PdfCraft's fork POC](https://github.com/blackoutsecure/pdfcraft/tree/feat/apple-native-poc-pipeline)
+- [PdfCraft's upstream POC proposal](https://github.com/storytold/pdfcraft/pull/7549)
   uses a SwiftUI document workspace over existing Rust automation and page rasters.
   It does not host egui or consume `craft-mobile`. Its working mobile subset is not
   full desktop feature parity.

@@ -18,7 +18,7 @@ The proposed living contract is [Apple distribution](../standards/apple-distribu
 Existing core rules already put CI in `craft-common-actions`; do not restate that
 as a new rule or add app-local workflow implementations.
 [storytold/craft-common-actions#259](https://github.com/storytold/craft-common-actions/issues/259)
-and [its existing draft #260](https://github.com/storytold/craft-common-actions/pull/260)
+and [its existing POC #260](https://github.com/storytold/craft-common-actions/pull/260)
 own the concrete opt-in workflow and future signing proposal.
 
 What is missing is the Apple-specific acceptance boundary: an unsigned artifact,
@@ -47,7 +47,7 @@ desktop releases or authorizing publication.
 ## PdfCraft audit and implementation boundary
 
 The [readiness issue](https://github.com/storytold/pdfcraft/issues/7540) and
-[reference app review](https://github.com/blackoutsecure/pdfcraft/blob/feat/apple-native-poc-pipeline/docs/apple-platform-review.md)
+[reference app review proposal](https://github.com/storytold/pdfcraft/pull/7549)
 record inspected source and remaining gates.
 
 Its current desktop entitlements intentionally omit App Sandbox; the packager
