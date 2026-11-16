@@ -186,6 +186,11 @@ prove the helper will be as fast. Phase 1 measures that (see Plan).
   matter.
 - **Using EffectCraft's GPU and CPU compositors at once.** Today a Render Queue job uses one and the
   other idles. That needs no driver code and can go ahead on its own.
+- **The CLI render path and the choice of compositor.** `effectcraft-cli render` renders on the CPU
+  unless it is started with `--gpu`, and a GPU render that runs out of memory can fall back to the
+  CPU without saying so. Hardware encoding alone will not close the gap that CLI users see
+  ([storytold/effectcraft#3706]; related: [storytold/effectcraft#897],
+  [storytold/effectcraft#2423], [storytold/effectcraft#2789]). That needs its own fix.
 - **Other codecs** (AV1, VP9, ProRes) in hardware.
 
 ## Technical notes (EffectCraft)
@@ -214,10 +219,13 @@ prove the helper will be as fast. Phase 1 measures that (see Plan).
 - The helper is a **separately versioned, optional** program with an app/helper compatibility
   check (D2), not part of the default install at first.
 - It reuses FilmCraft's backend; it does not fork it.
+- The helper is **not distributed until an owner is named** to build, sign and release it, and the
+  app/helper compatibility policy (D2) is written down.
 
 ## Still open
 
-1. Who builds, signs and releases the helper?
+1. Who builds, signs and releases the helper? Until someone is named, the helper is not
+   distributed.
 2. Where does its code live (FilmCraft, craft-libs or its own repository)? To be decided with
    FilmCraft's maintainers.
 3. What fixed rule should Auto use to pick between two GPUs (D7)?
@@ -237,3 +245,7 @@ prove the helper will be as fast. Phase 1 measures that (see Plan).
 [storytold/effectcraft#3648]: https://github.com/storytold/effectcraft/pull/3648
 [storytold/filmcraft#1612]: https://github.com/storytold/filmcraft/pull/1612
 [storytold/filmcraft#4083]: https://github.com/storytold/filmcraft/pull/4083
+[storytold/effectcraft#897]: https://github.com/storytold/effectcraft/issues/897
+[storytold/effectcraft#2423]: https://github.com/storytold/effectcraft/issues/2423
+[storytold/effectcraft#2789]: https://github.com/storytold/effectcraft/issues/2789
+[storytold/effectcraft#3706]: https://github.com/storytold/effectcraft/issues/3706
