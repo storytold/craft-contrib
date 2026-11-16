@@ -1,5 +1,7 @@
 # RFC-0029: Using other companies' names
 
+Short form for agents, with the current names list: [standards/naming.md](../standards/naming.md).
+
 This RFC sets one rule for when the Craft apps use names that belong to other companies, so the answer is the same in every app and easy to check.
 
 This is a conservative naming policy, not legal advice or trademark clearance. It keeps our own features under our own names, and sends unclear cases to an owner.
