@@ -89,6 +89,9 @@ Record pass/blocker/not-verified with source or runtime evidence, not an invente
 compliance score. Apple alone decides acceptance.
 
 - Functional completeness, accurate supported-feature disclosures and screenshots.
+- No evaluation/demo/beta build submitted as a public Store product (2.2).
+  TestFlight still requires guideline compliance and intent for public distribution;
+  renaming a POC does not fix completeness.
 - Real hardware/current and minimum supported OS, lifecycle/memory, accessibility
   and provider tests; no reliance on Simulator labels as full VoiceOver evidence.
 - Privacy/required-reason API manifests including relevant transitive SDKs, public
