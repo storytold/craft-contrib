@@ -54,8 +54,11 @@ anywhere.
    When this RFC is adopted, update
    [house rule 14](https://github.com/storytold/craft-contrib/blob/main/standards/house-rules-core.md)
    to these times.
-9. **Keep it current.** If `main` moved and the PR conflicts, rebase it and
-   check that the fix is still needed (the bug may have been fixed meanwhile).
+9. **Keep it current.** When a reviewer or maintainer asks, bring the PR up to
+   date with `main` and check that the fix is still needed (the bug may have
+   been fixed meanwhile). A conflict alone doesn't need a push while the PR
+   waits for review. Don't push to a PR a maintainer has taken into an
+   integration batch or asked you not to push to.
 
 ## Alternatives
 
