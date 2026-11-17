@@ -68,18 +68,25 @@ type in a font it cannot preview is drawn in the default font and highlighted.
 
 1. Never at startup and never for listing. A face is fetched only when type in an open document
    uses it, through a URL the index gives, best first, as `craft-font-store` tries them.
-2. A face is found by family and style exactly, as `craft-font-store`'s `Family::face` finds it.
+2. A face is found by family and style exactly, as `craft-font-store`'s `Family::face` finds it,
+   or by a PostScript name the index lists for it, exactly. No looser match is made.
    The build does not fetch another style of the family in place of one the index does not list;
    that style is drawn as the app draws any style it does not have (section 5).
 3. Previewing a family in a font menu does not fetch it. A family with a face not yet fetched is
    listed by name, without a sample, until it arrives; then its sample is drawn.
+4. A build fetches only an index's own URL and the URLs an index the host added gives. A fetch
+   carries nothing about the document or the user beyond that URL: nothing added to the URL or
+   its headers, no referrer, and credentials only to the host's own origin. In a browser that is
+   `referrerPolicy: "no-referrer"` and `credentials: "same-origin"`.
 
 ### 3. What a fetched face must be
 
 1. Its bytes match the index's sha256, and its size when the index gives one. In a browser, the fetch carries the sha256 as
    Subresource Integrity, so the browser refuses a mismatch too.
-2. The file actually contains the family and style the index says. A file of another family fails
-   that source even when the family is otherwise available.
+2. The file actually contains the family and style the index says, and the PostScript name when
+   the index gives one. A file of another family or another PostScript name fails that source
+   even when the family is otherwise available. With the PostScript name given, a document made
+   with one font cannot silently render with a lookalike served under the same family name.
 3. A face that fails either check fails its source. Nothing in it is used.
 
 ### 4. Activating a face is not an edit
@@ -141,13 +148,16 @@ Every build that adopts this RFC passes, from shared fixtures:
 1. An index with a wrong sha256, an http URL or an unsafe path is refused, and adds nothing.
 2. Listing a family fetches nothing. Opening a document that uses it fetches only the faces its type
    uses, and a style the index does not list fetches nothing.
-3. A file whose bytes do not match fails the source; a file of another family fails it.
+3. A file whose bytes do not match fails the source; a file of another family, or of another
+   PostScript name than the index gives, fails it.
 4. A face's arrival leaves the document unmodified and adds no undo step.
 5. A failed face draws in the fallback, is reported missing, and a retry fetches it again.
 6. A document whose composite font shares a host family's name keeps its definition through
    open, edit and save.
 7. An index added through the control channel, the MCP server, a script or a plug-in is refused
    and adds nothing; setting type in a family of a host's index from any of them fetches the face.
+8. Every fetch goes to an index's URL, sends no referrer, and sends credentials to no other
+   origin.
 
 ## Reference implementation, non-normative
 
@@ -155,25 +165,21 @@ A fork of VectorCraft's web build implements an earlier form of this (`text.addF
 `{family, style, url, sha256}` records, and `text.addFont`); it is not merged upstream. Its
 November 2026 review brought it to sections 2 to 6, with exceptions: it fetches a family's
 nearest listed style for a style no source lists (sections 2.2 and 5.4 say it should not), and it
-lacks the size and style checks of section 3. Two browsing paths (turning the font wheel over
+lacks the size, style and PostScript name checks of section 3. It sets no referrer policy, so a
+fetch sends the browser's default referrer (section 2.4). Two browsing paths (turning the font wheel over
 families, and selecting a row in Find Font) fetch faces, which section 2.3 rules out. It refuses sources from scripts and plug-ins but not
 from its control channel or MCP server, which section 7.3 also refuses. Adopting this RFC would
 mean reading craft-font-index indexes in place of that record, dropping that nearest-style fetch,
-adding those two checks, fetching nothing while browsing, and refusing those two callers.
+adding those three checks and the referrer policy, fetching nothing while browsing, and refusing
+those two callers.
 The checks on what a fetched face must be, the not-an-edit rule and the
 composite-font rule came out of that review.
 
 ## Open questions
 
-1. **The face's identity in the document.** storytold/craft-libs#223 notes a document records only family and style.
-   Should a host's index be allowed to say which PostScript name a document's family and style
-   mean, so a lookalike is not taken for the font?
-2. **Which interfaces count a host family as available.** In the fork, Find Font, Recent Fonts and
+1. **Which interfaces count a host family as available.** In the fork, Find Font, Recent Fonts and
    font replacement still treat a face not yet fetched as unavailable. Should every interface that
    lists fonts treat a host family as available, as the font menu does?
-3. **Names.** A document that names a family by an alias or a PostScript-derived name ("RobotoSlab")
-   never matches a host family "Roboto Slab" in the fork. Matching names is a separate question from
-   question 1's identity: should a build match a host family by the index's PostScript names too?
 
 ## References
 
