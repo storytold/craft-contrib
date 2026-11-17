@@ -113,9 +113,9 @@ cases, extended with `apps` and `kind`:
   "main": "palette_tools.wasm",
   "kind": "command",
   "apps": {
-    "figcraft": { "api": 1 },
-    "designcraft": { "api": 1 },
-    "vectorcraft": { "api": 1, "minApp": "0.30.0" }
+    "figcraft": { "api": 6 },
+    "designcraft": { "api": 6 },
+    "vectorcraft": { "api": 6, "minApp": "0.30.0" }
   },
   "permissions": {
     "access": "write",
@@ -146,8 +146,10 @@ A command plug-in acts on the document only through the app's commands, the
 same ones the menus, the CLI, the control channel and the MCP server run. Every
 Craft app already has such a registry (`crates/engine/src/cmd.rs` or
 `commands.rs` in each repository), which is why this kind can work in every
-app. Its ABI is FigCraft's current ABI, renamed from `figcraft` to `craft` where
-names appear, with FigCraft keeping the old import module name as an alias.
+app. Its ABI is FigCraft's current ABI, and keeps its numbering (6 today): the host
+import module and the entry point are renamed from `figcraft` to `craft`
+(`craft_run`), and the old names stay accepted, so FigCraft plug-ins already
+published keep working.
 Panels and settings are part of it. Widgets stay FigCraft's.
 
 The app implements one trait, the one FigCraft already has
@@ -202,8 +204,11 @@ the API version, the `apps` entry, and the module compiled but not run.
 
 **Consent.** Install opens a confirmation that lists the permissions, the kind,
 the source and the SHA-256. A plug-in from a repository that is in no catalog
-says so plainly ("not in any catalog you use"). Nothing is downloaded before the
-person presses Install. An update repeats the confirmation when permissions
+says so plainly ("not in any catalog you use"). Nothing is written before the
+person presses Install. From a repository, the permissions are in the bundle,
+so the bundle is downloaded into memory and checked first; a release must carry
+a `SHA256SUMS` entry or GitHub's asset digest for it, and exactly one
+`.craftplugin` asset. An update repeats the confirmation when permissions
 change.
 
 **Updates.** Browsing the Plug-ins window, or `plugin.update`, is the update
