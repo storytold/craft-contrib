@@ -24,6 +24,8 @@ anywhere.
 2. **Test.** Add a test that fails without the fix and passes with it. Prefer
    real data from the repository's test files over mocks when they exist.
 3. **Description.** In this order, short:
+   - First line: what the user gains (for example "Opening a large file is 3x
+     faster"). The title keeps the repository's style (point 4).
    - `Fixes #N.` only when the PR fixes the whole issue; otherwise
      `Part of #N.` and what is left.
    - What the user saw.
