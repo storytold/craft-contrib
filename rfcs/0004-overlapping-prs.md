@@ -22,7 +22,8 @@ one of a few reasons. Writing these down makes everyone's first PR better.
 ## Proposal
 
 1. **Look before opening.** Right before opening a PR, search open PRs for the
-   issue number and for the function or file you changed. These find candidates,
+   issue number and for the function or file you changed. If that code has
+   moved, or is being moved, to another repository, search there too. These find candidates,
    not proof of duplication: compare the actual behaviour each PR changes. PRs
    for independent parts of the same issue, or that touch the same file without
    overlapping behaviour, are not duplicates and should remain separate. A PR
