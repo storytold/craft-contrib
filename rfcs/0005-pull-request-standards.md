@@ -60,7 +60,10 @@ anywhere.
    date with `main` and check that the fix is still needed (the bug may have
    been fixed meanwhile). A conflict alone doesn't need a push while the PR
    waits for review. Don't push to a PR a maintainer has taken into an
-   integration batch or asked you not to push to.
+   integration batch or asked you not to push to. On a conflict in a generated
+   file (for example `docs/scorecard.md`), don't resolve it by hand: merge
+   `main` and regenerate the file. If the PR doesn't change anything the file
+   is generated from, `main`'s version is already right.
 
 ## Alternatives
 
