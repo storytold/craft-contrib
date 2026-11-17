@@ -25,7 +25,9 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    issue number and for the function or file you changed. These find candidates,
    not proof of duplication: compare the actual behaviour each PR changes. PRs
    for independent parts of the same issue, or that touch the same file without
-   overlapping behaviour, are not duplicates and should remain separate.
+   overlapping behaviour, are not duplicates and should remain separate. A PR
+   that waits for another PR links it in its description, so it isn't taken
+   for abandoned work or a duplicate.
 2. **Compare, then decide yourself.** If another PR fixes the same thing,
    compare the two with these questions:
    - Does it fix only where the bug is? A fix limited to the one platform or
@@ -41,7 +43,11 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    factual sentence on both PRs. Don't argue about who was first.
 4. **Combine when it makes sense.** If each PR has something the other lacks,
    one author adds the missing part to the other PR, with credit
-   (`Co-authored-by`), and the other PR closes.
+   (`Co-authored-by`), and the other PR closes. Building on someone's open PR
+   (for example a PR against their branch) is not a duplicate. Whether to take
+   it is that PR author's choice. The PR stays as narrow as its issue; anything
+   beyond it is a separate follow-up PR after the first one merges, crediting
+   whoever wrote it with `Co-authored-by`.
 5. **Shared mechanisms first.** If one PR adds a general mechanism that the
    other could use (for example a common helper), the specific PR waits for
    the general one and is rebuilt on top of it.
