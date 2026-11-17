@@ -39,7 +39,9 @@ these labels, so they need a written meaning.
    - `support`: not a development issue (how-to, installation, account);
    - `in progress`: an open PR already works on this problem, and it is
      linked. Check it before starting (RFC-0003, RFC-0004);
-   - `spam`, `no action needed`: as named.
+   - `spam`, `no action needed`: as named;
+   - `ignored claim`: set on a PR that ignored a live claim, with a warning
+     (RFC-0004). It exists in every repository so one search finds it.
 2. **New labels**
    - `already fixed`: the problem no longer happens on `main`; the fixing
      commit or PR is linked.
@@ -75,11 +77,16 @@ these labels, so they need a written meaning.
    duplicates; label `already fixed` or `duplicate` with a link instead.
 5. **Issues with several problems** are split, one problem per issue, so each
    can be claimed and closed on its own.
-6. **The bot labels, people close.** Automatic labels and comments are fine:
-   a wrong label costs little and anyone can point it out in a comment. Actions
+6. **The bot labels, people decide.** Automatic labels and comments are fine:
+   a wrong label costs little and anyone can point it out in a comment. A label
+   a person set or changed by hand wins: the bot doesn't change it back. Actions
    that close an issue (`support`, `no action needed`) are only suggested by
-   the bot and applied by a maintainer, because a wrong close leaves the
-   reporter without an answer.
+   the bot and applied by a person, because a wrong close leaves the reporter
+   without an answer. Simple closes (a confirmed duplicate with a link, a fix
+   verified on `main`, a support question) can be done by someone with the
+   Triage role; anything disputed or security-related goes to a maintainer.
+   Every close says why in a comment. For `already fixed`, it links the fix
+   and says whether the fix is in a release yet.
 
 ## Alternatives
 
