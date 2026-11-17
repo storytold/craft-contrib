@@ -55,8 +55,12 @@ one of a few reasons. Writing these down makes everyone's first PR better.
    it fixes more of the issue or fixes something the other gets wrong, not
    style. The author of such a PR has to say why it is clearly better. If they
    don't, a maintainer can close it without comparing the two. If someone keeps
-   ignoring live claims, they get a warning, and after that their PRs on
-   claimed issues are closed without review.
+   ignoring live claims, a maintainer warns them on the PR that ignored the
+   claim and adds the `ignored claim` label to it. A warning counts in every
+   app for 90 days from the warning comment. Before deciding, a maintainer finds
+   earlier warnings with one search, for example
+   `is:pr org:storytold author:<login> label:"ignored claim"`. While a warning
+   counts, that person's PRs on claimed issues are closed without review.
 
 ## Alternatives
 
