@@ -25,6 +25,7 @@ The most important documents:
 - [House rules (Rust)](standards/house-rules-rust.md) — extra rules for Rust code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
 - [Time](standards/time.md) — the calendar exception to the Rust rules
+- [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
 Repositories copy the core and language-specific rules into `AGENTS.md`. Repositories that draw an interface also copy the short accessibility rules from [house-rules-accessibility.md](standards/house-rules-accessibility.md).
 
