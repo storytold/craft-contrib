@@ -140,8 +140,10 @@ Before any app rollout, the shared joiner and app checks demonstrate:
 - Open-PR table and progress-log edits survive conversion; ambiguity fails
   visibly rather than being overwritten on the next nightly join.
 
-The RFC-0017 forward reference in this PR lands only together with an
-accepted RFC-0018, and must follow the final accepted scope. The comments
+Under [RFC-0013](0013-amending-rfcs.md), the only change this PR makes to
+accepted RFC-0017 is the `Updated by:` back-link under its title; the
+open-PR migration requirement above is stated here, not in RFC-0017. The
+back-link lands only together with an accepted RFC-0018. The comments
 retaining these rollout requirements are linked below; approval of the
 approach is not evidence that the tests or migration have already shipped.
 
