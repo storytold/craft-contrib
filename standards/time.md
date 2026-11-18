@@ -1,5 +1,9 @@
 # Time
 
-Craft code uses `chrono` for calendar dates. Do not hand-roll UTC or calendar conversion: days-to-date algorithms and leap-year math. A crate owns only its output format string.
+Craft code uses `chrono` for calendar dates. Never hand-roll UTC or calendar conversion: days-to-date algorithms and leap-year math. A crate owns only its output format string.
 
-The one exception is range extension. Past the years `chrono` can represent, shift the date by whole 400-year Gregorian cycles (146,097 days, after which the calendar repeats), let `chrono` compute the month and day, and add the cycles back to the year. Splitting seconds into hours, minutes and seconds is plain arithmetic.
+For dates past the years `chrono` can represent, extend its range: shift the date by whole 400-year Gregorian cycles (146,097 days, after which the calendar repeats), let `chrono` compute the month and day, and add the cycles back to the year. Splitting seconds into hours, minutes and seconds is plain arithmetic.
+
+## craft-launcher
+
+craft-launcher uses `jiff` for its time code, with no `chrono` beside it, as RFC-0048 records, until it moves to `chrono` (issue to be linked). It follows the rest of this standard: no hand-rolled calendar or UTC conversion.
