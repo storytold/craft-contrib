@@ -156,8 +156,8 @@ Every build that adopts this RFC passes, from shared fixtures:
    open, edit and save.
 7. An index added through the control channel, the MCP server, a script or a plug-in is refused
    and adds nothing; setting type in a family of a host's index from any of them fetches the face.
-8. Every fetch goes to an index's URL, sends no referrer, and sends credentials to no other
-   origin.
+8. Every fetch goes to an index's own URL or a URL that index lists, sends no referrer, and sends
+   credentials to no other origin.
 
 ## Reference implementation, non-normative
 
