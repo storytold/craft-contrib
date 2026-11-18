@@ -1,4 +1,4 @@
-# RFC-0041: One plug-in runtime and one way to install plug-ins
+# RFC-0046: One plug-in runtime and one way to install plug-ins
 
 Related: RFC-0040 (shared library first), RFC-0015 (confined file access),
 storytold/photocraft#662 (a capability model for plug-ins).
@@ -279,6 +279,13 @@ reference implementation. None of it is normative until this RFC is accepted.
 4. ArtCraft's desktop app has a web frontend rather than an egui one; how it
    would host plug-ins is left to a later RFC.
 5. Catalog access from the web builds (cross-origin requests to GitHub's hosts).
+6. The commands every app refuses are matched by id prefix (`file.*`, `app.*`,
+   …). Some apps name in-document commands after a menu: FilmCraft's
+   `file.newSequence`, `file.newBin` and `file.newColorMatte` create items
+   inside the open project and touch no disk, but `file.*` refuses them. Should
+   an app be able to reopen named ids under a refused prefix after review, or
+   should the shared list describe what a command does (reads or writes disk,
+   opens or closes documents) rather than its prefix?
 
 ## Decision process
 
