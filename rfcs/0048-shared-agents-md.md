@@ -95,23 +95,3 @@ one review cover them, and makes a rule change one pull request.
   rule that differs by repository, which is what this RFC removes. Where a
   repository needs a different fact (a command, an `unsafe` module), it states
   it in `## This repository`.
-
-## Questions for the team
-
-1. Clean room: confirm with whoever handles legal questions that a screen-level
-   behaviour specification, written by an agent that only operates the app, is
-   outside the "monitoring inputs and outputs" wording of the Adobe General
-   Terms §17(B).
-2. Fixtures: third-party published files are committed only under a licence on
-   the allowlist, otherwise fetched from a manifest. Is that the right reading?
-3. Corpus threshold: `testing.md` sends binary fixtures over 1 MB to a corpus
-   repository. Is 1 MB the right number?
-4. craft-launcher keeps `jiff` until it moves to `chrono`; the migration issue
-   will be linked from `time.md`. Do you accept that?
-5. Review response time: 3 days for actionable requests, with a reminder at 7
-   and eligibility for closure at 14 (RFC-0006 had 7, 14 and 30).
-6. Size limit: `standards/pull-requests.md` splits a PR that passes 400 changed
-   lines outside generated files, fixtures and pure moves. Is 400 the right
-   number?
-7. Merge craft-contrib#53?
-8. Decide patent-pool encoders (H.264, HEVC, AAC) with RFC-0031?
