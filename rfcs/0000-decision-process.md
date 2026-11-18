@@ -1,5 +1,7 @@
 # RFC-0000: How we make decisions
 
+Updated by: [RFC-0013](0013-amending-rfcs.md)
+
 Changes to this repo, and decisions that affect several apps, are made
 through RFCs: pull requests here that add `rfcs/NNNN-short-title.md`.
 This process is changed the same way.
