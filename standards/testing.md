@@ -199,7 +199,7 @@ Parsers, decoders and command handlers SHOULD return an error for any input, and
 
 - Fixtures SHOULD be committed and use real-format data; a mock only where no real-format sample exists. A crash regression SHOULD use a synthetic file cut down to the bytes that trigger it.
 - Every fixture follows the fixture rules of [clean-room.md](clean-room.md), provenance included.
-- Real-file corpora live in a corpus repository (for example `storytold/photocraft-corpus`), fetched pinned by commit and checked by sha256. A binary fixture over 1 MB SHOULD go in a corpus repository and SHOULD NOT be committed to an app or library repository.
+- Real-file corpora live in a corpus repository (for example `storytold/photocraft-corpus`), fetched pinned by commit and checked by sha256. A binary fixture over 256 KB SHOULD go in a corpus repository and SHOULD NOT be committed to an app or library repository.
 
 ## Tests that can't run here
 
