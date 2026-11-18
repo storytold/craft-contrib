@@ -185,11 +185,11 @@ A test in a fix category SHOULD be rewritten so that none applies.
 - A bug fix SHOULD come with a test that fails without the fix, unless the fixed code is a few lines with at most one branch and no state between calls.
 - A crash fix SHOULD add the input that panicked to the crate's hostile-input sweep, also when the fixed code is that small. A crate with no sweep SHOULD get a test that panicked before the fix.
 - A storage or format migration SHOULD get a test that each value the old version wrote survives the switch.
-- A failing generated case (proptest, fuzzer) SHOULD become a named regression test, not a committed regression file.
+- A failing generated case (proptest, fuzzer) SHOULD become a named regression test. It SHOULD NOT be committed as a regression file.
 
 ## Hostile input
 
-Parsers, decoders and command handlers SHOULD return an error, never panic or hang, for any input: damaged files, junk command parameters, malformed protocol messages. "Never panics" is the invariant here (C8 does not apply).
+Parsers, decoders and command handlers SHOULD return an error for any input, and SHOULD NOT panic or hang on it: damaged files, junk command parameters, malformed protocol messages. "Never panics" is the invariant here (C8 does not apply).
 
 - Each app SHOULD keep one sweep that runs every command with hostile parameters, and each parser or decoder SHOULD have a mutation sweep (truncation, bit flips, corrupt sizes). A crate that depends on craft-testkit SHOULD run its mutation sweep through `hostile::hammer`.
 - A new command, parser or protocol method SHOULD be added to the sweep in the same change.
@@ -199,11 +199,11 @@ Parsers, decoders and command handlers SHOULD return an error, never panic or ha
 
 - Fixtures SHOULD be committed and use real-format data; a mock only where no real-format sample exists. A crash regression SHOULD use a synthetic file cut down to the bytes that trigger it.
 - Every fixture follows the fixture rules of [clean-room.md](clean-room.md), provenance included.
-- Real-file corpora live in a corpus repository (for example `storytold/photocraft-corpus`), fetched pinned by commit and checked by sha256. A binary fixture over 1 MB SHOULD go in a corpus repository, not in an app or library repository.
+- Real-file corpora live in a corpus repository (for example `storytold/photocraft-corpus`), fetched pinned by commit and checked by sha256. A binary fixture over 1 MB SHOULD go in a corpus repository and SHOULD NOT be committed to an app or library repository.
 
 ## Tests that can't run here
 
-- A test that needs something the machine lacks (a GPU, a corpus file, a craft-fonts face, an oracle program) SHOULD skip with a reason the run lists, not with a bare `return` or `eprintln!`.
+- A test that needs something the machine lacks (a GPU, a corpus file, a craft-fonts face, an oracle program) SHOULD skip with a reason the run lists. It SHOULD NOT skip with a bare `return` or `eprintln!`.
 - A `*_REQUIRED` variable turns that skip into a failure: unset or empty means skip, `1` means required, and any other value fails with a message naming the variable and the accepted value. CI sets it where the resource is provided.
 
 ## Flaky and hanging tests
@@ -224,4 +224,4 @@ Parsers, decoders and command handlers SHOULD return an error, never panic or ha
 
 - A cut SHOULD be done per crate, one pull request each, containing no other change.
 - The pull request MUST list every removed or trimmed test, with its category, one line each, in the format above. A maintainer can then object to a single line instead of the whole cut.
-- Judging a whole file SHOULD start from the code, not the tests: list what in the code could plausibly break unnoticed, then map each test to one of those items or to a category.
+- Judging a whole file SHOULD start from the code rather than the tests: list what in the code could plausibly break unnoticed, then map each test to one of those items or to a category.
