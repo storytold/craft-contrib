@@ -371,6 +371,50 @@ Multiple accounts are part of the suite account contract:
 - The POC may keep account sessions in process, but public persistence is
   required before public multi-account support is claimed.
 
+### Detected document state
+
+The sensitivity-label dialog is not a static label catalog. Its document
+section is populated only after successful Microsoft sign-in and SDK/tenant
+inspection of the open document.
+
+For a detected label or protected file, the dialog shall show:
+
+- The document label name and policy description or tooltip.
+- Sensitivity/label metadata available from the SDK.
+- Protection state: label-only, protected/IRM, or unprotected.
+- Document owner and, when available, the protected-policy/content ID.
+- Mandatory-label, default-label, and downgrade-justification requirements.
+- A dynamic capability matrix: View, Edit, Save, Print, Copy/Extract,
+  Comment, Export, and Change Security.
+- Each capability's allowed/not allowed state, derived from SDK-confirmed
+  rights and intersected with ordinary PDF password permissions.
+- Available label operations only when the current account and policy permit
+  them.
+
+The Apply, Remove Label, and Remove Protection actions are stateful:
+
+- Apply is available only when the account is signed in and a tenant label is
+  selected.
+- Remove Label is available only when a current label exists and the SDK/rights
+  state permits changing security.
+- Remove Protection is available only when the document is protected and the
+  SDK confirms EXPORT/Owner or Change Rights capability.
+- Justification is required when the SDK/policy requires it for downgrade or
+  removal.
+
+The no-label state is also dynamic:
+
+- Before sign-in: do not list tenant labels or document capabilities.
+- After sign-in: "No sensitivity labels are available to this account or
+  tenant policy" is the normal tenant-policy result, not a sign-in retry
+  instruction.
+- After sign-in with a labeled document: show label/owner/protection/capability
+  information rather than the no-label message.
+
+The UI, engine, CLI/MCP, and automation surfaces must use the same
+SDK-confirmed account, label, owner, policy, and rights snapshot. No UI-only
+capability may bypass a provider or engine gate.
+
 Required operation states:
 
 - Protected document recognition.
