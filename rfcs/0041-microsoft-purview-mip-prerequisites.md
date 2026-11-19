@@ -132,6 +132,7 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Official MIP SDK package | Release engineering | Every SDK adoption/release; repeat on SDK, security, OS, or architecture change | Download the official package from Microsoft's official MIP SDK channel. Verify the package, version, license, `redist.txt`, `include/`, and `bins/release/<arch>/` for each OS/architecture. Record version, SHA-256, source URL, and redist inventory. | Builds are reproducible and redistributable policy is reviewable. | SDK build fails closed or cannot be packaged. |
 | Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
 | Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
+| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery with no email textbox. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Public builds persist account profiles and refresh/session state only in the platform credential store. | A person can add, switch, and sign out accounts, and automation can report the active account. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
 | Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, MFA/Conditional Access, and one PFILE fixture. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
 | App-specific format and rights implementation | Each app repository owner | Once per app format track; repeated for format/SDK/rights behavior changes | Implement format parse/write, label metadata, rights gates, UI/automation, save/re-publish behavior, private staging, and tests. Link a format-specific issue/PR to this RFC. | The app supports the format's agreed MIP behavior and cannot create an unauthorized plaintext copy. | Package metadata may survive, but live MIP sign-in, decryption, rights, or re-publishing is missing or falsely claimed. |
@@ -239,6 +240,7 @@ not mean no owner or procedure.
 | Public app permission/redirect review | Permission or auth protocol change | At design review and before public release | Confirm delegated permissions only, public/native client redirect, consent behavior, no secrets, no application-only privilege | Entra change record, app manifest, permission diff |
 | Customer tenant consent/licensing | Customer onboarding or tenant policy/permission change | Once per tenant when required; recheck after app permission or policy change | Verify Purview license, tenant consent, label publication, user/group scope, external recipient policy, MFA/Conditional Access | Customer check record and test fixture |
 | Tenant POC matrix | SDK update, major app release, OS support change, or label-policy change | Before each public SDK-enabled release and after each relevant tenant-policy change | Run real PFILE fixtures and rights matrix; run ordinary-password and MIP composition; capture evidence | POC report, screenshots, pass/fail count |
+| Microsoft account-session persistence | Account UX, auth protocol, credential-store, or app major-release change | POC before release; public builds before public multi-account support is claimed | Test add/switch/sign-out behavior, active-account isolation, OS credential-store persistence, token cleanup, app restart, and no plaintext settings/log storage | Account matrix, credential-store evidence, sign-out/restart verification |
 | App format rights implementation | Format adapter or rights behavior change | Once per app rollout; rerun for format/save/export/rights changes | Add issue/PR, format tests, engine/UI/CLI/MCP gates, re-publish/revert tests, tenant POC | App PR and test evidence |
 | Security and dependency review | SDK update, package change, vulnerability, or annual review | Triggered immediately for a finding; at least annually for the suite | Review SDK/C++ helper dependencies, staging cleanup, signing, logging, temp-file permissions, and revocation behavior | Security-review result and remediation link |
 
@@ -320,6 +322,54 @@ design, existing icon conventions, and shared states. Public screens and
 behavior may use Microsoft or PDF/Office behavior as a usability reference,
 but not as copied artwork, trademarks, icons, proprietary fonts, screenshots,
 or design traces.
+
+### Microsoft account UX
+
+The suite will not ask the person to type or repeat an email address before
+Microsoft sign-in. The Microsoft sign-in screen owns account discovery,
+selection, MFA, Conditional Access, tenant consent, and account verification.
+PdfCraft passes no pretyped email field to Microsoft unless an automation/API
+caller explicitly supplies a login hint.
+
+When signed out:
+
+- Show one primary **Sign in** action.
+- Do not show **Sign out**.
+- Do not show an account email textbox.
+- If app configuration or the SDK is unavailable, show that state instead of
+  a false sign-in action.
+
+When signed in:
+
+- Show the active account in the account card.
+- Prefer Microsoft `display_name`; show email/principal name as the secondary
+  line. A compact `Display name - email/principal name` label is the fallback
+  wherever one identity label is needed.
+- Replace **Sign in** with **Sign out** for the active account.
+- Offer **Add account** to start Microsoft account selection without exposing
+  an email entry field.
+- Offer an account switcher only when more than one account is signed in.
+- The active account is the only account used for the MIP helper until the
+  person switches or signs out.
+
+Multiple accounts are part of the suite account contract:
+
+- Signing in adds or replaces the account's in-process session and makes it
+  active.
+- Switching account changes the active RMS and MIP policy/sync session
+  immediately; open protected documents are retried only through the normal
+  rights-aware reopen/re-publish path.
+- Signing out removes the active account from the in-process account list.
+  If another account remains, that account becomes the next active account;
+  if none remain, the app becomes signed out.
+- Account profile metadata and active account selection must be verifiable in
+  the UI, CLI/MCP status, and automation result.
+- Public builds should persist account profile and refresh/session state in
+  the platform credential store (for example, macOS Keychain, Windows
+  Credential Manager, or Linux Secret Service). Tokens must never be stored
+  in settings files or logs.
+- The POC may keep account sessions in process, but public persistence is
+  required before public multi-account support is claimed.
 
 Required operation states:
 
