@@ -15,14 +15,14 @@ The Craft apps are a suite of independent creative applications for desktop and 
 | Folder | What it is |
 | --- | --- |
 | `rfcs/` | Decision documents. Each one proposes a change and records why it was accepted. |
-| `AGENTS.md` | The shared rules copied into every Craft repository's `AGENTS.md`. |
-| `standards/` | The longer rules that `AGENTS.md` links. |
+| `AGENTS.md` | Notes for agents working in this repository. |
+| `standards/` | `app-agents.md`, the shared rules copied into every Craft repository's `AGENTS.md`, and the longer rules it links. |
 
 The most important documents:
 
 - [RFC-0000: How we make decisions](rfcs/0000-decision-process.md) — the decision process itself
 - [RFC-0013: Amending an accepted RFC](rfcs/0013-amending-rfcs.md) — how accepted decisions are changed
-- [AGENTS.md](AGENTS.md) — the rules for every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
+- [App agents](standards/app-agents.md) — the shared rules for agents in every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
 - [Claims](standards/claims.md) — claiming issues and duplicate pull requests
 - [Pull requests](standards/pull-requests.md) — shape, description and review
 - [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
@@ -31,7 +31,7 @@ The most important documents:
 - [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
-Each repository's `AGENTS.md` starts with a copy of [AGENTS.md](AGENTS.md). Until a repository moves to it, it carries the generated house-rules blocks from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md), which are deleted once every repository has moved.
+Each repository's `AGENTS.md` starts with a copy of [standards/app-agents.md](standards/app-agents.md). Until a repository moves to it, it carries the generated house-rules blocks from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md), which are deleted once every repository has moved.
 
 ## How a decision is made (the short version)
 
@@ -68,7 +68,7 @@ Questions are comments too. If an RFC is hard to understand, saying so is valuab
 | **Comment period** | The days when a proposal is open for comments. A maintainer starts it by posting the end date. |
 | **Maintainer** | A member of the `craft-app-team` GitHub team. Maintainers review and merge RFCs. |
 | **Owner** | An admin of the storytold organisation who can decide objections. |
-| **House rules** | Rules that apply in every Craft repository. They live in `AGENTS.md` and `standards/` here, and `AGENTS.md` is copied into each repository's `AGENTS.md`. |
+| **House rules** | Rules that apply in every Craft repository. They live in `standards/` here, and `standards/app-agents.md` is copied into each repository's `AGENTS.md`. |
 | **`AGENTS.md`** | The instruction file that coding agents read in every repository. |
 | **`craft-libs`** | The shared Rust library repository that several apps depend on. |
 | **Claim** | Saying on an issue that you are working on it, so two people do not fix the same bug ([RFC-0003](rfcs/0003-claiming-issues.md)). |

@@ -9,7 +9,7 @@ Depends on: RFC-0047 (`standards/testing.md`), [craft-contrib#71](https://github
 ## Summary
 
 Every Craft repository's `AGENTS.md` starts with one shared text, kept in
-`AGENTS.md` at the root of this repository. Each repository adds a
+`standards/app-agents.md` in this repository. Each repository adds a
 `## This repository` section that describes the project: layout, commands,
 paths and conventions. Long topics live in linked standards. The generated
 house-rules blocks and their source files are retired.
@@ -28,8 +28,9 @@ one review cover them, and makes a rule change one pull request.
 
 ## Proposal
 
-1. **The shared file.** `AGENTS.md` at the root of this repository holds the
-   shared rules. It is the living document for this RFC (RFC-0013 point 5):
+1. **The shared file.** `standards/app-agents.md` in this repository holds the
+   shared rules. It is for the Craft app and library repositories; this
+   repository's own `AGENTS.md` is a short note for work here and is not copied. It is the living document for this RFC (RFC-0013 point 5):
    wording fixes are ordinary pull requests; adding, removing or changing a
    rule needs an RFC that updates this one and changes the file in the same
    pull request. Whoever runs an agent answers for what it opens and for its
