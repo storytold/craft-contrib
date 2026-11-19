@@ -52,7 +52,7 @@ Judge from the test's body and the code it drives, never from its name or file a
    - No check is cut, but a fix category applies: `FIX`. Rewrite it so that none applies, then judge it again.
    - Otherwise: `KEEP`, with the invariant and the breaking change.
 
-Tests behind a feature flag or a target OS are judged like every other test. A test marked `#[ignore]` that no CI job runs is C8: in practice it checks nothing. A flaky test quarantined under an open issue (see "Flaky and hanging tests") is judged when that issue closes.
+Tests behind a feature flag or a target OS are judged like every other test. A test, or an assertion inside one, that no CI job runs is C8: in practice it checks nothing. That covers a test marked `#[ignore]` and an assertion behind `cfg!` for a platform no CI job runs. A flaky test quarantined under an open issue (see "Flaky and hanging tests") is judged when that issue closes.
 
 **Cite only a test that stays.** A covering test (for C6, or for the "only this test" line) SHOULD itself be kept or trimmed, with the covering check still in it. Two tests that cover each other can't both go: keep the one with more reach, and keep the shared check in it.
 
@@ -145,6 +145,9 @@ A test in a fix category SHOULD be rewritten so that none applies.
 ### F2 Timing
 **Question:** Does the result depend on wall-clock time, `sleep`, or how fast the machine is?
 - **Fix:** drive the clock and frames by hand (a manual clock, `settle()`), and assert what happened, not how long it took. Give randomized tests a fixed seed. To stop a test that might hang, run it under craft-testkit's `with_deadline`; the deadline ends the test and is not asserted.
+  - When a time bound stands in for "A finished before B", assert the order (a flag the slow side sets), not the seconds.
+  - For a claim about how cost grows, count steps with a counter that exists only in tests and compare the counts at n and 8n, not the times.
+  - A test whose point is speed SHOULD NOT be part of the gate (`cargo xtask ci` or a required CI job): on a loaded machine it fails without any regression.
 
 ### F3 Platform-fragile
 **Question:** Could the test pass on one operating system and fail on another, without the code under test having platform-specific behaviour?
@@ -159,7 +162,8 @@ A test in a fix category SHOULD be rewritten so that none applies.
   - add `text eol=lf` to `.gitattributes`;
   - set the OS with `fixture.os(...)`;
   - fit the content to the room the fixture gives;
-  - compare floats with a tolerance or by relation.
+  - compare floats with a tolerance or by relation;
+  - a hash of rendered output is an exact value on every platform: compare the pixels with a tolerance, or keep the hash and name the CI job that asserts it.
 
 ### F4 Unbudgeted stress
 **Question:** Does the test loop over many generated or random cases, or build inputs of millions of items, without going through the shared case budget?
