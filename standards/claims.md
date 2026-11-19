@@ -4,8 +4,6 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 
 These rules apply to every issue and pull request in the Craft repositories, for people and agents. `AGENTS.md` carries the short form and links here. Changing a rule needs an RFC.
 
-They carry RFC-0003 and RFC-0004 ([craft-contrib#5](https://github.com/storytold/craft-contrib/pull/5)), by MarekSpodBiedry, as RFC-0048 updates them.
-
 ## Before you start
 
 1. You SHOULD read the issue's comments and search open and closed pull requests for `#N` in the same repository (`storytold/other-repo#N` is a different issue).
@@ -31,13 +29,13 @@ They carry RFC-0003 and RFC-0004 ([craft-contrib#5](https://github.com/storytold
    - Does it handle the case the way neighbouring code handles it?
    - Does it cover every point of the issue and every way a user reaches the bug, with a test for each?
    - Does it update the docs and help that describe the behaviour?
-4. One pull request is clearly better when it is better on at least one question and worse on none. If theirs is clearly better, you SHOULD close yours with a comment that links theirs and says why. If yours is clearly better, you SHOULD say what differs in one factual sentence on both pull requests. If neither is, it is a tie, and point 6 applies. Who opened first does not matter, except under "Live claims".
+4. If theirs is better on at least one question and worse on none, you SHOULD close yours with a comment that links theirs and says why. If yours is better that way, you SHOULD say what differs in one factual sentence on both pull requests. If neither is, it is a tie: the earlier valid claim wins ("Live claims" point 2), otherwise a maintainer decides (point 6). Who opened first does not matter, except under "Live claims".
 5. If each has something the other lacks, one author SHOULD add the missing part to the other pull request with `Co-authored-by`, and the other SHOULD close theirs. If one pull request adds a general mechanism the other could use, the specific one SHOULD wait and be rebuilt on it.
-6. On a tie, or when the authors disagree, a maintainer decides with the same questions and explains on both pull requests.
+6. When the authors disagree, a maintainer decides with the same questions and explains on both pull requests.
 
 ## Live claims
 
-1. You SHOULD NOT start work or open a pull request on an issue with a live claim.
+1. You SHOULD NOT open a pull request on an issue with a live claim.
 2. If two fixes are equal, the earlier valid claim wins.
-3. A pull request that ignored a live claim MAY replace the claimed work only if it is clearly better ("When two pull requests fix the same thing", point 4) and says why. Otherwise a maintainer MAY close it unreviewed.
+3. A pull request that ignored a live claim SHOULD replace the claimed work only if it is better on at least one question in "When two pull requests fix the same thing" and worse on none, and says why. Otherwise a maintainer MAY close it unreviewed.
 4. Maintainer step: an author who ignores live claims more than once SHOULD get the `ignored claim` label on the pull request and a warning that counts in every Craft repository for 90 days. While a warning counts, that person's pull requests on claimed issues are closed without review.

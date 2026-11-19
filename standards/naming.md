@@ -17,12 +17,12 @@ This is a naming policy, not legal advice or trademark clearance.
    - to call a name common, three unrelated products that use it descriptively for their own feature.
 
    You SHOULD record the date, sources, findings and decision in the pull request and in the app's existing feature-naming document (`docs/feature-names.md` if it has none). Finding nothing doesn't mean the name is free.
-5. **Unclear means no.** If the check doesn't settle it, you SHOULD NOT ship the name. Use our own, or ask a Craft owner on the pull request. Owners decide; contributors aren't expected to make legal calls.
+5. **Unclear means no.** If the check doesn't settle it, you SHOULD NOT ship the name. Use our own, or ask a Craft owner on the pull request. Contributors aren't expected to make legal calls.
 6. **Renaming.** A rename SHOULD change labels only. It SHOULD keep ids, preference keys and stored values, and SHOULD keep the old label as a search alias that isn't displayed. The new label SHOULD be translated.
 
 ## Names list
 
-Policy choices, not findings that a name infringes anything. A name marked *US-checked* passed two parts of rule 4: the owner's trademark list and a US register search, with descriptive uses by other products. The app pull request that first uses the name runs the WIPO Global Brand Database search and updates the row.
+Policy choices, not findings that a name infringes anything. A name marked *US-checked* passed two parts of rule 4 on 2026-11-16: the owner's trademark list and a US register search, with descriptive uses by other products ([record](https://github.com/storytold/craft-contrib/pull/61#issuecomment-6919612985)). The WIPO Global Brand Database search is still open. The app pull request that first uses the name runs that search and updates the row.
 
 ### Not used as our feature's name
 

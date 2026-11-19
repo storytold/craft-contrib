@@ -8,30 +8,30 @@ The Craft apps — PhotoCraft, WordCraft, EffectCraft, VectorCraft and the rest 
 
 ## What are the Craft apps?
 
-The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; the shared [AGENTS.md](AGENTS.md) holds the rules that apply to them ([RFC-0048](rfcs/0048-shared-agents-md.md)).
+The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0048](rfcs/0048-shared-agents-md.md) explains the rules that apply to them.
 
 ## What lives in this repository
 
 | Folder | What it is |
 | --- | --- |
 | `rfcs/` | Decision documents. Each one proposes a change and records why it was accepted. |
-| `AGENTS.md` | The shared rules for agents, copied into every Craft repository's `AGENTS.md`. |
-| `standards/` | The detailed standards that the shared rules link. |
+| `AGENTS.md` | The shared rules copied into every Craft repository's `AGENTS.md`. |
+| `standards/` | The longer rules that `AGENTS.md` links. |
 
 The most important documents:
 
 - [RFC-0000: How we make decisions](rfcs/0000-decision-process.md) — the decision process itself
 - [RFC-0013: Amending an accepted RFC](rfcs/0013-amending-rfcs.md) — how accepted decisions are changed
-- [AGENTS.md](AGENTS.md) — the shared rules for every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
+- [AGENTS.md](AGENTS.md) — the rules for every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
 - [Claims](standards/claims.md) — claiming issues and duplicate pull requests
-- [Pull requests](standards/pull-requests.md) — shape, description and review responses
+- [Pull requests](standards/pull-requests.md) — shape, description and review
 - [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
-- [Licences](standards/licences.md) — the licence allowlist and our own licence
+- [Licences](standards/licences.md) — the licence allowlist, fonts and vendored code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
-- [Time](standards/time.md) — calendar dates and range extension
+- [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
-Each repository copies the shared `AGENTS.md` into its own, between markers, and adds a `## This repository` section about the project. Until a repository carries the shared copy, its `AGENTS.md` still holds the older house rules from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md).
+Each repository's `AGENTS.md` starts with a copy of [AGENTS.md](AGENTS.md). Until a repository moves to it, it carries the generated house-rules blocks from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md), which are deleted once every repository has moved.
 
 ## How a decision is made (the short version)
 
@@ -68,7 +68,7 @@ Questions are comments too. If an RFC is hard to understand, saying so is valuab
 | **Comment period** | The days when a proposal is open for comments. A maintainer starts it by posting the end date. |
 | **Maintainer** | A member of the `craft-app-team` GitHub team. Maintainers review and merge RFCs. |
 | **Owner** | An admin of the storytold organisation who can decide objections. |
-| **Shared rules** | Rules that apply in every Craft repository. They live in `AGENTS.md` here and are copied into each repository's `AGENTS.md`. |
+| **House rules** | Rules that apply in every Craft repository. They live in `AGENTS.md` and `standards/` here, and `AGENTS.md` is copied into each repository's `AGENTS.md`. |
 | **`AGENTS.md`** | The instruction file that coding agents read in every repository. |
 | **`craft-libs`** | The shared Rust library repository that several apps depend on. |
 | **Claim** | Saying on an issue that you are working on it, so two people do not fix the same bug ([RFC-0003](rfcs/0003-claiming-issues.md)). |

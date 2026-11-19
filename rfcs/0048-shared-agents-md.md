@@ -26,40 +26,36 @@ weak model follows whichever sentence it read last.
 One text, the same in every repository, gives every agent the same rules, lets
 one review cover them, and makes a rule change one pull request.
 
-Much of the standards text comes from earlier proposals. `standards/claims.md`
-carries RFC-0003 and RFC-0004 ([craft-contrib#5](https://github.com/storytold/craft-contrib/pull/5)),
-and `standards/pull-requests.md` carries RFC-0005
-([craft-contrib#6](https://github.com/storytold/craft-contrib/pull/6)), all by
-MarekSpodBiedry; their pull requests hold the discussion behind each rule.
-`standards/accessibility.md` carries RFC-0014, by Futyn-Maker.
-
 ## Proposal
 
 1. **The shared file.** `AGENTS.md` at the root of this repository holds the
    shared rules. It is the living document for this RFC (RFC-0013 point 5):
    wording fixes are ordinary pull requests; adding, removing or changing a
    rule needs an RFC that updates this one and changes the file in the same
-   pull request.
+   pull request. Whoever runs an agent answers for what it opens and for its
+   review comments.
 2. **Keywords.** The file uses the key words of RFC 2119 and RFC 8174. MUST and
    MUST NOT are for legal and safety limits (clean room, licences, secrets,
-   irreversible steps, reporting checks accurately). Other rules are SHOULD or
-   SHOULD NOT.
-   An agent that departs from a SHOULD says so and why in the PR. An operator
-   may set aside a SHOULD, stated in the PR, but never a MUST.
+   irreversible steps, automation roots, reporting checks accurately). Other
+   rules are SHOULD or SHOULD NOT. An agent that departs from a SHOULD says so
+   and why in the PR.
 3. **Linked standards.** `standards/claims.md`, `pull-requests.md`,
    `clean-room.md`, `licences.md`, `accessibility.md`, `naming.md`, `time.md`
    and `testing.md` hold the detail a rule needs on some tasks. `testing.md`
-   comes from RFC-0047; this RFC depends on it. The shared file states every
+   comes from RFC-0047; this RFC merges only after RFC-0047 is accepted, and
+   rules 27-32 follow RFC-0047's short form. If RFC-0047 is rejected, rules
+   27-32 become "A bug fix SHOULD add a test that fails without it" and the
+   links to `testing.md` go. The shared file states every
    rule an agent needs on every task and links the standard for the rest. A
    standard adds detail and exceptions to the rule that links it, and an
    exception written in a standard applies; on any other conflict the shared
-   file wins.
+   file wins. `time.md` records one exception: craft-launcher uses `jiff`
+   until it moves to `chrono` ([craft-launcher#1526](https://github.com/storytold/craft-launcher/issues/1526)).
 4. **Repository files.** Each repository's root `AGENTS.md` is the shared
    text, copied between markers, then `## This repository`, which describes
    that project: layout, commands, paths and conventions, including the
-   modules where `unsafe` and a one-lint `#[allow]` are allowed. It may add
-   rules stricter than the shared ones, never weaker. Text there works for
-   every reader: no notes about one machine, no links readers cannot open.
+   modules where `unsafe` is allowed. Text there works for every reader: no
+   notes about one machine, no links readers cannot open.
 5. **Integrity check.** The copy sits between
    `<!-- craft-agents:start source=<full merged commit SHA> sha256=<digest> -->`
    and `<!-- craft-agents:end -->`. A check in `craft-common-actions` compares
@@ -78,89 +74,54 @@ MarekSpodBiedry; their pull requests hold the discussion behind each rule.
    standard first.
 9. **Retired.** `standards/house-rules-core.md`, `house-rules-rust.md` and
    `house-rules-accessibility.md` are deleted once every repository carries
-   the shared copy. The agent rules in craft-contrib#5, #6, #33, #45 and #57 are
-   in the shared file or the standards; those pull requests keep only what is
-   not an agent rule.
-10. **Exceptions.** These differ from a shared rule in one repository, and
-    that repository's `## This repository` states them:
-    - craft-launcher uses `jiff` instead of `chrono` (rule 12) until
-      [storytold/craft-launcher#1526](https://github.com/storytold/craft-launcher/issues/1526)
-      moves it; `standards/time.md` records it.
-    - craft-launcher's tests require a row in every one of its own catalogs
-      for new user-facing text, where rule 16 asks for English only.
+   the shared copy.
+10. **Sources.** The shared file and the standards carry the agent rules of
+    accepted RFCs and of four closed proposals, whose discussions explain
+    them:
+    - `claims.md`: RFC-0003 and RFC-0004
+      ([craft-contrib#5](https://github.com/storytold/craft-contrib/pull/5)),
+      by MarekSpodBiedry;
+    - `pull-requests.md`: RFC-0005
+      ([craft-contrib#6](https://github.com/storytold/craft-contrib/pull/6)),
+      by MarekSpodBiedry;
+    - rule 15:
+      [craft-contrib#45](https://github.com/storytold/craft-contrib/pull/45)
+      and [craft-contrib#44](https://github.com/storytold/craft-contrib/issues/44),
+      by PhilC58;
+    - the MPL-2.0 section of `licences.md`:
+      [craft-contrib#57](https://github.com/storytold/craft-contrib/pull/57),
+      by FredApps.
 
-## Changes to accepted RFCs
-
-RFC-0013 points 2 and 3: this RFC updates two accepted RFCs, and its pull
-request adds the back-links.
-
-- **RFC-0003 (claims).** An open pull request that says `Part of #N`, not
-  only a draft that says `Fixes #N`, counts as a claim (`standards/claims.md`).
-- **RFC-0014 (accessibility), point 4.** A kittest test is required where
-  warranted rather than for every changed control: a new or changed keyboard
-  path, focus move or announcement warrants one, and a control's role or name
-  alone does not. The built-in name check stays on, and tests do not turn it
-  off.
-- **RFC-0014, point 10.** The generated `house-rules-accessibility.md` block is
-  retired; rule 19 of the shared file is the short form, and the full rules stay
-  in `standards/accessibility.md`.
-
-Rule 16 also replaces the "a line in every catalog" of RFC-0005 point 5
-([craft-contrib#6](https://github.com/storytold/craft-contrib/pull/6), closed
-without being accepted) with English only. `standards/naming.md` keeps
-RFC-0029's meaning: its edits are wording only.
-
-## Order with RFC-0047
-
-This pull request merges only after RFC-0047
-([craft-contrib#71](https://github.com/storytold/craft-contrib/pull/71)) is
-accepted: rules 25 to 29, `pull-requests.md`'s C1 exemption and
-`accessibility.md` link `standards/testing.md`, which RFC-0047 adds. Rules 25
-to 29 follow RFC-0047, and a change to them follows RFC-0047's process. If
-RFC-0047 is rejected, rules 25 to 29 are replaced by house rule core 4's "add a
-test that fails without the fix", and the links to `standards/testing.md` are
-removed, before this merges.
+    [craft-contrib#33](https://github.com/storytold/craft-contrib/pull/33)
+    (house-rule exceptions and contributor credits) is not carried as a
+    whole: rule 20 allows contributor credits a person consented to, and
+    `## This repository` holds no rules of its own.
+11. **Changes to accepted RFCs.**
+    - RFC-0003: any open pull request that says `Fixes #N` or `Part of #N`
+      counts as a claim, and `claims.md` adds the rules for two pull requests
+      that fix the same thing.
+    - RFC-0014: point 4's kittest test is needed where `accessibility.md`
+      says it is warranted, not for every changed control. Point 10's short
+      form is retired; rule 21 of the shared file replaces it.
 
 ## Rollout
 
 1. Merge the shared file and the standards; the generator and the check follow
    in craft-common-actions.
 2. Pilot in craft-libs and two apps.
-3. Move each remaining repository in its own pull request. Each lists every
+3. Move each remaining repository in its own pull request. In scope are the
+   storytold repositories craft-libs, craft-launcher, craft-launcher-assets,
+   craft-i18n, craft-fonts, craft-common-actions, craft-extensions,
+   craft-skills, craft-wiki, crafthub, craft-ai-integrations, craft-anything,
+   craft-pr-review-tool, craft-repo-status-app, indd-utils, photocraft,
+   photocraft-corpus, pdfcraft, lightcraft, filmcraft, vectorcraft,
+   designcraft, deckcraft, wordcraft, gridcraft, figcraft, cadcraft,
+   cadcraft-corpus, soundcraft, texturecraft, materialcraft, effectcraft,
+   effectcraft-corpus, anicraft and autocraft, and every new Craft
+   repository. A repository without an `AGENTS.md` gets one. Each lists every
    rule it removes from the repository's file and where that rule now lives,
    or why it was dropped, so no guard disappears unseen.
 4. Delete the house-rules files.
-
-Every public storytold repository is in scope. Those with no `AGENTS.md` get
-one: craft-common-actions, craft-fonts, craft-extensions, craft-skills,
-craft-wiki, craft-launcher-assets and crafthub. craft-pr-review-tool and
-craft-repo-status-app, which have only `CLAUDE.md`, get an `AGENTS.md`, and
-their `CLAUDE.md` becomes `@AGENTS.md` (proposal point 7).
-
-What each rollout pull request moves into `## This repository`:
-
-- **Stricter local rules stay**, as proposal point 4 allows: materialcraft
-  never names its reference product, also in code and commits; the corpus
-  repositories ban force-pushing, because apps pin their commits; filmcraft's
-  `#[allow(unsafe_code)]` on its FFI modules, and the one
-  `#[allow(clippy::expect_used)]` with a reason that five apps allow, are named
-  as rule 13's modules.
-- **App facts that depend on paths.** An app with an agent entry point
-  (`<app>-cli mcp`) states that it MUST refuse to start without
-  `--automation-read-root` and `--automation-write-root` and refuse file
-  access outside them (RFC-0015). An app with an append-only progress log
-  names the path for a new fragment file per change (RFC-0017).
-- **Exceptions** from proposal point 10.
-
-What rollout drops or narrows:
-
-- craft-anything's "rebase on `main` before asking for review" conflicts with
-  rule 34 and is dropped.
-- `deny.toml` lists match `standards/licences.md`: craft-ai-integrations'
-  `MIT-0` and `bzip2-1.0.6` and pdfcraft's `MIT-0` are removed, or an RFC adds
-  them first.
-- `LicenseRef-Storyteller-Trademark` in attribution files becomes
-  `LicenseRef-ArtCraft-Trademark` for the same marks.
 
 ## Alternatives
 

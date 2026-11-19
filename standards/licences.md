@@ -2,11 +2,7 @@
 
 The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119 and RFC 8174.
 
-These rules apply to every dependency, asset and piece of copied code in the Craft repositories. `AGENTS.md` carries the short form and links here. Adding an identifier needs an RFC, and only when a dependency or asset uses it. Lines that state a licence's own conditions use MUST.
-
-## Our own licence
-
-Our code is `MIT OR Apache-2.0`. A new crate and a new repository say so (the crate's `license` field, `LICENSE-MIT` and `LICENSE-APACHE`). Licences are set per crate; files need no SPDX header.
+These rules apply to every dependency, asset, font and piece of vendored code in the Craft repositories. `AGENTS.md` carries the short form and links here. Adding an identifier needs an RFC, and only when a dependency or asset uses it.
 
 ## The allowlist
 
@@ -36,15 +32,9 @@ Dependencies and assets use SPDX identifiers. A licence expression is allowed wh
 
 Each keeps its notice: you MUST record it in `ATTRIBUTION.md` and `NOTICE`. For `IJG`, you MUST also state that the software is based in part on the work of the Independent JPEG Group.
 
-Language data in storytold/craft-i18n also uses `LicenseRef-SCOWL`, `LicenseRef-BSD-Lebedev` and `LicenseRef-hyph-bg`. RFC-0026 left these for their own decision, and this list defers them too: they stay allowed for that language data until an RFC decides, and for nothing else.
+Language data in storytold/craft-i18n under `LicenseRef-SCOWL`, `LicenseRef-BSD-Lebedev` and `LicenseRef-hyph-bg` is outside this list until its own RFC decides; it stays as it is until then.
 
 A repository MAY enforce a shorter list in its configuration (`deny.toml`); its `## This repository` section states that. A repository SHOULD NOT add an identifier.
-
-An `OFL-1.1` font is allowed whoever designed it, if it comes from its open-source release and not from a copy a product installed. One with a Reserved Font Name is used unmodified; a subset or other change needs a new name.
-
-## Copied and vendored code
-
-Vendored or ported code MUST keep its upstream copyright and licence notice and MUST get an `ATTRIBUTION.md` row: source URL, commit and licence. Apache-2.0 code MUST keep its `NOTICE`, and files we change MUST say so. Its licence MUST be on the list above.
 
 ## MPL-2.0
 
@@ -56,6 +46,18 @@ Vendored or ported code MUST keep its upstream copyright and licence notice and 
 - A pull request that adds an MPL-2.0 dependency SHOULD name the crate and the apps that ship it.
 - A package that ships MPL-2.0 code MUST tell users where to get that code's source and MUST keep its licence and notice files.
 
+## Vendored and ported code
+
+Code copied, vendored or ported from another project MUST keep its upstream copyright and licence notice and MUST get an `ATTRIBUTION.md` row with its source URL, commit and licence. Apache-2.0 code MUST keep its `NOTICE`, and changed files MUST be marked as changed.
+
+## Fonts
+
+1. Font files SHOULD live in [storytold/craft-fonts](https://github.com/storytold/craft-fonts). New fonts SHOULD be added there and SHOULD NOT be added to another repository. A minimal font made for a parser test MAY stay in its repository, with its provenance recorded.
+2. craft-fonts is the optional build input `CRAFT_FONTS_DIR` (an absolute path) and SHOULD NOT be a `Cargo.toml` dependency. Code and tests SHOULD build and run with it unset; tests that need its glyphs SHOULD skip. Releases SHOULD build with it and ship its licences.
+3. An `OFL-1.1` font is allowed whoever designed it, if it comes from its open-source release and not from a copy a product installed.
+4. An `OFL-1.1` font with a Reserved Font Name MUST be used unmodified under that name. A subset or modified copy MUST get a new name.
+5. A font installed on the user's machine MAY be read at runtime. It SHOULD NOT be embedded, shipped or committed in the project's own files, and SHOULD NOT appear in published screenshots. A user's own documents and exports MAY embed the fonts the user chose.
+
 ## Trademarks
 
-`LicenseRef-ArtCraft-Trademark` is not on the list. It covers only the ArtCraft name and logos in `docs/brand/`, under `docs/brand/LICENSE-brand.txt`, as [clean-room.md](clean-room.md) describes. Attribution files written under the house rules call the same marks `LicenseRef-Storyteller-Trademark` (pdfcraft's `ATTRIBUTION.md` does today). Both mean the same marks; each repository renames the identifier in its rollout pull request.
+`LicenseRef-ArtCraft-Trademark` is not on the list. It covers only the ArtCraft name and logos in `docs/brand/`, under `docs/brand/LICENSE-brand.txt`, as [clean-room.md](clean-room.md) describes. pdfcraft's records use the earlier identifier `LicenseRef-Storyteller-Trademark` for the same marks until pdfcraft moves to the shared `AGENTS.md`.

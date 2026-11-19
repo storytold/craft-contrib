@@ -10,32 +10,30 @@ These rules apply in every Craft repository, with the same restrictions everywhe
    - public specifications and conformance material;
    - public documentation: help pages, published screenshots, tutorial videos;
    - papers and textbooks;
-   - behaviour specifications written as "Observing a proprietary app" describes, including its measurements;
-   - corpus files that "Fixtures and corpus files" allows.
+   - behaviour specifications written as "Observing a proprietary app" describes.
 
-   You SHOULD cite the source in the module or crate docs. For a format or codec, you SHOULD record the specification and its edition.
-2. You MUST learn behaviour and ideas only. You MUST NOT copy another product's code, shaders, presets, string tables, help text, UI wording, icons, artwork or pixels, in tests and fixtures too. Fitting our own model to measured output, as "Measurements" describes, is not copying. Feature names follow [naming.md](naming.md).
+   You SHOULD cite the source in the module or crate docs. For a format or codec, you SHOULD record the specification and its edition, and the pull request SHOULD cite the sections it implements. A statement that code is clean-room is not evidence; a reviewer who finds code shaped like another implementation SHOULD ask about it before merging.
+2. You MUST learn behaviour and ideas only. You MUST NOT copy another product's code, shaders, presets, string tables, help text, UI wording, icons, artwork or pixels, in tests and fixtures too. Feature names follow [naming.md](naming.md).
 3. You MUST NOT use remembered knowledge of a proprietary product's internals (SDK class names, IDs, persistence details). A fact that no public specification, behaviour specification or corpus evidence shows MUST NOT go in.
 4. You MUST NOT read, copy or link GPL, LGPL or AGPL code. Copyleft tools such as ffmpeg MAY run as separate processes that generate fixtures or check output in tests. You MUST NOT link, bundle or ship them.
 5. You SHOULD implement a format or codec from its specification and conformance material. You SHOULD NOT implement it from another implementation's source outside storytold, whatever its licence. Permissively licensed crates MAY be dependencies under [licences.md](licences.md); shared code comes from craft-libs.
 6. You SHOULD write translations from the meaning of the English text and SHOULD NOT consult another product's localisation. Language data (dictionaries, hyphenation patterns) SHOULD come unchanged from open-licensed upstream files through craft-i18n.
 7. You MAY follow another product's layout, arrangement and conventions. Every icon, control, colour and font MUST be drawn or chosen by us; you MUST NOT trace or sample anything from its screens.
-8. A statement that code is clean-room is not evidence. A format or codec pull request SHOULD cite the specification sections it implements, and a reviewer who finds code shaped like another implementation SHOULD ask before merging.
 
 ## Observing a proprietary app
 
 Two roles keep what is learned from the app apart from the code. One agent session MUST NOT take both.
 
 1. **Observer.** An agent that operates the app. It MUST only write a behaviour specification. It:
-   - MUST operate the app only through its user interface, as a user does, and open in it only files we generate or a contributor owns;
+   - MUST run the proprietary app only with inputs we generate or a contributor owns;
    - SHOULD write a behaviour specification of what a user sees and does: screens, controls, results;
    - SHOULD screenshot only the app's window, by its window id, and SHOULD NOT capture the rest of the desktop;
    - SHOULD NOT capture the user's own documents, account, store, cloud, home or recent-files screens;
    - MUST NOT instrument the app: no tracing, debugging, memory or traffic inspection;
    - MUST NOT read, disassemble, decompile or copy anything inside the app's install or bundle, and MUST NOT copy its fonts, presets, templates, profiles, plug-ins or sample files.
 2. **Implementer.** An agent that writes code. It MUST NOT operate the app or read its install. It works from behaviour specifications and their screenshots, public documentation and published format specifications.
-3. **Measurements.** A behaviour specification MAY include numbers measured from the app's output: files the observer exports from inputs we generate or a contributor owns, compared with each other. The exports are captures and stay private. Parameters of our own model fitted to those numbers MAY be committed, with the method and the number of inputs recorded. The app's output, and tables that reproduce it, MUST NOT be committed. The session that reads the exports is the observer: it MAY run a fitting tool on them, which stays private with them, and it MUST NOT write the model's code.
-4. **Captures.** Screenshots, recordings, exports and observation notes stay in the gitignored `plan/` folder. You SHOULD NOT commit, publish, link, embed or trace them, and SHOULD NOT attach them to issues or pull requests.
+3. **Measurements.** Numbers measured from the app's output, such as exports compared with each other or parameters of our own model fitted to them, are not yet covered by these rules and need their own decision. Until then, you MUST NOT start work that uses them; existing work stays as it is.
+4. **Captures.** Screenshots, recordings and observation notes stay in the gitignored `plan/` folder. You SHOULD NOT commit, publish, link, embed or trace them, and SHOULD NOT attach them to issues or pull requests.
 
 ## Assets
 
@@ -45,9 +43,9 @@ Two roles keep what is learned from the app apart from the code. One agent sessi
    - under a licence on [licences.md](licences.md), taken from its original source (the author's repository or release, not a mirror), with the exact version recorded.
 3. You MUST NOT use an asset from a proprietary product, its installer, website or documents: icons, UI artwork, fonts it installs, presets, templates, stock media, sample projects. This includes traced, redrawn, recoloured or lookalike copies, also as a placeholder or a reference file.
 4. Also excluded: system fonts that are not openly licensed, vendor emoji artwork, stock photos, "free for personal use" material, and anything whose licence you cannot show from its original source.
-5. An `OFL-1.1` font is allowed whoever designed it, if it comes from its open-source release and not from a copy a product installed.
+5. Fonts follow [licences.md](licences.md).
 6. Art drawn or generated in code, synthesized sound and generated demo content are original work; you SHOULD record them as such.
-7. The ArtCraft name and logos in `docs/brand/` are trademarks, not open source, under `docs/brand/LICENSE-brand.txt` (`LicenseRef-ArtCraft-Trademark`; older attribution files call the same marks `LicenseRef-Storyteller-Trademark`, as [licences.md](licences.md) explains). You SHOULD use them unmodified and only for the project; forks SHOULD remove them. They are the only asset not under an open licence, and they allow no other company's marks.
+7. The ArtCraft name and logos in `docs/brand/` are trademarks, not open source, under `docs/brand/LICENSE-brand.txt` (`LicenseRef-ArtCraft-Trademark`; pdfcraft's records still say `LicenseRef-Storyteller-Trademark` until its move to the shared `AGENTS.md`). You SHOULD use them unmodified and only for the project; forks SHOULD remove them. They are the only asset not under an open licence, and they allow no other company's marks.
 
 ## Fixtures and corpus files
 
@@ -64,13 +62,6 @@ You SHOULD NOT ask anyone to make files for the project. You MUST NOT commit a f
 1. Every asset MUST be recorded in the repository's attribution file (`ATTRIBUTION.md`, or the file `## This repository` names) in the same change that adds it: path, title, author, source with version, licence, and how it was made or changed. Assets bundled through a dependency or fetched at build time get a row too.
 2. You SHOULD keep the licence text next to the asset when the licence requires it, and the required notices in `NOTICE`.
 3. Where the repository has an asset check (`cargo xtask assets`), it SHOULD pass. You SHOULD NOT weaken it to pass; fix the record or remove the asset.
-
-## Fonts
-
-1. Font files SHOULD live in [storytold/craft-fonts](https://github.com/storytold/craft-fonts). New UI or document fonts SHOULD be added there and SHOULD NOT be added to another repository. A minimal font made for a parser test MAY stay with that test, with its provenance recorded.
-2. craft-fonts is the optional build input `CRAFT_FONTS_DIR` (an absolute path) and SHOULD NOT be a `Cargo.toml` dependency. Code and tests SHOULD build and run with it unset; tests that need its glyphs SHOULD skip. Releases SHOULD build with it and ship its licences.
-3. A font installed on the user's machine, or one a build's host supplies ([RFC-0034](../rfcs/0034-host-fonts.md)), MAY be read at runtime. The project SHOULD NOT embed, ship or commit it in its own files, and it SHOULD NOT appear in published screenshots. A user's own document or export MAY embed the fonts the user chose.
-4. An `OFL-1.1` font with a Reserved Font Name is used unmodified; a subset or other change needs a new name.
 
 ## Screenshots, demo and test media
 
