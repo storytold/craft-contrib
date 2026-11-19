@@ -434,6 +434,22 @@ not expose independent bypass paths.
 
 ## Security and privacy standard
 
+- Use Microsoft's official native MIP SDK C++ library through a native helper.
+- Do not replace the SDK with independent PDF/Office decryption, Azure CLI
+  credentials, or a third-party MIP SDK wrapper.
+- Azure CLI may be used by Storytold maintainers for tenant/app-registration
+  setup and Azure resource administration, but it is not a runtime identity or
+  credential source for PdfCraft or other Craft apps.
+- A future device-code flow is headless/CLI fallback material only and still
+  requires the Storytold app client ID and delegated MIP scopes.
+- Keep authentication dependencies to browser launch, OAuth/PKCE, HTTPS token
+  exchange, URL parsing, and JSON/profile decoding. Do not add UUID, generic
+  Base64, Azure CLI, refresh-token persistence, or device-code dependencies
+  unless a documented product requirement and security review approve them.
+- Package official SDK binaries and redistributables for macOS arm64/x86_64,
+  supported Windows architectures, and supported Linux distributions/architectures.
+- The native helper is platform-specific packaging; the Rust policy and rights
+  seam stays platform-neutral.
 - Use the official SDK for decryption and authorization.
 - Never decrypt or unprotect independently to implement a bypass.
 - Stage original and decrypted files with owner-only/private permissions.
