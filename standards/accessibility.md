@@ -34,7 +34,7 @@ You SHOULD record the observed behaviour in the app's parity docs, as WordCraft 
 
 ## Checks
 
-- Where a test is warranted for keyboard or screen-reader behaviour (judged by [testing.md](testing.md)), it SHOULD be an egui_kittest test that drives it by keyboard and checks the accessibility tree: roles, names, states, where focus is after each step, and the announcement if there is one. Not every changed control needs one. Until the shared helpers for focus and announcements exist (storytold/craft-libs#437, part 4), a pull request that can't write such a test SHOULD say so in its Accessibility section, and review doesn't block on it.
+- Where a test is warranted for keyboard or screen-reader behaviour (judged by [testing.md](testing.md)), it SHOULD be an egui_kittest test that drives it by keyboard and checks the accessibility tree: roles, names, states, where focus is after each step, and the announcement if there is one. A new or changed keyboard path, focus move or announcement warrants a kittest test; a control's role or name alone doesn't, because the built-in check covers names. Until the shared helpers for focus and announcements exist (storytold/craft-libs#437, part 4), a pull request that can't write such a test SHOULD say so in its Accessibility section, and review doesn't block on it.
 - The built-in name check SHOULD stay on; tests SHOULD NOT pass `with_accessibility_check(false)`.
 - Whenever an agent takes `ui.screenshot`, it SHOULD also read the accessibility tree of the same window and check it against the rules above: through the control channel where it returns the tree, otherwise in a kittest test.
 - A test SHOULD check the contrast of new colours in both themes.
@@ -55,7 +55,7 @@ Every UI pull request SHOULD check for:
 
 ## Pull requests
 
-A UI pull request's description SHOULD have an Accessibility section. It SHOULD say what the tests and the tree check cover. Tree tests alone do not support "works with screen readers". When the pull request fixes an accessibility problem, or builds accessibility logic that standard widgets don't give (a drawn surface's tree, its own focus handling, text exposed as a document) with a real risk that only a person can judge, the section SHOULD say so, and the triage bot or a maintainer SHOULD add `needs screen reader test`. A feature built from standard controls doesn't get the label.
+A UI pull request's description SHOULD have an Accessibility section. It SHOULD say what the tests and the tree check cover. Tree tests alone do not support "works with screen readers". When the pull request fixes an accessibility problem, or builds accessibility logic that standard widgets don't give (a drawn surface's tree, its own focus handling, text exposed as a document) with a real risk that only a person can judge, the section SHOULD say so, and the triage bot or a triager SHOULD add `needs screen reader test`. A feature built from standard controls doesn't get the label.
 
 ## Labels and test builds
 

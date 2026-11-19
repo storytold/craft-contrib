@@ -8,26 +8,30 @@ The Craft apps — PhotoCraft, WordCraft, EffectCraft, VectorCraft and the rest 
 
 ## What are the Craft apps?
 
-The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0006](rfcs/0006-coding-agents.md) explains the rules that apply to them.
+The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; the shared [AGENTS.md](AGENTS.md) holds the rules that apply to them ([RFC-0048](rfcs/0048-shared-agents-md.md)).
 
 ## What lives in this repository
 
 | Folder | What it is |
 | --- | --- |
 | `rfcs/` | Decision documents. Each one proposes a change and records why it was accepted. |
-| `standards/` | The rule texts copied into the Craft apps' `AGENTS.md` files. |
+| `AGENTS.md` | The shared rules for agents, copied into every Craft repository's `AGENTS.md`. |
+| `standards/` | The detailed standards that the shared rules link. |
 
 The most important documents:
 
 - [RFC-0000: How we make decisions](rfcs/0000-decision-process.md) — the decision process itself
 - [RFC-0013: Amending an accepted RFC](rfcs/0013-amending-rfcs.md) — how accepted decisions are changed
-- [House rules (core)](standards/house-rules-core.md) — the rules for every Craft repository
-- [House rules (Rust)](standards/house-rules-rust.md) — extra rules for Rust code
+- [AGENTS.md](AGENTS.md) — the shared rules for every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
+- [Claims](standards/claims.md) — claiming issues and duplicate pull requests
+- [Pull requests](standards/pull-requests.md) — shape, description and review responses
+- [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
+- [Licences](standards/licences.md) — the licence allowlist and our own licence
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
-- [Time](standards/time.md) — the calendar exception to the Rust rules
+- [Time](standards/time.md) — calendar dates and range extension
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
-Repositories copy the core and language-specific rules into `AGENTS.md`. Repositories that draw an interface also copy the short accessibility rules from [house-rules-accessibility.md](standards/house-rules-accessibility.md).
+Each repository copies the shared `AGENTS.md` into its own, between markers, and adds a `## This repository` section about the project. Until a repository carries the shared copy, its `AGENTS.md` still holds the older house rules from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md).
 
 ## How a decision is made (the short version)
 
@@ -64,7 +68,7 @@ Questions are comments too. If an RFC is hard to understand, saying so is valuab
 | **Comment period** | The days when a proposal is open for comments. A maintainer starts it by posting the end date. |
 | **Maintainer** | A member of the `craft-app-team` GitHub team. Maintainers review and merge RFCs. |
 | **Owner** | An admin of the storytold organisation who can decide objections. |
-| **House rules** | Rules that apply in every Craft repository. They live in `standards/` here and are copied into each repository's `AGENTS.md`. |
+| **Shared rules** | Rules that apply in every Craft repository. They live in `AGENTS.md` here and are copied into each repository's `AGENTS.md`. |
 | **`AGENTS.md`** | The instruction file that coding agents read in every repository. |
 | **`craft-libs`** | The shared Rust library repository that several apps depend on. |
 | **Claim** | Saying on an issue that you are working on it, so two people do not fix the same bug ([RFC-0003](rfcs/0003-claiming-issues.md)). |

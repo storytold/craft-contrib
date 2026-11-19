@@ -1,5 +1,7 @@
 # RFC-0014: Accessibility in every UI change
 
+Updated by: [RFC-0048](0048-shared-agents-md.md)
+
 Related: storytold/craft-libs#437 (shared work), RFC-0005, RFC-0006,
 RFC-0007.
 

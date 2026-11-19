@@ -1,5 +1,7 @@
 # RFC-0003: Claiming issues
 
+Updated by: [RFC-0048](0048-shared-agents-md.md)
+
 ## Summary
 
 Before working on an issue, check that it is still free and still broken,

@@ -11,13 +11,13 @@ This is a naming policy, not legal advice or trademark clearance.
 1. **Our feature uses our own name.** Feature names MUST NOT use another company's trademarked product or feature names: a product, technology or distinctive feature name, or a name its owner claims as a software trademark (on its trademark list, marked ™ or ® in its docs, or found by the check below). Describe the feature in our own words. Ordinary descriptive words aren't excluded just because one company used them first. A name that is neither of these is allowed: usually one that describes what the feature does in ordinary words, the way several unrelated products describe the same thing (`Layers`, `Crop`, `Find and Replace`).
 2. **Scope.** This covers what users see: labels, menus, dialogs, messages, tooltips, help, READMEs, store and release text, and every translation. It doesn't cover command ids, preference keys, stored values, code, comments, tests or internal comparison documents. You SHOULD NOT use other companies' logos or icons, or promotional comparisons ("Figma-class").
 3. **These MAY stay accurate:** file formats, languages and APIs we support (`Open PSD`); names that belong to the user's documents, and interchange names, also in files we export; protocols and plug-in formats once the integration works (until then, hide the entry or show it disabled); factual compatibility statements ("opens PSD files") in help, tooltips and import messages, but not in our feature's label; legal notices and attribution.
-4. **Check a new or changed name** (SHOULD) when another product uses it for the same feature or it is not plain description, unless it is already in the list below and used the same way:
+4. **Check every new or changed name** (SHOULD), including a replacement, unless it is already in the list below and used the same way:
    - the owner's trademark list, and ™ or ® in its documentation;
    - [USPTO](https://tmsearch.uspto.gov/), [EUIPO eSearch](https://euipo.europa.eu/eSearch/) or [TMview](https://www.tmdn.org/tmview/), and the [WIPO Global Brand Database](https://branddb.wipo.int/), for the name and obvious variants;
    - to call a name common, three unrelated products that use it descriptively for their own feature.
 
    You SHOULD record the date, sources, findings and decision in the pull request and in the app's existing feature-naming document (`docs/feature-names.md` if it has none). Finding nothing doesn't mean the name is free.
-5. **Unclear means no.** If the check doesn't settle it, you SHOULD NOT ship the name. Use our own, or ask a maintainer on the pull request. Contributors aren't expected to make legal calls.
+5. **Unclear means no.** If the check doesn't settle it, you SHOULD NOT ship the name. Use our own, or ask a Craft owner on the pull request. Owners decide; contributors aren't expected to make legal calls.
 6. **Renaming.** A rename SHOULD change labels only. It SHOULD keep ids, preference keys and stored values, and SHOULD keep the old label as a search alias that isn't displayed. The new label SHOULD be translated.
 
 ## Names list
