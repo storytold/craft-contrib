@@ -14,7 +14,7 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 ## Starting a task
 
 5. Before writing code, and again right before opening a PR, you SHOULD search open and closed issues and PRs for the same work, and check recent commits on `main` in the files involved; if it is already done, say so and stop.
-6. You MUST NOT start an issue another account has a live claim on. You SHOULD claim it in a comment before writing code and say there if you stop. Before claiming or taking over: read standards/claims.md.
+6. You SHOULD NOT start an issue another account has a live claim on, and SHOULD claim it in a comment before writing code and say there if you stop. Before claiming or taking over: read standards/claims.md.
 7. You SHOULD reuse search results and SHOULD NOT poll GitHub in a loop; wait for CI with one `gh pr checks --watch --interval 300`, or report and stop. At a rate limit, stop and say so.
 
 ## Changing code

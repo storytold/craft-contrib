@@ -42,8 +42,8 @@ MarekSpodBiedry; their pull requests hold the discussion behind each rule.
    pull request.
 2. **Keywords.** The file uses the key words of RFC 2119 and RFC 8174. MUST and
    MUST NOT are for legal and safety limits (clean room, licences, secrets,
-   irreversible steps, reporting checks accurately) and for live claims, which
-   work only if everyone honours them. Other rules are SHOULD or SHOULD NOT.
+   irreversible steps, reporting checks accurately). Other rules are SHOULD or
+   SHOULD NOT.
    An agent that departs from a SHOULD says so and why in the PR. An operator
    may set aside a SHOULD, stated in the PR, but never a MUST.
 3. **Linked standards.** `standards/claims.md`, `pull-requests.md`,
@@ -95,9 +95,7 @@ RFC-0013 points 2 and 3: this RFC updates two accepted RFCs, and its pull
 request adds the back-links.
 
 - **RFC-0003 (claims).** An open pull request that says `Part of #N`, not
-  only a draft that says `Fixes #N`, counts as a claim. Not starting on a live
-  claim, the claim and takeover times, closing a pull request that ignored a
-  claim, and the warning are MUST (`standards/claims.md`).
+  only a draft that says `Fixes #N`, counts as a claim (`standards/claims.md`).
 - **RFC-0014 (accessibility), point 4.** A kittest test is required where
   warranted rather than for every changed control: a new or changed keyboard
   path, focus move or announcement warrants one, and a control's role or name
