@@ -18,6 +18,12 @@ The [native Apple boundary](../standards/apple-native.md) is the proposed living
 contract. The same PR proposes the corresponding narrow canonical Rust-rule change;
 no generated app instruction block is changed.
 
+This is deliberately Apple-only. Android and cross-platform mobile-host work remain
+under [RFC-0039 / storytold/craft-contrib#60](https://github.com/storytold/craft-contrib/pull/60),
+[craft-libs#632](https://github.com/storytold/craft-libs/pull/632),
+and a separately reviewed companion RFC if maintainers choose to extend the native-shell
+boundary to Android.
+
 ## Why a separate decision is necessary
 
 The current native-app rule is Rust-only. A working fork is not permission to
@@ -33,10 +39,11 @@ There are now two materially different sources of evidence:
   full desktop feature parity.
 - [storytold/craft-libs#632](https://github.com/storytold/craft-libs/pull/632)
   proposes a shared egui/Metal host with native platform shells.
-  Its author's [RFC discussion](https://github.com/storytold/craft-contrib/pull/60)
-  additionally reports local, unpushed Rust-described native chrome. That later kit
-  has not been independently reviewed here. Do not copy or prescribe an unavailable
-  API, or describe one POC as validation of the other.
+  Its author's public Rust-described native panel branch,
+  [`feat/native-chrome`](https://github.com/simonhull/craft-libs/tree/feat/native-chrome),
+  provides source for optional native-panel reference work. It is not part of
+  `#632`, has not been independently reviewed or adopted here, and must not be
+  described as validation of the PdfCraft POC or as a suite direction.
 
 The host author reports an iOS scene-lifecycle limitation in winit and an iOS
 accessibility-adapter gap. Treat these as version-specific findings to reproduce,
