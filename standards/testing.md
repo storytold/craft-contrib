@@ -34,7 +34,7 @@ A test SHOULD stay only if you can write all three of these:
 2. **Breaking change:** a plausible change to the code that breaks that invariant. Plausible means a change someone could make while fixing, refactoring or extending this code: reordering steps, an off-by-one, a dropped case, a changed default, a replaced algorithm. Deleting the function or arbitrary sabotage doesn't count.
 3. **Only this test:** no other test, and no shared-suite case, would fail on that change. Find the other tests (grep for the function) and check.
 
-If you can't write all three, or are unsure whether you can, the test SHOULD go: the burden is on keeping a test, not on cutting it. Apply this before you add a test. Existing tests are judged only as described under "Cutting existing tests".
+If you can't write all three, or are unsure whether you can, the test SHOULD go: the burden is on keeping a test, not on cutting it. The exception is a regression test for saving files or for safety: while you are unsure, it SHOULD stay until someone has checked the three lines. Apply this before you add a test. Existing tests are judged only as described under "Cutting existing tests".
 
 The keep rule is necessary, not sufficient: a check in a cut category SHOULD go even when you can write all three lines. For example, readable code (C1) has plausible breaking changes too, but a reviewer catches them by reading.
 
@@ -52,7 +52,7 @@ Judge from the test's body and the code it drives, never from its name or file a
    - No check is cut, but a fix category applies: `FIX`. Rewrite it so that none applies, then judge it again.
    - Otherwise: `KEEP`, with the invariant and the breaking change.
 
-Tests behind a feature flag or a target OS are judged like every other test. A test, or an assertion inside one, that no CI job runs is C8: in practice it checks nothing. That covers a test marked `#[ignore]` and an assertion behind `cfg!` for a platform no CI job runs. A flaky test quarantined under an open issue (see "Flaky and hanging tests") is judged when that issue closes.
+Tests behind a feature flag or a target OS are judged like every other test. A test, or an assertion inside one, that no CI job runs checks nothing in practice. That covers a test marked `#[ignore]` and an assertion behind `cfg!` for a platform no CI job runs. If it passes the keep rule, fix it so that a CI job runs it; otherwise it is C8. A flaky test quarantined under an open issue (see "Flaky and hanging tests") is judged when that issue closes.
 
 **Cite only a test that stays.** A covering test (for C6, or for the "only this test" line) SHOULD itself be kept or trimmed, with the covering check still in it. Two tests that cover each other can't both go: keep the one with more reach, and keep the shared check in it.
 
@@ -95,7 +95,7 @@ A check in a cut category SHOULD NOT be written, and SHOULD be cut from an exist
 - **Not this:**
   - a default computed from other inputs, such as a size that follows the system's DPI;
   - a property of the whole table that other code relies on: sorted for a binary search, an entry for every variant, no duplicates.
-- A table entry stays C3 even when a bug fix added it, and even when its value comes from outside our code (a spec, another program, a platform). A wrong entry is caught by checking the table against its source, not by one spot-check test per entry.
+- A table entry stays C3 even when a bug fix added it, and even when its value comes from outside our code (a spec, another program, a platform). A wrong entry is caught by checking the table against its source, not by one spot-check test per entry. Spot checks of a file-format table SHOULD stay until such a check against the spec exists.
 - A default limit is C3 unless the code computes it. A comment explaining where the number comes from is not computation.
 
 ### C4 Compiler-checked
@@ -112,6 +112,7 @@ A check in a cut category SHOULD NOT be written, and SHOULD be cut from an exist
 
 ### C6 Duplicate
 **Question:** Does another test, or a shared-suite case, already go through the same code and fail on the same breaking change? Find that test and confirm it before citing it.
+- When the other test is a property test, confirm that it catches the same breaking change with the number of cases pull requests run, not only with the full run.
 - Of two overlapping tests, keep the one that reaches more of the code. At equal reach, keep the one at the level the user meets the behaviour (through the component), and cut the other.
 - **Example:** `a_moved_stop_passes_its_neighbours_and_keeps_its_tag` (stop model) is covered by the editor's drag test through the same move function.
 - **Example:** `a_window_blur_cancels_a_captured_press_once` is covered by the shared suite's press-cancel case on every component.
