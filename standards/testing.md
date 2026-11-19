@@ -11,8 +11,8 @@ These rules apply to every test in the Craft repositories, written by a person o
 
 Three rules hold in both cases:
 
-- You MUST NOT delete, weaken, ignore or skip a test to make a check pass.
-- Tests MUST be cut or quarantined only in a pull request of their own that lists every removed test.
+- You MUST NOT delete, weaken, ignore or skip a test to make a check pass. A quarantine under "Flaky and hanging tests" is the only exception.
+- Tests SHOULD be cut or quarantined only in a pull request of their own, which MUST list every removed test.
 - You MUST NOT quarantine a test that fails every time.
 
 ## What tests are for
@@ -197,7 +197,7 @@ Parsers, decoders and command handlers SHOULD return an error for any input, and
 
 ## Fixtures
 
-- Fixtures SHOULD be committed and use real-format data; a mock only where no real-format sample exists. A crash regression SHOULD use a synthetic file cut down to the bytes that trigger it.
+- Fixtures SHOULD be committed, or listed in a manifest where [clean-room.md](clean-room.md) says so, and use real-format data; a mock only where no real-format sample exists. A crash regression SHOULD use a synthetic file cut down to the bytes that trigger it.
 - Every fixture follows the fixture rules of [clean-room.md](clean-room.md), provenance included.
 - Real-file corpora live in a corpus repository (for example `storytold/photocraft-corpus`), fetched pinned by commit and checked by sha256. A binary fixture SHOULD be under 100 KB. A larger one SHOULD go in a corpus repository and SHOULD NOT be committed to an app or library repository.
 

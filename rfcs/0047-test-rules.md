@@ -25,13 +25,14 @@ The rules were applied to every test in three craft-libs crates ([craft-libs#214
 1. Adopt `standards/testing.md`, added by this RFC's PR, as the rules for every test.
 2. It is a living document under RFC-0013 point 5. Wording fixes are ordinary PRs. Adding, removing or changing a rule needs an RFC that updates this one.
 3. Three rules use MUST or MUST NOT:
-   - A test is never deleted, weakened, ignored or skipped to make a check pass.
-   - Tests are cut or quarantined only in a pull request of their own that lists every removed test.
+   - A test is never deleted, weakened, ignored or skipped to make a check pass. A quarantine of a flaky test, as `testing.md` describes, is the only exception.
+   - A pull request that cuts or quarantines tests lists every removed test. Such a pull request SHOULD contain no other change.
    - A test that fails every time is never quarantined.
 
-   Everything else uses SHOULD, SHOULD NOT or MAY.
-4. The shared agent instructions carry a short form of the rules and link to the full document, so agents' context stays small.
-5. Existing tests are judged and cut only when an issue asks for it, per crate, in a pull request that lists each removed test with its category.
+   Everything else uses SHOULD, SHOULD NOT or MAY, as [RFC-0048](https://github.com/storytold/craft-contrib/pull/72) point 2 sets for the shared rules.
+4. The shared agent instructions carry a short form of the rules and link to the full document, so agents' context stays small. The short form is rules 27 to 32 of the shared `AGENTS.md` ([RFC-0048](https://github.com/storytold/craft-contrib/pull/72)). Where the two differ, the shared file wins, and this document is corrected to match.
+5. RFC-0048 merges only after this RFC is accepted, and the two merge back to back: `testing.md` links `clean-room.md`, which RFC-0048 adds, and RFC-0048's rules 27 to 32 link `testing.md`.
+6. Existing tests are judged and cut only when an issue asks for it, per crate, in a pull request that lists each removed test with its category.
 
 ## Alternatives
 
