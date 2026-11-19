@@ -19,7 +19,7 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 
 ## Changing code
 
-8. A PR SHOULD cover one issue and change nothing the fix does not need; open an issue for other bugs you find. Moving code and changing behaviour SHOULD be separate PRs, so the move can be reviewed as a move.
+8. A PR SHOULD cover one issue and change nothing the fix does not need, except refactors; open an issue for other bugs you find. Moving code and changing behaviour SHOULD be separate PRs, so the move can be reviewed as a move.
 9. Reusable parsers, codecs, protocols and widgets SHOULD live in storytold/craft-libs: extend it instead of adding an app copy. A move is its own PR that keeps behaviour, limits, attribution and tests; app-specific policy stays in the app. An app SHOULD NOT depend on another app's crates.
 10. Git dependencies SHOULD come only from storytold, with all storytold/craft-libs crates at one `rev` that is merged on storytold/craft-libs `main`; a `rev` move is its own PR.
 11. Apps SHOULD be Rust only: no handwritten JavaScript or TypeScript, Tauri, Electron or webview.
