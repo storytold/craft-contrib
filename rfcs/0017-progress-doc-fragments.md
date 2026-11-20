@@ -1,5 +1,7 @@
 # RFC-0017: Progress-doc entries are fragments
 
+Updated by: [RFC-0018](0018-gap-parity-items.md) (open-PR migration).
+
 Every pull request edits the same few lines of `ROADMAP.md` and the other
 progress docs, so any two open PRs conflict there. In WordCraft the
 status line holds a "previously …" chain of 100+ entries, and the line
