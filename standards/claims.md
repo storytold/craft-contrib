@@ -24,6 +24,12 @@ These rules apply to every issue and pull request in the Craft repositories, for
 
 1. Right before opening a pull request, you SHOULD search open pull requests for the issue number and for the functions and files you changed, also in a repository the code is moving to.
 2. Pull requests for independent parts of an issue are not duplicates. Compare the behaviour each one changes. A pull request that waits for another SHOULD link it in its description.
+   An extension offered on top of someone else's open pull request is not, by
+   itself, a duplicate; the receiving author decides whether to take it. The
+   original pull request SHOULD stay focused on the issue it fixes. Work beyond
+   that issue SHOULD be a separate, focused follow-up pull request after the
+   original merges. Credit the original contributor when their work is carried
+   over, using `Co-authored-by` where appropriate.
 3. You SHOULD compare duplicates with these questions:
    - Does it fix only where the bug is?
    - Does it handle the case the way neighbouring code handles it?
