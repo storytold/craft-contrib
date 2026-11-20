@@ -6,4 +6,4 @@
 
 **Affects:** which craft apps, the whole org (e.g. shared process or tooling), or "this repo only"
 
-**Comment period:** 3 days / 7 days (adding/removing an app or changing the process)
+**Open questions:** (optional) what you'd like reviewers to weigh in on
