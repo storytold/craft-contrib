@@ -56,7 +56,7 @@ See the [open pull requests](https://github.com/storytold/craft-contrib/pulls) f
 
 Questions are comments too. If an RFC is hard to understand, saying so is valuable — it means the text needs work.
 
-**Open an RFC.** If you want to change a rule or decision, add `rfcs/NNNN-short-title.md` in a pull request. Pick the next free number, describe the problem first and the solution second, and say which apps it affects. An accepted RFC is not edited to change its meaning: add `Updates: RFC-NNNN` or `Obsoletes: RFC-NNNN` below the new RFC's title, as described in [RFC-0013](rfcs/0013-amending-rfcs.md).
+**Open an RFC.** If you want to change a rule or decision, add `rfcs/NNNN-short-title.md` in a pull request. Its number is the pull request's number ([RFC-0076](rfcs/0076-rfc-numbers.md)): once the PR is open, rename the file and set `RFC-NNNN` in its heading and the PR title. Describe the problem first and the solution second, and say which apps it affects. An accepted RFC is not edited to change its meaning: add `Updates: RFC-NNNN` or `Obsoletes: RFC-NNNN` below the new RFC's title, as described in [RFC-0013](rfcs/0013-amending-rfcs.md).
 
 **Fix small things.** Typos, broken links and wording clarifications that do not change a rule's meaning can be ordinary pull requests. They still need a maintainer's approval.
 
