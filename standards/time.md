@@ -6,4 +6,4 @@ For dates past the years `chrono` can represent, extend its range: shift the dat
 
 ## craft-launcher
 
-craft-launcher uses `jiff` for its time code, with no `chrono` beside it, as RFC-0048 records, until it moves to `chrono` ([craft-launcher#1526](https://github.com/storytold/craft-launcher/issues/1526)). It follows the rest of this standard: no hand-rolled calendar or UTC conversion.
+craft-launcher uses `jiff` for its time code, with no `chrono` beside it, as RFC-0072 records, until it moves to `chrono` ([craft-launcher#1526](https://github.com/storytold/craft-launcher/issues/1526)). It follows the rest of this standard: no hand-rolled calendar or UTC conversion.

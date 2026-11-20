@@ -8,7 +8,7 @@ The Craft apps — PhotoCraft, WordCraft, EffectCraft, VectorCraft and the rest 
 
 ## What are the Craft apps?
 
-The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0048](rfcs/0048-shared-agents-md.md) explains the rules that apply to them.
+The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0072](rfcs/0072-shared-agents-md.md) explains the rules that apply to them.
 
 ## What lives in this repository
 
@@ -22,9 +22,10 @@ The most important documents:
 
 - [RFC-0000: How we make decisions](rfcs/0000-decision-process.md) — the decision process itself
 - [RFC-0013: Amending an accepted RFC](rfcs/0013-amending-rfcs.md) — how accepted decisions are changed
-- [App agents](standards/app-agents.md) — the shared rules for agents in every Craft repository ([RFC-0048](rfcs/0048-shared-agents-md.md))
+- [App agents](standards/app-agents.md) — the shared rules for agents in every Craft repository ([RFC-0072](rfcs/0072-shared-agents-md.md))
 - [Claims](standards/claims.md) — claiming issues and duplicate pull requests
 - [Pull requests](standards/pull-requests.md) — shape, description and review
+- [Testing](standards/testing.md) — the test rules ([RFC-0071](rfcs/0071-test-rules.md))
 - [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
 - [Licences](standards/licences.md) — the licence allowlist, fonts and vendored code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard

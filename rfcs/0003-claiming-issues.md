@@ -1,6 +1,6 @@
 # RFC-0003: Claiming issues
 
-Updated by: [RFC-0048](0048-shared-agents-md.md)
+Updated by: [RFC-0072](0072-shared-agents-md.md)
 
 ## Summary
 

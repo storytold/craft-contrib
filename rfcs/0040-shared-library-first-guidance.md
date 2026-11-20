@@ -1,6 +1,6 @@
 # RFC-0040: Shared-library-first guidance for Craft apps
 
-Obsoleted by: [RFC-0048](0048-shared-agents-md.md)
+Obsoleted by: [RFC-0072](0072-shared-agents-md.md)
 
 Updates: [RFC-0006](0006-coding-agents.md)
 

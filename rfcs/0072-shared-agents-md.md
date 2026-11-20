@@ -1,10 +1,10 @@
-# RFC-0048: One shared AGENTS.md
+# RFC-0072: One shared AGENTS.md
 
 Obsoletes: [RFC-0006](0006-coding-agents.md), [RFC-0040](0040-shared-library-first-guidance.md)
 
 Updates: [RFC-0003](0003-claiming-issues.md), [RFC-0014](0014-accessibility.md)
 
-Depends on: RFC-0047 (`standards/testing.md`), [craft-contrib#71](https://github.com/storytold/craft-contrib/pull/71)
+Depends on: RFC-0071 (`standards/testing.md`), [craft-contrib#71](https://github.com/storytold/craft-contrib/pull/71)
 
 ## Summary
 
@@ -43,8 +43,8 @@ one review cover them, and makes a rule change one pull request.
 3. **Linked standards.** `standards/claims.md`, `pull-requests.md`,
    `clean-room.md`, `licences.md`, `accessibility.md`, `naming.md`, `time.md`
    and `testing.md` hold the detail a rule needs on some tasks. `testing.md`
-   comes from RFC-0047; this RFC merges only after RFC-0047 is accepted, and
-   rules 27-32 follow RFC-0047's short form. If RFC-0047 is rejected, rules
+   comes from RFC-0071; this RFC merges only after RFC-0071 is accepted, and
+   rules 27-32 follow RFC-0071's short form. If RFC-0071 is rejected, rules
    27-32 become "A bug fix SHOULD add a test that fails without it" and the
    links to `testing.md` go. The shared file states every
    rule an agent needs on every task and links the standard for the rest. A

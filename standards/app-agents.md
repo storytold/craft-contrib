@@ -13,13 +13,13 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 
 ## Starting a task
 
-5. Before writing code and again right before opening a PR, you SHOULD search open and closed issues and PRs for the same work and check recent commits on `main` in the files involved; if it is already done, say so and stop.
-6. You SHOULD NOT start an issue another account has a live claim on, and SHOULD claim it in a comment before writing code and say there if you stop, so two people don't build the same fix. Before claiming or taking over: read standards/claims.md.
-7. You SHOULD reuse search results and SHOULD NOT poll GitHub in a loop; wait for CI with one `gh pr checks --watch --interval 60`. At a rate limit, stop and say so.
+5. Before writing code and again right before opening a PR, you SHOULD search open and closed issues and PRs for the same work and recent commits on `main` in the files involved; if it is already done, say so and stop.
+6. You SHOULD NOT start an issue another account has a live claim on, and SHOULD claim it in a comment before writing code and say there if you stop, so two people don't build the same fix. Before claiming or taking over, read standards/claims.md.
+7. You SHOULD reuse search results, SHOULD NOT poll GitHub in a loop; wait for CI with one `gh pr checks --watch --interval 60`. At a rate limit, stop and say so.
 
 ## Changing code
 
-8. A PR SHOULD cover one issue and change nothing the fix does not need, except refactors; open an issue for other bugs you find. Moving code and changing behaviour SHOULD be separate PRs, so the move can be reviewed as a move.
+8. A PR SHOULD cover one issue and change nothing the fix does not need, except refactors; open an issue for other bugs you find. Moving code and changing behaviour SHOULD be separate PRs, so a move reviews as a move.
 9. Reusable parsers, codecs, protocols and widgets SHOULD live in storytold/craft-libs: extend it instead of adding an app copy. A move is its own PR that keeps behaviour, limits, attribution and tests; app-specific policy stays in the app. An app SHOULD NOT depend on another app's crates.
 10. Git dependencies SHOULD come only from storytold, with all storytold/craft-libs crates at one `rev` that is merged on storytold/craft-libs `main`; a `rev` move is its own PR.
 11. Apps SHOULD be Rust only: no handwritten JavaScript or TypeScript, Tauri, Electron or webview.
@@ -28,9 +28,9 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 14. Panels SHOULD change engine state only through registered commands, so the automation interface can do everything a panel does. Colours, sizes and fonts SHOULD come from theme tokens, so every theme applies. Every feature SHOULD also work without the GUI, through the automation interface.
 15. You SHOULD NOT present unsupported, partial or placeholder behaviour as success: tell the user, in the GUI and in CLI and automation results.
 16. User-facing text SHOULD go through the translation system with English as the key. Feature PRs SHOULD add English only; translations are added in storytold/craft-i18n. A missing translation shows in English and SHOULD NOT block a PR or release.
-17. Workflows SHOULD call storytold/craft-common-actions. A feature or fix PR SHOULD NOT change `.github/workflows/`; a CI change goes in its own PR, so it gets its own review.
+17. Workflows SHOULD call storytold/craft-common-actions. A feature or fix PR SHOULD NOT change `.github/workflows/`; a CI change goes in its own PR, for its own review.
 18. Agent entry points (`<app>-cli mcp`) MUST refuse to start without `--automation-read-root` and `--automation-write-root` and refuse file access outside them.
-19. An append-only progress log SHOULD get a new fragment file per change, at the path `## This repository` names, rather than an edit to the log, so parallel PRs don't conflict.
+19. An append-only progress log SHOULD get a new fragment file per change, at the path `## This repository` names, instead of editing the log, so parallel PRs don't conflict.
 20. You MUST keep secrets and personal details, except credits a person consented to, out of code, logs, fixtures and requests. You MUST report a vulnerability through the repository's private security advisory, never in public.
 21. A UI change SHOULD work by keyboard with no trap; keyboard navigation SHOULD move egui's focus (`request_focus`), not only paint a highlight. Each control and drawn surface SHOULD expose its role, a translated name that starts with its visible label, its state, and whether it is editable. A change away from focus SHOULD be announced through a live region. Text SHOULD have 4.5:1 contrast and controls 3:1, and colour SHOULD NOT be the only signal. With each `ui.screenshot`, also read the accessibility tree. Before a UI change, read standards/accessibility.md.
 22. Feature names MUST NOT use another company's trademarked product or feature names; describe the feature in our own words. Before naming a user-visible feature, read standards/naming.md.
@@ -57,6 +57,6 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119
 34. You SHOULD NOT open a duplicate of an equal or better PR (standards/claims.md). Before writing the description: read standards/pull-requests.md.
 35. You SHOULD NOT commit scratch files or your agent tool's own files (`.claude/`, `.cursor/`), or pass `--no-verify`.
 36. If two different fixes for the same failing check have not worked, you SHOULD leave the PR a draft, say what fails and what you tried, and stop. A failure that also happens on `main` is not yours to fix; link the `main` run.
-37. You SHOULD answer review requests within 3 days. You SHOULD merge `main` into your PR only when a reviewer or maintainer asks, so a push doesn't rerun CI and reset reviews without need; a conflict alone is not a reason.
+37. You SHOULD answer review requests within 3 days. You SHOULD merge `main` into your PR only when a reviewer or maintainer asks, so a push doesn't needlessly rerun CI and reset reviews; a conflict alone is not a reason.
 
 ## This repository
