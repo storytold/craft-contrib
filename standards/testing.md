@@ -145,7 +145,7 @@ A test in a fix category SHOULD be rewritten so that none applies.
 
 ### F2 Timing
 **Question:** Does the result depend on wall-clock time, `sleep`, or how fast the machine is?
-- **Fix:** drive the clock and frames by hand (a manual clock, `settle()`), and assert what happened, not how long it took. Give randomized tests a fixed seed. To stop a test that might hang, run it under craft-testkit's `with_deadline`; the deadline ends the test and is not asserted.
+- **Fix:** drive the clock and frames by hand (a manual clock, `settle()`), and assert what happened, not how long it took. Give randomized tests a fixed seed. To stop a test that might hang, run it under craft-media-testkit's `with_deadline`; the deadline ends the test and is not asserted.
   - When a time bound stands in for "A finished before B", assert the order (a flag the slow side sets), not the seconds.
   - For a claim about how cost grows, count steps with a counter that exists only in tests and compare the counts at n and 8n, not the times.
   - A test whose point is speed SHOULD NOT be part of the gate (`cargo xtask ci` or a required CI job): on a loaded machine it fails without any regression.
@@ -168,7 +168,7 @@ A test in a fix category SHOULD be rewritten so that none applies.
 
 ### F4 Unbudgeted stress
 **Question:** Does the test loop over many generated or random cases, or build inputs of millions of items, without going through the shared case budget?
-- **Fix:** use the shared caps (`PROPTEST_CASES`, and `CRAFT_HOSTILE_DIVISOR` through craft-testkit's `hostile::hammer`), or test a limit with a small limit value instead of a huge input. Pull requests then run a fraction of the cases, and the nightly run does the full count.
+- **Fix:** use the shared caps (`PROPTEST_CASES`, and `CRAFT_HOSTILE_DIVISOR` through craft-media-testkit's `hostile::hammer`), or test a limit with a small limit value instead of a huge input. Pull requests then run a fraction of the cases, and the nightly run does the full count.
 
 ### F5 Slow
 **Question:** Does a unit test take over 0.1 s, or an integration test over 1 s, in the debug build CI runs, without a comment saying why?
@@ -196,7 +196,7 @@ A test in a fix category SHOULD be rewritten so that none applies.
 
 Parsers, decoders and command handlers SHOULD return an error for any input, and SHOULD NOT panic or hang on it: damaged files, junk command parameters, malformed protocol messages. "Never panics" is the invariant here (C8 does not apply).
 
-- Each app SHOULD keep one sweep that runs every command with hostile parameters, and each parser or decoder SHOULD have a mutation sweep (truncation, bit flips, corrupt sizes). A crate that depends on craft-testkit SHOULD run its mutation sweep through `hostile::hammer`.
+- Each app SHOULD keep one sweep that runs every command with hostile parameters, and each parser or decoder SHOULD have a mutation sweep (truncation, bit flips, corrupt sizes). A crate that depends on craft-media-testkit SHOULD run its mutation sweep through `hostile::hammer`.
 - A new command, parser or protocol method SHOULD be added to the sweep in the same change.
 - Sweeps SHOULD go through the shared case budget (F4).
 

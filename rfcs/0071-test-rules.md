@@ -1,4 +1,4 @@
-# RFC-0047: Test rules
+# RFC-0071: Test rules
 
 ## Summary
 
@@ -29,9 +29,9 @@ The rules were applied to every test in three craft-libs crates ([craft-libs#214
    - A pull request that cuts or quarantines tests lists every removed test. Such a pull request SHOULD contain no other change.
    - A test that fails every time is never quarantined.
 
-   Everything else uses SHOULD, SHOULD NOT or MAY, as [RFC-0048](https://github.com/storytold/craft-contrib/pull/72) point 2 sets for the shared rules.
-4. The shared agent instructions carry a short form of the rules and link to the full document, so agents' context stays small. The short form is rules 27 to 32 of the shared rules file, `standards/app-agents.md` ([RFC-0048](https://github.com/storytold/craft-contrib/pull/72)). Where the two differ, the shared file wins, and this document is corrected to match.
-5. RFC-0048 merges only after this RFC is accepted, and the two merge back to back: `testing.md` links `clean-room.md`, which RFC-0048 adds, and RFC-0048's rules 27 to 32 link `testing.md`.
+   Everything else uses SHOULD, SHOULD NOT or MAY, as [RFC-0072](https://github.com/storytold/craft-contrib/pull/72) point 2 sets for the shared rules.
+4. The shared agent instructions carry a short form of the rules and link to the full document, so agents' context stays small. The short form is rules 27 to 32 of the shared rules file, `standards/app-agents.md` ([RFC-0072](https://github.com/storytold/craft-contrib/pull/72)). Where the two differ, the shared file wins, and this document is corrected to match.
+5. RFC-0072 merges only after this RFC is accepted, and the two merge back to back: `testing.md` links `clean-room.md`, which RFC-0072 adds, and RFC-0072's rules 27 to 32 link `testing.md`.
 6. Existing tests are judged and cut only when an issue asks for it, per crate, in a pull request that lists each removed test with its category.
 
 ## Alternatives
