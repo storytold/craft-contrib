@@ -42,6 +42,16 @@ The full text is in [RFC-0000](rfcs/0000-decision-process.md).
 
 See the [open pull requests](https://github.com/storytold/craft-contrib/pulls) for proposals currently under discussion. Accepted decisions are recorded in [`rfcs/`](rfcs/).
 
+The Apple proposals currently under review are:
+
+- [RFC-0041](rfcs/0041-native-apple-shells.md) — a scoped Swift/SwiftUI/UIKit
+  iPhone/iPad host exception around existing Rust behavior
+- [RFC-0042](rfcs/0042-apple-distribution-lanes.md) — opt-in Apple validation,
+  distribution lanes and Mac App Store readiness gates
+
+Neither proposal is adopted policy before maintainer review. No app instruction
+blocks or releases change here.
+
 ## How you can help
 
 **Comment on an open RFC.** This helps the most, and it is the easiest thing to do. A useful comment does not need to be technical:

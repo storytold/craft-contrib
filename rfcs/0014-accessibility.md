@@ -1,5 +1,7 @@
 # RFC-0014: Accessibility in every UI change
 
+Updated by: [RFC-0041](0041-native-apple-shells.md).
+
 Related: storytold/craft-libs#437 (shared work), RFC-0005, RFC-0006,
 RFC-0007.
 
