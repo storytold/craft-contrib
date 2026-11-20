@@ -26,8 +26,10 @@ both PRs.
 2. **Merged RFCs keep their numbers.** Numbers are not contiguous: pull
    requests that are not RFCs, and RFCs that don't merge, use numbers too.
 3. **Open RFCs move to their PR numbers,** except the four whose PR number
-   a merged RFC already uses: #15, #23, #30 and #34 keep the numbers in
-   their titles (RFC-0011, RFC-0016, RFC-0018 and RFC-0019). No later pull
+   a merged RFC already uses: #15, #23 and #34 keep the numbers in their
+   titles (RFC-0011, RFC-0016 and RFC-0019), and #30 takes RFC-0044, since
+   RFC-0018 is open PR #18's number. Each of these numbers belongs to an
+   issue, so no pull request can take it. No later pull
    request can collide, because pull request numbers are already past every
    merged RFC's number.
 
