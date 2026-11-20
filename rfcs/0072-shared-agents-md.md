@@ -1,6 +1,6 @@
 # RFC-0072: One shared AGENTS.md
 
-Updated by: RFC-NNNN
+Updated by: [RFC-0080](0080-open-pr-extensions.md)
 
 Obsoletes: [RFC-0006](0006-coding-agents.md), [RFC-0040](0040-shared-library-first-guidance.md)
 

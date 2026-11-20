@@ -1,4 +1,4 @@
-# RFC-NNNN: Extensions offered on an open pull request
+# RFC-0080: Extensions offered on an open pull request
 
 Updates: [RFC-0072](0072-shared-agents-md.md)
 
