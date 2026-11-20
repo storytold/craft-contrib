@@ -1,4 +1,4 @@
-# RFC-NNNN: Document-scoped VBA, starting with user-defined functions
+# RFC-0079: Document-scoped VBA, starting with user-defined functions
 
 Related: storytold/gridcraft#6 and #1143 (VBA requests), storytold/gridcraft#990,
 #143 and #3332–#3334 (VBA pull requests), storytold/wordcraft#172, #2586 and
@@ -194,7 +194,7 @@ Merging this RFC means:
 - phase 1 pull requests can be reviewed against this text;
 - the "out of scope" lines in GridCraft's `docs/target-app-parity.md` and
   `docs/gaps.md`, and WordCraft's `docs/gaps.md`, are updated to say
-  "workplace-bound VBA is out of scope; document-scoped VBA follows RFC-NNNN".
+  "workplace-bound VBA is out of scope; document-scoped VBA follows RFC-0079".
 
 It does not decide phase 2, and it does not commit any maintainer to writing the
 code.
