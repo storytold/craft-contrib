@@ -1,4 +1,4 @@
-# RFC-NNNN: Add `MIT-0` to the licence allowlist
+# RFC-0081: Add `MIT-0` to the licence allowlist
 
 RFC-0027 left `MIT-0` out because nothing depended on it: "an identifier is added when something depends on it".
 Something now does. `constant_time_eq`, licensed `CC0-1.0 OR MIT-0 OR Apache-2.0`, is a dependency of the official
