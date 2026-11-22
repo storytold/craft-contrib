@@ -1,9 +1,9 @@
-# RFC-0049: A build chooses the interface languages it embeds
+# RFC-0074: A build chooses the interface languages it embeds
 
-Related: RFC-0011 (storytold/craft-contrib#15, language data, `CRAFT_PROOF_EMBED`), RFC-0036
+Related: RFC-0011 (storytold/craft-contrib#15, language data, `CRAFT_PROOF_EMBED`), RFC-0056
 (storytold/craft-contrib#56, which leaves the interface catalogs to "its own decision, in its own
-RFC"), RFC-0023 (web builds' memory budgets), RFC-0039 (storytold/craft-contrib#60, mobile
-builds), storytold/vectorcraft#3432 (closed).
+RFC"), RFC-0023 (web builds' memory budgets), RFC-0060 (storytold/craft-contrib#60, mobile
+builds), RFC-0072 (the shared app rules), storytold/vectorcraft#3432 (closed).
 
 ## Summary
 
@@ -20,7 +20,13 @@ the languages its own users need and no others.
 
 ## Motivation
 
-- **The catalogs are a large share of a web build.** On 19 November (bedbbad72f) VectorCraft's 28
+- **The catalogs are a large share of a web build, today.** PhotoCraft is on craft-i18n and has a
+  web build, whose CI job ("web build and wasm size gate") builds with `CRAFT_I18N_REQUIRED=1`
+  and so embeds every locale that has a `photocraft.tsv`. At its pinned craft-i18n commit
+  (e56d262) that is 35 locales: 6,438,689 bytes of `photocraft.tsv` and 850,328 of `common.tsv`,
+  7,289,017 in all (2,241,533 with `gzip -9`, 1,254,307 with `brotli -q 11`). (Measured by
+  @hectorviov on this pull request.)
+- **And growing.** On 19 November (bedbbad72f) VectorCraft's 28
   interface catalogs are 20,885,397 bytes as embedded: 6,073,327 bytes with `gzip -9` and
   3,053,717 with `brotli -q 11`. On 22 October (cee30f05b) the same directory held 24 catalogs
   and 7,060,092 bytes, so they nearly tripled in four weeks as languages and strings were added.
@@ -47,9 +53,13 @@ the languages its own users need and no others.
 1. `CRAFT_I18N_EMBED` names the interface locales a build embeds: a comma-separated list of
    craft-i18n locale codes (`de,fr,pt-br`), `all`, or `en`. Unset or empty means `all`.
 2. It is read where `CRAFT_I18N_DIR` is read: the app's `build.rs`, which writes the `CRAFT_I18N`
-   static. A locale it doesn't name is left out of the static, so its catalog is not in the binary.
+   static. A locale it doesn't name is left out of the static, so its catalogs (the shared one and the app's) are not in the binary.
 3. `en` embeds no catalog: English is the source text.
-4. A named locale brings its fallback chain: `pt-br` brings `pt`, `zh-hant-hk` brings `zh-hant`.
+4. A named locale brings its fallback chain, as the `craft-i18n` crate builds it: a locale with a
+   region subtag falls back to the locale without it, when that one has a catalog (`pt-br` to
+   `pt`; a script subtag never falls back, so `sr-latn` does not bring `sr`). No locale on
+   craft-i18n `main` has such a parent today (it has `pt-br` and no `pt`), so this rule applies
+   only once one is added.
 5. A named locale with no catalog in the checkout is a `cargo::warning`, or a `cargo::error` under
    `CRAFT_I18N_REQUIRED=1`, as a missing checkout is today.
 6. `cargo::rerun-if-env-changed=CRAFT_I18N_EMBED`.
@@ -70,11 +80,11 @@ the languages its own users need and no others.
 
 An app that still embeds its own catalogs honors the same variable in its own build, with the
 same meaning, so a packager learns one switch. VectorCraft is such an app: its catalogs are
-the evidence above, and it would read the variable in `vectorcraft-ui-egui`'s build. (A fork of
+the evidence of growth above, and it would read the variable in `vectorcraft-ui-egui`'s build. (A fork of
 VectorCraft, addibble/vectorcraft, does this today with one Cargo feature per language and
 section 2's behavior, without section 1.4's fallback chain: its `pt-br` catalog is complete on
-its own. That form is non-normative, and the variable replaces it.) RFC-0048's shared rules
-(storytold/craft-contrib#72, proposed) say translations are added in storytold/craft-i18n. When
+its own. That form is non-normative, and the variable replaces it.) The shared app rules
+(RFC-0072, standards/app-agents.md point 16) say translations are added in storytold/craft-i18n. When
 such an app moves its catalogs there, the variable keeps its meaning.
 
 ### 4. Web builds
@@ -94,7 +104,8 @@ builds embed the locales `CRAFT_I18N_EMBED` names, `all` by default".
 1. `CRAFT_I18N_EMBED=en` gives a binary with no catalog. The picker lists English only.
 2. `CRAFT_I18N_EMBED=de` offers English and German only. A saved `fr` setting, or `fr` set by the
    app's command, reads as Automatic and is kept; an unknown code is refused.
-3. `CRAFT_I18N_EMBED=pt-br` embeds `pt` too, and a string `pt-br` lacks falls back to `pt`.
+3. With a test checkout that has `pt` and `pt-br`, `CRAFT_I18N_EMBED=pt-br` embeds `pt` too, and a
+   string `pt-br` lacks falls back to `pt`.
 4. A system locale list of `ja, de` with only `de` embedded shows German.
 5. Unset, the static is the same as today's.
 
@@ -102,7 +113,7 @@ builds embed the locales `CRAFT_I18N_EMBED` names, `all` by default".
 
 1. **One variable or two.** A "Language build" might want the same locales for the interface and
    for proofing. Should `CRAFT_I18N_EMBED` also set `CRAFT_PROOF_EMBED` when that is unset?
-2. **Web and mobile defaults.** Should a web release, or a mobile one under RFC-0039, default to
+2. **Web and mobile defaults.** Should a web release, or a mobile one under RFC-0060, default to
    a smaller set, or keep `all` until catalogs can be fetched on demand?
 
 ## References
