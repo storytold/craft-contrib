@@ -1,5 +1,9 @@
 # RFC-0006: A shared section for coding agents (`AGENTS.md`)
 
+Obsoleted by: [RFC-0072](0072-shared-agents-md.md)
+
+Updated by: [RFC-0040](0040-shared-library-first-guidance.md)
+
 Related: storytold/craft-libs#37, storytold/craft-libs#38.
 
 ## Summary
