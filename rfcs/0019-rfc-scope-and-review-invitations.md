@@ -48,10 +48,8 @@ resolution, unless an owner uses RFC-0000's explained early-decision path.
 Opening this draft and time spent discussing RFC-0000 do not start or satisfy
 that period.
 
-[RFC-0013](https://github.com/storytold/craft-contrib/pull/17) separately proposes
-how accepted RFCs are amended. It remains a proposal; this RFC does not depend
-on treating it as adopted. Before accepting this RFC, reconcile its amendment
-format with any process changes accepted in the meantime.
+[RFC-0013](0013-amending-rfcs.md) is the accepted process for how accepted
+RFCs are amended. This RFC follows that format.
 
 This proposal does not change reviewer eligibility, require a non-committer
 reviewer, or change branch protection.
