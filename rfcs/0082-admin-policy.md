@@ -1,4 +1,4 @@
-# RFC-NNNN: Administrator policies for the launcher and the Craft apps
+# RFC-0082: Administrator policies for the launcher and the Craft apps
 
 ## Summary
 
