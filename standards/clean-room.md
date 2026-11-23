@@ -32,7 +32,13 @@ Two roles keep what is learned from the app apart from the code. One agent sessi
    - MUST NOT instrument the app: no tracing, debugging, memory or traffic inspection;
    - MUST NOT read, disassemble, decompile or copy anything inside the app's install or bundle, and MUST NOT copy its fonts, presets, templates, profiles, plug-ins or sample files.
 2. **Implementer.** An agent that writes code. It MUST NOT operate the app or read its install. It works from behaviour specifications and their screenshots, public documentation and published format specifications.
-3. **Measurements.** Numbers measured from the app's output, such as exports compared with each other or parameters of our own model fitted to them, are not yet covered by these rules and need their own decision. Until then, you MUST NOT start work that uses them; existing work stays as it is.
+3. **Measurements and fitted models.** You MAY fit parameters of our own documented mathematical model (such as a 3×3 colour matrix or a global tone curve) to pairs of inputs and exported outputs from a proprietary app, provided:
+   - the inputs are files a contributor owns or we generate;
+   - the app is operated as a black box by an Observer agent with settings recorded in a behaviour specification;
+   - no code, binary, shader, profile, LUT or asset inside the app's install is inspected or copied;
+   - an Implementer agent who has not operated the app fits our own model to the decoupled data;
+   - the fitted numbers and their provenance are recorded in `ATTRIBUTION.md`;
+   - the exported images and intermediate captures remain in the gitignored `plan/` folder and are never committed or published.
 4. **Captures.** Screenshots, recordings and observation notes stay in the gitignored `plan/` folder. You SHOULD NOT commit, publish, link, embed or trace them, and SHOULD NOT attach them to issues or pull requests.
 
 ## Assets
