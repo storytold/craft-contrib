@@ -1,4 +1,4 @@
-# RFC-0018: Gap and parity items are files
+# RFC-0044: Gap and parity items are files
 
 Updates: [RFC-0017](0017-progress-doc-fragments.md) (open-PR migration).
 
@@ -143,7 +143,7 @@ Before any app rollout, the shared joiner and app checks demonstrate:
 Under [RFC-0013](0013-amending-rfcs.md), the only change this PR makes to
 accepted RFC-0017 is the `Updated by:` back-link under its title; the
 open-PR migration requirement above is stated here, not in RFC-0017. The
-back-link lands only together with an accepted RFC-0018. The comments
+back-link lands only together with an accepted RFC-0044. The comments
 retaining these rollout requirements are linked below; approval of the
 approach is not evidence that the tests or migration have already shipped.
 
