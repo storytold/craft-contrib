@@ -1,4 +1,4 @@
-# RFC-NNNN: Permitted Use of Model Parameters Fitted to Proprietary App Outputs
+# RFC-0085: Permitted Use of Model Parameters Fitted to Proprietary App Outputs
 
 Updates: [RFC-0072](0072-shared-agents-md.md)
 
