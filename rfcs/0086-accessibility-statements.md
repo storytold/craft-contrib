@@ -14,26 +14,25 @@ in an **Accessibility** tab on the repository overview and in the **About**
 sidebar. Keeping one canonical source in `craft-contrib`—following the same
 shared-prefix and integrity-stamp model as [RFC-0072](0072-shared-agents-md.md)
 (`standards/app-agents.md`)—gives users a predictable, plain-language home for
-accessibility goals, workarounds, and barrier reporting without letting 18
-copies drift apart.
+workarounds and barrier reporting without letting 18 copies drift apart, while
+explicitly guarding against coding agents treating `ACCESSIBILITY.md` as a
+mandate to overbuild or restyle controls.
 
 ## Motivation
 
 [RFC-0014](0014-accessibility.md) and
-[`standards/accessibility.md`](../standards/accessibility.md) establish strong
-engineering and review rules for contributors and coding agents, and each
+[`standards/accessibility.md`](../standards/accessibility.md) establish
+engineering and review guidance for contributors and coding agents, and each
 repository's `AGENTS.md` summarizes them. However, a user who arrives at an
 application repository after hitting a keyboard, screen-reader, magnifier, or
 contrast barrier has no surfaced user-facing statement telling them:
 
-- what assistive technologies and platforms the app targets (`egui` +
-  `AccessKit`, WCAG 2.2 AA via WCAG2ICT on desktop and WCAG 2.2 AA on web), and
-  what is still early-alpha work in progress;
-- known suite-wide barriers and practical workarounds (including `<app>-cli`
+- how the apps expose accessibility (`egui` + `AccessKit` across desktop and
+  web) and what is still early-alpha work in progress;
+- known suite-wide gaps and practical workarounds (including `<app>-cli`
   headless workflows where available);
 - how to report a barrier without disclosing a disability or recording
-  screenshots, and how `accessibility`, `needs screen reader test`, and
-  `priority: high` / `priority: critical` triage work.
+  screenshots, and what happens after filing.
 
 GitHub now highlights `ACCESSIBILITY.md` directly on repository overview pages
 ([GitHub Blog announcement](https://github.blog/open-source/maintainers/accessibility-statements-now-have-a-home-on-github/)).
@@ -45,6 +44,17 @@ capabilities improve. A single reference document in `craft-contrib`, copied
 into the application repositories with a small per-app tail, avoids both
 problems.
 
+At the same time, coding agents routinely read root markdown files when working
+in a repository. Sweeping normative slogans or simplified WCAG checklists in a
+root `ACCESSIBILITY.md` cause models to overbuild—for example, restyling a flat
+button's resting background to hit a 3:1 contrast ratio when its label and focus
+ring already satisfy the user need, or bolting bespoke accessibility scaffolding
+onto unrelated pull requests. `standards/app-accessibility.md` therefore uses
+calm, descriptive user-facing language, omits duplicate engineering checklists,
+and carries an explicit guardrail instructing coding agents to defer to
+`AGENTS.md` and `standards/accessibility.md`, preserve shared theme tokens and
+visual design, and solve actual user needs rather than naive rule readings.
+
 ## Proposal
 
 1. **The shared reference document.** `standards/app-accessibility.md` in this
@@ -54,7 +64,12 @@ problems.
    factual status (such as newly resolved suite-wide barriers) are ordinary pull
    requests here; policy changes to our accessibility commitments or contributor
    rules require an RFC updating [RFC-0014](0014-accessibility.md) or this RFC.
-2. **Scope.** Every public `storytold` Craft repository that publishes
+2. **Agent anti-overbuilding guardrail.** `standards/app-accessibility.md` stays
+   user-focused rather than repeating normative engineering checklists, and
+   includes a dedicated `## Note for contributors and coding agents` section
+   directing agents not to overbuild, restyle shared theme tokens to chase naive
+   interpretations of standards, or widen unrelated pull requests.
+3. **Scope.** Every public `storytold` Craft repository that publishes
    application builds carries a root `ACCESSIBILITY.md`. Today those 18
    repositories are:
    `anicraft`, `cadcraft`, `craft-anything`, `craft-launcher`, `deckcraft`,
@@ -62,7 +77,7 @@ problems.
    `lightcraft`, `materialcraft`, `pdfcraft`, `photocraft`, `soundcraft`,
    `texturecraft`, `vectorcraft`, and `wordcraft`. New Craft applications added
    to the suite include `ACCESSIBILITY.md` when created.
-3. **Repository file layout and integrity stamp.** Once this RFC merges, each
+4. **Repository file layout and integrity stamp.** Once this RFC merges, each
    application repository's root `ACCESSIBILITY.md` carries the normalized
    contents of `standards/app-accessibility.md` between HTML comment markers:
 
@@ -78,14 +93,14 @@ problems.
    app-specific known barriers if any, and direct links to open an issue, view
    open `accessibility` issues, and view pull requests labelled
    `needs screen reader test` in that repository.
-4. **Validation and sync.** A follow-up pull request in
+5. **Validation and sync.** A follow-up pull request in
    `storytold/craft-common-actions` extends the existing `house-rules` generator
    and check (or adds a companion mode using the same normalization and commit
    ancestry check) to verify `craft-accessibility` blocks in repositories where
    `ACCESSIBILITY.md` is present: an edited block or unmerged revision fails,
    and an intact older revision warns when `standards/app-accessibility.md` has
    changed on `main`.
-5. **Amendment to RFC-0014.** Updates [RFC-0014](0014-accessibility.md) point 10
+6. **Amendment to RFC-0014.** Updates [RFC-0014](0014-accessibility.md) point 10
    ("Where it lives") to add `standards/app-accessibility.md` here and root
    `ACCESSIBILITY.md` in application repositories alongside
    `standards/accessibility.md`.
@@ -125,7 +140,7 @@ problems.
   issue links could not appear in the page.
 - **Maintain independent `ACCESSIBILITY.md` files per repository.** Suite-wide
   facts (`AccessKit` platform support, `craft-libs#437` limitations, triage and
-  label rules) would quickly drift across 18 repositories.
+  label practices) would quickly drift across 18 repositories.
 - **Put only a one-line redirect stub in each repository.** People reading an
   accessibility statement have often just hit a barrier; forcing an extra jump
   to another repository before showing workarounds or how to report the issue
