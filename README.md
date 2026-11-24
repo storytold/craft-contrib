@@ -16,7 +16,7 @@ The Craft apps are a suite of independent creative applications for desktop and 
 | --- | --- |
 | `rfcs/` | Decision documents. Each one proposes a change and records why it was accepted. |
 | `AGENTS.md` | Notes for agents working in this repository. |
-| `standards/` | `app-agents.md`, the shared rules copied into every Craft repository's `AGENTS.md`, and the longer rules it links. |
+| `standards/` | `app-agents.md` and `app-accessibility.md`, copied into Craft repositories, and the longer rules they link. |
 
 The most important documents:
 
@@ -29,6 +29,7 @@ The most important documents:
 - [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
 - [Licences](standards/licences.md) — the licence allowlist, fonts and vendored code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
+- [App accessibility](standards/app-accessibility.md) — the shared user-facing statement copied into each Craft application's `ACCESSIBILITY.md` ([RFC-NNNN](rfcs/NNNN-accessibility-statements.md))
 - [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
