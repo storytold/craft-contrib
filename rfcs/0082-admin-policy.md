@@ -3,9 +3,10 @@
 ## Summary
 
 An organization can set the ArtCraft Launcher's and each Craft app's settings,
-and lock them, through Intune, Group Policy, a macOS configuration profile or a
-Linux system file. Every app reads its own policy through one craft-libs crate,
-`craft-policy`. The suite ships one ADMX/ADML template for all of its apps.
+and lock them: on Windows through Group Policy or Intune, on macOS through a
+configuration profile from any MDM, and on Linux through a system file that any
+configuration-management tool can place. Every app reads its own policy
+through one craft-libs crate, `craft-policy`. The suite ships one ADMX/ADML template for all of its apps.
 
 Affects: craft-libs (new crate), craft-launcher (templates, admin guide,
 install and update policy), and every app in the suite (PhotoCraft,
@@ -53,25 +54,92 @@ pins it already hands apps through `CRAFT_VERSIONS_FILE`.
   and `/etc/artcraft-launcher/policy.json`.
 - These names never change once released. An app that is renamed keeps its
   old key.
-- The JSON file is the object #5054 reads, for example
+
+Every platform uses the same policy names. `DisableUpdateCheck` is the
+registry value name on Windows, the preference key on macOS and the JSON key
+on Linux. The same name under `Defaults` sets a default instead of a lock.
+One reader in
+`craft-policy` turns all three into the same table, so precedence (section 3),
+invalid values (section 5) and the automation results (section 6) work the
+same everywhere. The templates and samples in section 8 come from the same
+`policies.toml` (section 7).
+
+#### Windows: Group Policy and Intune
+
+- The app reads `Software\Policies\ArtCraft\<App>` in HKLM and HKCU.
+  Section 4 says how the two hives combine.
+- A switch is a `REG_DWORD` 0 or 1, a number is a `REG_DWORD`, and a choice or
+  text is a `REG_SZ`.
+- **Deploying it.** An admin loads the suite ADMX/ADML (section 8) into the
+  Group Policy central store
+  ([Create and manage the central store](https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store))
+  or imports them into Intune
+  ([Import custom ADMX and ADML templates](https://learn.microsoft.com/en-us/intune/intune-service/configuration/administrative-templates-import-custom)).
+  Any tool that can write those registry values works the same way.
+- Microsoft's ADMX ingestion for Win32 apps refuses policies that write under
+  `System`, `Software\Microsoft` or `Software\Policies\Microsoft`, with listed
+  exceptions. Its sample uses `software\policies\<vendor>\<app>`
+  ([Win32 and Desktop Bridge app ADMX policy ingestion](https://learn.microsoft.com/en-us/windows/client-management/win32-and-centennial-app-policy-configuration)).
+  The ADMX `key` attribute names the key without the hive, and `class` picks
+  Machine, User or Both
+  ([ADMX schema](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/policy/admx-schema)).
+
+#### macOS: configuration profiles from any MDM
+
+- **Where the app reads it.** The app reads its preference domain,
+  `ai.storyteller.<id>`, through the system preferences API. It doesn't read
+  files directly. A value counts as policy only when the API reports it as
+  forced. Apple documents `objectIsForced(forKey:)` as returning true "if an
+  administrator provides a value for the key", and says apps "can't change the
+  value of managed keys" and should disable the UI for them
+  ([objectIsForced(forKey:)](https://developer.apple.com/documentation/foundation/userdefaults/objectisforced(forkey:))).
+  #5054 uses `CFPreferencesAppValueIsForced`, the Core Foundation form of the
+  same check. A value the user writes with `defaults write` is not forced, so
+  it is never policy.
+- **How an admin deploys it.** Any MDM that installs configuration profiles
+  can deliver policy. Jamf is one, and the RFC describes only the standard
+  mechanism, not any vendor's own behaviour. The profile carries a payload of
+  type `com.apple.ManagedClient.preferences`. Its `PayloadContent` is keyed by
+  the preference domain, and the policy values go in that domain's `Forced`
+  array, under `mcx_preference_settings`. Apple's page shows this layout, and
+  lists the payload for macOS on both the device and the user channel
+  ([ManagedPreferences](https://developer.apple.com/documentation/devicemanagement/managedpreferences)).
+  A profile can also be installed by hand, which that page also lists.
+- **Locks and defaults.** Locks are the forced keys at the top of the domain.
+  Defaults are a forced dictionary named `Defaults` in the same domain, with
+  the same key names. The app treats its entries as defaults (section 3), so
+  the user can still change them.
+- Apple's payload also has set-once preferences
+  ([ManagedPreferences](https://developer.apple.com/documentation/devicemanagement/managedpreferences)).
+  This RFC doesn't use them, because the app can't tell a set-once value from
+  one the user chose (see Open questions).
+- Each launcher release ships a sample `.mobileconfig` (section 8). An admin
+  uploads it to their MDM as a custom profile.
+
+#### Linux and FreeBSD: a system policy file
+
+- **Where the app reads it.** The app reads `/etc/<id>/policy.json`, or
+  `/usr/local/etc/<id>/policy.json` on FreeBSD.
+  - The FHS says `/etc` holds configuration files, "a local file used to
+    control the operation of a program", and recommends a subdirectory per
+    program
+    ([FHS 3.0, /etc](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch03s07.html)).
+  - FreeBSD keeps configuration for programs installed by `pkg` or ports in
+    `/usr/local/etc`
+    ([hier(7)](https://man.freebsd.org/cgi/man.cgi?query=hier&sektion=7)).
+- **Format.** It is the JSON object #5054 reads. Lock keys are at the top
+  level and a `Defaults` object holds the defaults, for example
   `{"DisableUpdateCheck": true, "Defaults": {"Theme": "dark"}}`.
   - Unknown keys are ignored, so a newer file works with an older app.
   - A file over 64 KB, or anything there that isn't a regular file, counts as
-    unreadable.
+    unreadable (section 5).
   - So does a file anyone but root can write. This check is new; #5054 does
     not have it.
-- On Windows, a switch is a `REG_DWORD` 0 or 1, a number a `REG_DWORD`, and a
-  choice or text a `REG_SZ`.
-
-Microsoft's ADMX ingestion for Win32 apps refuses policies that write under
-`System`, `Software\Microsoft` or `Software\Policies\Microsoft`, with listed
-exceptions. Its sample uses `software\policies\<vendor>\<app>`
-([Win32 and Desktop Bridge app ADMX policy ingestion](https://learn.microsoft.com/en-us/windows/client-management/win32-and-centennial-app-policy-configuration)).
-
-On macOS, #5054 reads a value only when `CFPreferencesAppValueIsForced` says
-it is forced, so a value the user writes with `defaults write` is not policy.
-We could not read Apple's page for that function (it needs JavaScript). The
-macOS PR in craft-libs cites it before it merges.
+- **One level.** The file applies to every user on the machine. There is no
+  per-user policy file, because a file the user can write is not policy.
+- **How an admin deploys it.** Any tool that can place a root-owned file
+  works: a configuration-management tool, a system package, or a disk image.
+  Each launcher release ships a sample `policy.json` (section 8).
 
 ### 3. Two layers: locks and defaults
 
@@ -275,6 +343,24 @@ for RFC-0029. App PRs follow that file.
 
 ## Open questions
 
+- **macOS, device and user channel.** Apple lists the managed-preferences
+  payload on both channels
+  ([ManagedPreferences](https://developer.apple.com/documentation/devicemanagement/managedpreferences)).
+  We found no Apple page that says which forced value the preferences API
+  returns when both channels, or two profiles, set the same key. Until that is
+  verified, the guide tells admins to set each key in one profile only, and
+  section 4's stricter-wins rule is Windows only.
+- **macOS, set-once values.** We found no Apple page that describes how
+  set-once preferences behave once applied. If they turn out to suit
+  defaults, a later RFC can allow them beside the forced `Defaults`
+  dictionary.
+- **macOS, Apple's Core Foundation page.** We could not read Apple's page for
+  `CFPreferencesAppValueIsForced`; the Foundation page is cited instead. The
+  macOS PR in craft-libs cites it before it merges.
+- **Linux, sandboxed packages.** We have not checked whether an app installed
+  as a Flatpak or Snap can read `/etc/<id>/policy.json` from inside its
+  sandbox. The Linux PR in craft-libs checks this for each package format the
+  suite ships.
 - Should values directly under `Software\Policies\ArtCraft`, such as
   `OrganizationName` or `DisableUpdateCheck`, apply to every app, with the
   app's own key winning?
