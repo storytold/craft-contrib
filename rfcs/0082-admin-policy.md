@@ -136,7 +136,17 @@ same everywhere. The templates and samples in section 8 come from the same
   - A file over 64 KB, or anything there that isn't a regular file, counts as
     unreadable (section 5).
   - So does a file anyone but root can write. This check is new; #5054 does
-    not have it.
+    not have it. The rule below was proposed by jcl-bit on
+    [pdfcraft#5054](https://github.com/storytold/pdfcraft/pull/5054#issuecomment-7134258768):
+    - The reader checks the file it opened (`fstat` on the handle), not the
+      path, so nothing can swap the file between the check and the read.
+    - Root owns the file. Others can't write it, and its group can write it
+      only if that group is root's.
+    - The folder (`/etc/<id>`, or `/usr/local/etc/<id>` on FreeBSD) must meet
+      the same rule, since a writable folder lets someone replace a file that
+      is itself locked down.
+    - A failed check counts as unreadable, so a file a user can write can only
+      make policy stricter.
 - **One level.** The file applies to every user on the machine. There is no
   per-user policy file, because a file the user can write is not policy.
 - **How an admin deploys it.** Any tool that can place a root-owned file
@@ -290,10 +300,12 @@ but not required. For reference:
   - the app, key root, macOS domain and file path as parameters;
   - the defaults layer;
   - the other value kinds;
-  - the `policies.toml` parser.
-- PdfCraft uses `Software\Policies\ArtCraft\PdfCraft`. #5054 uses
-  `SOFTWARE\Policies\PdfCraft` today and has not shipped, so no admin has to
-  migrate. Its macOS domain and Linux path already match.
+  - the `policies.toml` parser;
+  - the Linux ownership check (section 2). jcl-bit, who proposed it, offered
+    to write it.
+- PdfCraft uses `Software\Policies\ArtCraft\PdfCraft`. #5054 moved to that key
+  in 42cf20af, before shipping, so no admin has to migrate. Its macOS domain
+  and Linux path already match.
 - The reader comes from Microsoft's documentation and #5054, not from any
   other product's code ([standards/clean-room.md](../standards/clean-room.md)).
 
