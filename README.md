@@ -29,7 +29,7 @@ The most important documents:
 - [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
 - [Licences](standards/licences.md) — the licence allowlist, fonts and vendored code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
-- [App accessibility](standards/app-accessibility.md) — the shared user-facing statement copied into each Craft application's `ACCESSIBILITY.md` ([RFC-NNNN](rfcs/NNNN-accessibility-statements.md))
+- [App accessibility](standards/app-accessibility.md) — the shared user-facing statement copied into each Craft application's `ACCESSIBILITY.md` ([RFC-0086](rfcs/0086-accessibility-statements.md))
 - [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 

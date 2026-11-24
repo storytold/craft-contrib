@@ -1,4 +1,4 @@
-# RFC-NNNN: Shared ACCESSIBILITY.md for Craft applications
+# RFC-0086: Shared ACCESSIBILITY.md for Craft applications
 
 Updates: [RFC-0014](0014-accessibility.md)
 
@@ -94,7 +94,25 @@ problems.
 
 1. Merge `standards/app-accessibility.md` and this RFC in `craft-contrib`.
 2. Stamp the draft pull requests across all 18 application repositories from the
-   merged `craft-contrib` `main` commit SHA and mark them ready for review.
+   merged `craft-contrib` `main` commit SHA and mark them ready for review:
+   - [storytold/anicraft#602](https://github.com/storytold/anicraft/pull/602)
+   - [storytold/cadcraft#3430](https://github.com/storytold/cadcraft/pull/3430)
+   - [storytold/craft-anything#2377](https://github.com/storytold/craft-anything/pull/2377)
+   - [storytold/craft-launcher#1598](https://github.com/storytold/craft-launcher/pull/1598)
+   - [storytold/deckcraft#2344](https://github.com/storytold/deckcraft/pull/2344)
+   - [storytold/designcraft#3197](https://github.com/storytold/designcraft/pull/3197)
+   - [storytold/effectcraft#4140](https://github.com/storytold/effectcraft/pull/4140)
+   - [storytold/figcraft#2588](https://github.com/storytold/figcraft/pull/2588)
+   - [storytold/filmcraft#5213](https://github.com/storytold/filmcraft/pull/5213)
+   - [storytold/gridcraft#4711](https://github.com/storytold/gridcraft/pull/4711)
+   - [storytold/lightcraft#4707](https://github.com/storytold/lightcraft/pull/4707)
+   - [storytold/materialcraft#315](https://github.com/storytold/materialcraft/pull/315)
+   - [storytold/pdfcraft#8184](https://github.com/storytold/pdfcraft/pull/8184)
+   - [storytold/photocraft#16614](https://github.com/storytold/photocraft/pull/16614)
+   - [storytold/soundcraft#1731](https://github.com/storytold/soundcraft/pull/1731)
+   - [storytold/texturecraft#793](https://github.com/storytold/texturecraft/pull/793)
+   - [storytold/vectorcraft#9208](https://github.com/storytold/vectorcraft/pull/9208)
+   - [storytold/wordcraft#7710](https://github.com/storytold/wordcraft/pull/7710)
 3. Add `craft-accessibility` block generation and checking in
    `storytold/craft-common-actions`.
 
