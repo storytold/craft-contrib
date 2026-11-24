@@ -1,4 +1,4 @@
-# RFC-0009: Shared infrastructure admission
+# RFC-0010: Shared infrastructure admission and ownership
 
 Related: storytold/craft-libs#24, storytold/craft-libs#96.
 
@@ -23,7 +23,9 @@ Additionally, admitting code to shared infrastructure without identifying who ma
    - *Authentication contracts*: Identity verification, session tokens, or credential management shared across ecosystem services.
    - *Interoperability primitives*: Core document interchange structures, standard file format parsers, or wire protocol definitions intended for cross-application communication.
    - *Common platform contracts*: Low-level operating system abstractions, thread lifecycle coordination, or native window event primitives that must remain uniform across applications.
-   Admission under an exception requires explicit approval from maintainers during the RFC or pull request review.
+   The proposal must explain which cross-app contract would be at risk if implementations diverged, and why that contract needs shared ownership before a second app adopts it. A faster build or a smaller app repository, by itself, is insufficient. For example, a helper that rearranges one app’s export dialog stays in that app until a second app needs it.
+
+   A maintainer other than the proposer approves the exception in the RFC or pull request. The crate README records who approved it, why, and when to re-review the exception if a second consumer has yet to adopt it. At that milestone the maintainer review records whether to retain the exception, move the crate back to the app, or plan a deprecation with its consumers.
 
 3. **Zero App Code Invariant**: Crates in `craft-libs` must never depend on any application crate (such as `photocraft`, `vectorcraft`, or `filmcraft`). Shared crates must remain reusable across applications and must not depend on application-specific crates. Shared presentation components are permitted when their interfaces and behavior are sufficiently generalizable.
 
@@ -36,6 +38,7 @@ Additionally, admitting code to shared infrastructure without identifying who ma
    - *Contract and ownership definition*: The contributor proposes the crate scope, public API types, error structures, and identified maintainer.
    - *Implementation*: The crate is implemented in `craft-libs` with independent unit tests and without application dependencies.
    - *Consumer adoption*: Applications update their dependencies to consume the shared crate, retiring redundant local implementations.
+   - *Ownership handoff*: When the responsible maintainer or team steps down, record the vacancy in the crate README and bring it to the craft-libs maintainers. Existing users can keep their pins. Pause new adoption until someone accepts ownership or maintainers record another disposition, including any security maintenance commitments.
 
 ## Alternatives
 
@@ -46,5 +49,6 @@ Additionally, admitting code to shared infrastructure without identifying who ma
 
 ## Open questions
 
-- How should shared crates admitted under an exception be evaluated if a second consumer does not adopt them within a reasonable period?
+- Should the suite set a default re-review interval for exceptions, alongside the milestone recorded at admission?
+- Should the suite set a standing security maintenance policy for crates without an owner?
 - Should large file format parsers (such as PDF or PSD) be hosted directly in `craft-libs` or in dedicated standalone repositories under the `storytold` organization?
