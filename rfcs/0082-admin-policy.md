@@ -21,7 +21,9 @@ deploys the apps can't turn off the update check
 ([craft-libs#769](https://github.com/storytold/craft-libs/issues/769)), pin a
 version for its fleet, or stop users changing a setting it has decided.
 [RFC-0025](0025-suite-accounts-and-tokens.md) left enterprise policy hooks out
-of scope.
+of scope. A school district that updates its workstations centrally asks for
+default and locked settings across all the apps
+([artcraft#2897](https://github.com/storytold/artcraft/issues/2897)).
 
 [pdfcraft#5054](https://github.com/storytold/pdfcraft/pull/5054) adds a policy
 reader to one app, with one policy (`DisableJavaScript`). If each app does the
@@ -294,6 +296,25 @@ but not required. For reference:
   migrate. Its macOS domain and Linux path already match.
 - The reader comes from Microsoft's documentation and #5054, not from any
   other product's code ([standards/clean-room.md](../standards/clean-room.md)).
+
+**Open work this RFC affects.** These open PRs, as of 2026-11-24, already read
+policy or turn off the update check. None has merged, so none has to migrate.
+- [pdfcraft#7551](https://github.com/storytold/pdfcraft/pull/7551) reads
+  `DisableUpdateCheck` from HKLM `SOFTWARE\Policies\PdfCraft` and ships its own
+  `PdfCraft.admx`. Under this RFC the same policy is a `policies.toml` entry
+  under `ArtCraft\PdfCraft`, read from both hives through `craft-policy`, and
+  its template text joins the suite ADMX.
+- [pdfcraft#5419](https://github.com/storytold/pdfcraft/pull/5419) reads a
+  host `policy.json` to require a secure redacted copy. That setting becomes a
+  lock read through `craft-policy`.
+- [craft-libs#2629](https://github.com/storytold/craft-libs/pull/2629) lets an
+  app turn craft-update's checks off. `DisableUpdateCheck` drives that switch.
+  When a lock turned it off, the message says the organization did (section 3).
+- Environment variables, command-line flags and build labels that turn off
+  the check at startup, such as
+  [pdfcraft#7639](https://github.com/storytold/pdfcraft/pull/7639), stay as
+  they are. They are not locks, so a lock on `DisableUpdateCheck` wins over
+  them.
 
 ### 10. Where the rule is kept
 
