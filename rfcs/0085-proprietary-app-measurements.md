@@ -74,15 +74,15 @@ In `standards/app-agents.md`, update the summary reference to clean-room observa
 
 ## Alternatives Considered
 
-1. **Physical ColorChecker captures under calibrated illuminants:**
-   - *Approach:* Photographing physical ColorChecker charts under calibrated 5000 K / 2856 K lighting with every unsupported camera body, as done for the EOS D60 (`clean-room/crw/10-chart-calibration.md`).
-   - *Why it falls short:* Requires physical possession of every camera body, calibrated lighting rigs, and physical reference targets. For out-of-production bodies (EOS 6D) or low-cost regional bodies (Rebel T100 / 4000D), contributors often have raw files but lack physical measurement laboratories.
+1. **Physical ColorChecker captures:**
+   - *Approach:* Photographing physical ColorChecker charts with every unsupported camera body, as done for the EOS D60 with sunlight and tungsten bulbs (`clean-room/crw/10-chart-calibration.md`).
+   - *Why it falls short:* The real limit is having both the camera body and a chart. For out-of-production bodies (EOS 6D) or low-cost regional bodies (Rebel T100 / 4000D), contributors often have raw files but lack the camera body, the chart, or both.
 2. **Waiting for open spectral sensitivity databases (`rawtoaces-data`):**
    - *Approach:* Waiting for Academy Software Foundation or academic labs to publish laboratory monochromator measurements for missing cameras.
-   - *Why it falls short:* `rawtoaces-data` has been stagnant on older consumer bodies; recent cameras and budget models are rarely measured in academic color science labs.
+   - *Why it falls short:* `rawtoaces-data` at e9b8503 (checked 2026-11-24) has no EOS 6D, Rebel T100, 2000D, 3000D or 4000D, and there is no known date for adding them.
 3. **Embedded-JPEG calibration fallback:**
    - *Approach:* Fitting matrices by comparing raw sensor values to in-camera embedded preview JPEGs.
-   - *Why it falls short:* In-camera JPEGs have non-linear tone curves, dynamic range optimization, sharpening, and proprietary color matrix twists baked into 8-bit YCbCr pixels, introducing significant error compared to a 16-bit linear or neutral export from an official raw developer.
+   - *Why it falls short:* Camera JPEGs are 8-bit and carry the camera's tone and picture settings; their accuracy against a vendor export has not been measured.
 4. **Reading vendor SDKs or decompiling binaries:**
    - *Approach:* Decompiling vendor raw processing libraries or reading leaked SDK header files.
    - *Why it falls short:* Directly violates Rule 23 of `AGENTS.md` and foundational clean-room principles.
