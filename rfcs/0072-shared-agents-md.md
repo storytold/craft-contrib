@@ -1,6 +1,6 @@
 # RFC-0072: One shared AGENTS.md
 
-Updated by: [RFC-NNNN](NNNN-rule-18-connected-agents.md)
+Updated by: [RFC-0090](0090-rule-18-connected-agents.md)
 
 Obsoletes: [RFC-0006](0006-coding-agents.md), [RFC-0040](0040-shared-library-first-guidance.md)
 

@@ -1,4 +1,4 @@
-# RFC-NNNN: Rule 18 covers connected agent entry points and adds a shared conformance check
+# RFC-0090: Rule 18 covers connected agent entry points and adds a shared conformance check
 
 Updates: [RFC-0072](0072-shared-agents-md.md)
 
