@@ -30,8 +30,13 @@ PdfCraft is the implementation POC and the completion standard for PDF:
   [storytold/pdfcraft#6747](https://github.com/storytold/pdfcraft/issues/6747)
 - Implementation PR:
   [storytold/pdfcraft#7843](https://github.com/storytold/pdfcraft/pull/7843)
-- POC follow-up commit:
-  [dbde699256f5594cdf755651de5363c40eba0c4a](https://github.com/storytold/pdfcraft/commit/dbde699256f5594cdf755651de5363c40eba0c4a)
+- Validated protected-open login-hint implementation:
+  [2901b8d0a6d861286268679b4abf586f44688ebf](https://github.com/storytold/pdfcraft/commit/2901b8d0a6d861286268679b4abf586f44688ebf)
+- External-tenant prerequisite runbook:
+  [b7f55a2e7e7a4c8930d770aa123762084a5252a8](https://github.com/storytold/pdfcraft/commit/b7f55a2e7e7a4c8930d770aa123762084a5252a8)
+
+The upstream implementation PR is the canonical current-state reference; the
+linked Storytold commit URLs resolve to its cross-repository source history.
 
 The POC exercises native SDK bridging, PFILE detection, rights and save-state
 seams, UI, automation/MCP, and packaging with synthetic tests. Protected PDF
