@@ -1,4 +1,4 @@
-# RFC-0012: Command-line conventions
+# RFC-0018: Command-line conventions
 
 ## Summary
 
@@ -6,7 +6,7 @@ Every Craft app's command-line tool (`<app>-cli`) behaves the same way and is
 built the same way: [clap](https://docs.rs/clap) derive types that parse the
 command line into typed values, [thiserror](https://docs.rs/thiserror) errors,
 the same exit codes and output streams, and generated shell completions and man
-pages. A CLI that follows these rules says so ("follows RFC-0012"), so a user
+pages. A CLI that follows these rules says so ("follows RFC-0018"), so a user
 who knows one Craft CLI knows them all, and a reviewer can check a CLI against
 one list instead of re-arguing each choice per app.
 
@@ -152,7 +152,7 @@ An app's `AGENTS.md` asks coding agents to run the same scan before pushing.
 An app adopts this RFC in one PR with a clear commit history, rather than a
 stack of small PRs: the work is repeating what photocraft already did. The PR
 moves the CLI to these rules, turns on the ast-grep workflow, and adds
-"Follows [RFC-0012](https://github.com/storytold/craft-contrib/blob/main/rfcs/0012-cli-conventions.md)"
+"Follows [RFC-0018](https://github.com/storytold/craft-contrib/blob/main/rfcs/0018-cli-conventions.md)"
 to the CLI's book page, listing any rule it doesn't follow yet and why, and
 which paths the ast-grep scan covers. An app claims the line once rule 2.7's
 tests pass and its packages install the generated files.
