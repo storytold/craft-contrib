@@ -1,4 +1,4 @@
-# RFC-NNNN: A contributor's own earlier code
+# RFC-0096: A contributor's own earlier code
 
 Updates: [RFC-0072](0072-shared-agents-md.md)
 
@@ -34,7 +34,7 @@ The rules exist to keep copyleft and proprietary knowledge out and to keep the c
 5. **§5 gains the same exception:** "…outside storytold, whatever its licence, other than your own code as §2 allows."
 6. **The ported code meets every repository rule as new code would:** tests, never-panic, layering, and the licence allowlist for anything it depends on.
 
-This RFC changes `standards/clean-room.md` §2 and §5. It adds `Updated by: RFC-NNNN` to RFC-0072, which created clean-room.md as RFC-0048. Comment period: 3 days, per RFC-0013, unless a maintainer sets longer.
+This RFC changes `standards/clean-room.md` §2 and §5. It adds `Updated by: RFC-0096` to RFC-0072, which created clean-room.md as RFC-0048. Comment period: 3 days, per RFC-0013, unless a maintainer sets longer.
 
 ## Alternatives
 

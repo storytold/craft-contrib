@@ -4,7 +4,7 @@ Obsoletes: [RFC-0006](0006-coding-agents.md), [RFC-0040](0040-shared-library-fir
 
 Updates: [RFC-0003](0003-claiming-issues.md), [RFC-0014](0014-accessibility.md)
 
-Updated by: [RFC-NNNN](NNNN-own-earlier-code.md)
+Updated by: [RFC-0096](0096-own-earlier-code.md)
 
 Depends on: RFC-0071 (`standards/testing.md`), [craft-contrib#71](https://github.com/storytold/craft-contrib/pull/71)
 
