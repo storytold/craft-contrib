@@ -1,4 +1,4 @@
-# RFC-NNNN: Hyphenation is read through craft-proof
+# RFC-0093: Hyphenation is read through craft-proof
 
 Updates: [RFC-0011](0011-language-data-in-craft-i18n.md)
 
@@ -43,7 +43,7 @@ craft-i18n's manifest under its licence rules when an app needs them.
 DesignCraft and VectorCraft still carry local hyphenation code. Under
 RFC-0011, each moves onto craft-proof in its own repository.
 
-This RFC updates RFC-0011, so its PR adds `Updated by: RFC-NNNN` to
+This RFC updates RFC-0011, so its PR adds `Updated by: RFC-0093` to
 RFC-0011.
 
 ## Alternatives
