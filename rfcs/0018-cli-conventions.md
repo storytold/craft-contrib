@@ -124,9 +124,9 @@ other apps can follow it.
      elvish and PowerShell files are generated but not installed.
    - **macOS and Windows are out of scope** for installed completions and man
      pages. The macOS CLI is a zip with the binary and the licence files, which
-     craft-launcher installs
-     ([craft-launcher#1422](https://github.com/storytold/craft-launcher/issues/1422)).
-     An app that wants them there puts them in its zip and changes the launcher in
+     craft-launcher is to install
+     ([craft-launcher#1422](https://github.com/storytold/craft-launcher/issues/1422),
+     open). An app that wants them there puts them in its zip and changes the launcher in
      its own pull request. The CLI's book page says which platforms ship them.
 
 ### 2. How it is built
