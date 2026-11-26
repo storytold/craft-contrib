@@ -1,4 +1,4 @@
-# RFC-0032: Shared crates for PBR materials and 3D rendering
+# RFC-0050: Shared crates for PBR materials and 3D rendering
 
 This RFC revises the 2026-10-27 design by addibble
 (<https://gist.github.com/addibble/0895ec701abaa70ac8f4bf6154750317>), which proposed moving
