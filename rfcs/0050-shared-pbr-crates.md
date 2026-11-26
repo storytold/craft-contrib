@@ -139,13 +139,13 @@ craft-common-actions `release.yml` fails on any other git source.
 ## VectorCraft
 
 VectorCraft is a planned consumer of the four crates. How its 3D effects use them, with new effect
-parameters and rendering tiers, is proposed in RFC-0038 (storytold/craft-contrib#59) and is not decided
+parameters and rendering tiers, is proposed in RFC-0059 (storytold/craft-contrib#59) and is not decided
 here.
 
 ## Defaults this RFC takes
 
 1. **Names.** `craft-geom` is not used, because storytold/craft-libs#1132, storytold/craft-libs#138 and
-   RFC-0030 (#46) use it for 2D code. `craft-gpu` is not used, because storytold/craft-libs#663 uses
+   RFC-0030 use it for 2D code. `craft-gpu` is not used, because storytold/craft-libs#663 uses
    it.
 2. **Geometry processing.** It goes in a new crate beside `craft-mesh`, because the `craft-mesh` README
    leaves normals, tangents and UVs to the apps. If the `craft-mesh` maintainers prefer it inside
@@ -159,7 +159,7 @@ here.
 5. **MikkTSpace.** The `mikktspace` 0.3.0 crate declares `MIT/Apache-2.0`. `MIT`, `Apache-2.0` and,
    since RFC-0027 (#41), `Zlib` are on the license allowlist in `standards/house-rules-rust.md`, so
    the crate is allowed whether or not its source files carry a Zlib notice.
-6. **Consumers and RFC-0009.** RFC-0009 (#10), still open, sets when code may move into craft-libs,
+6. **Consumers and RFC-0010.** RFC-0010 (#10), still open, sets when code may move into craft-libs,
    including its rule that a crate has two consuming apps and its rule that a crate names a responsible
    maintainer. The moves in this RFC follow whatever #10 decides. Each crate names at least two planned
    consumers in its README, but two crates have fewer than two consuming apps at the steps above:
