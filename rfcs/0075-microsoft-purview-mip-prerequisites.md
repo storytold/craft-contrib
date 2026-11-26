@@ -132,7 +132,7 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Official MIP SDK package | Release engineering | Every SDK adoption/release; repeat on SDK, security, OS, or architecture change | Download the official package from Microsoft's official MIP SDK channel. Verify the package, version, license, `redist.txt`, `include/`, and `bins/release/<arch>/` for each OS/architecture. Record version, SHA-256, source URL, and redist inventory. | Builds are reproducible and redistributable policy is reviewable. | SDK build fails closed or cannot be packaged. |
 | Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
 | Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
-| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery with no email textbox. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Follow RFC-0025: non-secret display identity, account handle, routing, and generation metadata belong in the shared suite account list; tokens and other secrets belong only in the shared platform secret/credential store. | A person can add, switch, and sign out accounts, and automation can report the active account without duplicating or exposing credentials. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
+| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery. An app may offer an optional work/school-email **login hint** only while opening a protected file; clear it after browser handoff and never persist it. Keep passwords/MFA and tenant selection on the Microsoft page. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Follow RFC-0025: non-secret display identity, account handle, routing, and generation metadata belong in the shared suite account list; tokens and other secrets belong only in the shared platform secret/credential store. | A person can add, switch, and sign out accounts, and automation can report the active account without duplicating or exposing credentials. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
 | Token renewal and authentication challenges | Storytold identity/engineering owner, per app integration | On provider-reported expiry or challenge; retest whenever authentication, SDK, or tenant policy changes | Use an approved identity implementation and secure credential storage where persistence is needed. Renew or reauthenticate the same account and tenant, preserve unsaved protected work, and revalidate SDK rights before continuing. Handle MFA, Conditional Access, revocation, and failure without plaintext fallback. Do not assume a fixed token lifetime. | Long-running protected sessions can continue only after identity and rights are verified. | Protected operations, saves, and recovery may fail after expiry; public use is blocked until safe renewal is implemented and tested. |
 | Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, and MFA/Conditional Access. Create tenant-issued fixtures for every claimed format and protection mode, including native protection and PFILE where claimed. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
@@ -336,17 +336,20 @@ or design traces.
 
 ### Microsoft account UX
 
-The suite will not ask the person to type or repeat an email address before
-Microsoft sign-in. The Microsoft sign-in screen owns account discovery,
-selection, MFA, Conditional Access, tenant consent, and account verification.
-PdfCraft passes no pretyped email field to Microsoft unless an automation/API
-caller explicitly supplies a login hint.
+The Microsoft sign-in page owns password entry, account selection, MFA,
+Conditional Access, tenant consent, and account verification. When a protected
+file is waiting to open, PdfCraft may offer one optional work/school-email
+**login hint** to skip a first account-identification screen. The hint is
+ephemeral: clear it at browser handoff, never persist or log it, and still allow
+the field to be empty so Microsoft shows its normal account chooser.
 
 When signed out:
 
-- Show one primary **Sign in** action.
+- Show one primary **Sign in** action for ordinary sign-in; a protected-open
+  gate may label that action **Continue with Microsoft**.
 - Do not show **Sign out**.
-- Do not show an account email textbox.
+- Do not require an email or password in the app. Show an email textbox only as
+  an optional protected-open login hint, not as credential capture.
 - If app configuration or the SDK is unavailable, show that state instead of
   a false sign-in action.
 
@@ -358,7 +361,7 @@ When signed in:
   wherever one identity label is needed.
 - Replace **Sign in** with **Sign out** for the active account.
 - Offer **Add account** to start Microsoft account selection without exposing
-  an email entry field.
+  the protected-open login-hint field.
 - Offer an account switcher only when more than one account is signed in.
 - The active account is the only account used for the MIP helper until the
   person switches or signs out.
