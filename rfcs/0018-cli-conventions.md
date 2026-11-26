@@ -14,26 +14,56 @@ The rules come from photocraft's move to clap
 ([photocraft#7071](https://github.com/storytold/photocraft/issues/7071), merged
 in [#9167](https://github.com/storytold/photocraft/pull/9167) and
 [#9194](https://github.com/storytold/photocraft/pull/9194)), which is the
-reference implementation.
+reference implementation. cadcraft and soundcraft have since taken most of its pattern.
 
 ## Motivation
 
-Twelve other Craft apps ship a CLI (cadcraft, deckcraft, designcraft,
-effectcraft, figcraft, filmcraft, gridcraft, lightcraft, pdfcraft, soundcraft,
-vectorcraft and wordcraft), and none of them uses clap: each parses its
-arguments its own way. The problems photocraft had before its port are likely in each of them:
+On 2026-11-26 the `main` branch of the storytold repositories had 19 `<app>-cli` crates: anicraft,
+cadcraft, chatcraft, craft-anything, deckcraft, designcraft, effectcraft, figcraft, filmcraft,
+gridcraft, lightcraft, loopcraft, materialcraft, pdfcraft, photocraft, soundcraft, texturecraft,
+vectorcraft and wordcraft. Seventeen are in a release (chatcraft and loopcraft are not). Appendix A
+lists them. Reading their source and running the released Linux x86_64 binaries shows:
+
+- **Five use clap, fourteen parse by hand.** cadcraft, craft-anything, figcraft, photocraft and
+  soundcraft use clap derive. The other fourteen each parse their own way, in 284 to 4467 lines per CLI.
+  Four crates (cadcraft, figcraft, photocraft, soundcraft) use thiserror. Fifteen of the nineteen
+  return `Result<_, String>` somewhere. Only cadcraft, chatcraft, photocraft and soundcraft run through a
+  `run(args, out, err)`-style function that tests can call.
+- **Exit codes differ.** All 17 released CLIs refuse an unknown top-level flag and print nothing on
+  stdout, but 8 exit 2 (rule 1.2) and 9 exit 1. helenkwok measured the same split on the macOS
+  releases of 13 November
+  ([comment](https://github.com/storytold/craft-contrib/pull/18#issuecomment-6870457576)): 8 on 2
+  and 10 on 1, with `solidcraft` as the eighteenth CLI, which has no repository to read. Her
+  measurement and this one are top-level behaviour; they are dated and cover one release each.
+- **Flags after a subcommand are not checked everywhere.** Given an unknown flag, the `commands`
+  subcommand of deckcraft, designcraft, filmcraft, lightcraft and vectorcraft exits 0 and prints its
+  normal output, so a mistyped flag (`--fromat`) is silently ignored. The other subcommands
+  were not probed.
+- **`--version` is top-level only for 16 of 17.** Only filmcraft prints the version for
+  `commands --version`. pdfcraft does not accept `-V`. Eight CLIs accept a `version` subcommand
+  (anicraft, deckcraft, designcraft, effectcraft, filmcraft, gridcraft, lightcraft, texturecraft).
+- **Overwriting is a flag in the clap CLIs only.** `--in-place` exists in cadcraft, photocraft and
+  soundcraft. No CLI reads an environment variable into a destructive flag today. The variables they
+  read are tokens, keys, paths, ports, locale and logging.
+- **Completions and man pages ship from three apps.** The Linux tarballs of cadcraft, photocraft and
+  soundcraft install bash, zsh and fish completions and a man page per command. The other fourteen
+  released apps ship none, and no macOS CLI zip carries them (helenkwok's finding, checked on
+  photocraft's zip).
+
+The problems photocraft had before its port show up in the hand-written CLIs:
 
 - A mistyped flag (`--fromat`) was silently ignored, and a repeated one quietly
-  took the last value.
+  took the last value. The ignored flag is measured above; repeated flags were not.
 - A bad value failed late, after work had started, or not at all.
 - Errors were strings, so a caller couldn't tell a usage error from a failure,
   and messages drifted from flag to flag.
-- `--help` was hand-written text that drifted from what the parser accepted.
+- `--help` was hand-written text that drifted from what the parser accepts.
 
-Fixing these per app, with different answers each time, would give users five
-different CLIs and reviewers five different sets of rules to remember.
+Fixing these per app, with different answers each time, would give users nineteen
+different CLIs and reviewers nineteen different sets of rules to remember.
 Photocraft has already answered the questions, through review by several
-maintainers, so the other apps can follow it.
+maintainers, and cadcraft and soundcraft have taken most of its pattern, so the
+other apps can follow it.
 
 ## Proposal
 
@@ -202,3 +232,41 @@ requirements pass.
   existing hits, so it can be turned on before the cleanup is finished?
 - Should `--json` be required on every subcommand that prints a listing, or
   only where a program is expected to read it?
+
+## Appendix A: the CLIs on 2026-11-26
+
+Source read at each repository's `main`; behaviour from the latest non-rc Linux x86_64 release's
+`bin/<app>-cli`, run with an empty HOME and no input. "Sub flag" is an unknown flag given to a
+subcommand (`info` for the clap CLIs and pdfcraft, `commands` for the others). Exit codes are for an
+unknown top-level flag.
+
+| App | Crate | Parser | thiserror | `run(args, out, err)` | `-V` | `version` word | Exit | Sub flag | Linux completions and man |
+|---|---|---|---|---|---|---|---|---|---|
+| anicraft | `crates/cli` | hand | no | no | yes | accepted | 1 | exit 1 | no |
+| cadcraft | `apps/cadcraft-cli` | clap | yes | yes | yes | refused | 2 | refused, 2 | yes |
+| chatcraft | `apps/chatcraft-cli` | hand | no | yes (`cli::main`) | n/a (no release) | n/a | n/a | n/a | n/a |
+| craft-anything | `apps/craft-anything-cli` | clap | no | no | yes | refused | 2 | refused, 2 | no |
+| deckcraft | `apps/deckcraft-cli` | hand | no | no | yes | accepted | 1 | ignored | no |
+| designcraft | `apps/designcraft-cli` | hand | no | no | yes | accepted | 1 | ignored | no |
+| effectcraft | `apps/effectcraft-cli` | hand | no | no | yes | accepted | 2 | refused, 2 | no |
+| figcraft | `apps/figcraft-cli` | clap | yes | no | yes | refused | 2 | refused, 2 | no |
+| filmcraft | `apps/filmcraft-cli` | hand | no | no | yes | accepted | 2 | ignored | no |
+| gridcraft | `apps/gridcraft-cli` | hand | no | no | yes | accepted | 1 | refused, 1 | no |
+| lightcraft | `apps/lightcraft-cli` | hand | no | no | yes | accepted | 1 | ignored | no |
+| loopcraft | `apps/loopcraft-cli` | hand | no | no | n/a (no release) | n/a | n/a | n/a | n/a |
+| materialcraft | `apps/materialcraft-cli` | hand | no | no | yes | refused | 1 | refused, 1 | no |
+| pdfcraft | `apps/pdfcraft-cli` | hand | no | no | **no** | refused | 1 | refused, 1 | no |
+| photocraft | `apps/photocraft-cli` | clap | yes | yes | yes | refused | 2 | refused, 2 | yes |
+| soundcraft | `apps/soundcraft-cli` | clap | yes | yes | yes | refused | 2 | refused, 2 | yes |
+| texturecraft | `apps/texturecraft-cli` | hand | no | no | yes | accepted | 2 | refused, 2 | no |
+| vectorcraft | `apps/vectorcraft-cli` | hand | no | no | yes | refused | 1 | ignored | no |
+| wordcraft | `apps/wordcraft-cli` | hand | no | no | yes | refused | 1 | refused, 1 | no |
+
+Other differences the adoption pull requests meet:
+
+- anicraft's overwrite flag is `--overwrite yes` (on `gif`), not `--in-place`.
+- craft-anything exits 130 on Ctrl-C. WordCraft exits 3 for a strict-mode report.
+- With no arguments, 5 print help and exit 0, 4 exit 1 and 8 exit 2.
+- TextureCraft prints `TextureCraft 0.6.1 (…)` for `--version`, without `-cli`.
+- figcraft's CLI depends on `clap_complete` and `clap_mangen`, but its release ships no completions or
+  man pages.
