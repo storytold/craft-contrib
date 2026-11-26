@@ -401,6 +401,9 @@ For a detected label or protected file, the dialog shall show:
 - Each capability's allowed/not allowed state, derived from SDK-confirmed
   rights and, where the SDK and format support both layers, intersected with
   ordinary file-password permissions.
+- Microsoft SDK rights remain distinct: `EDIT` is the protected-save
+  capability; `DOCEDIT` is the content-edit capability. Do not synthesize one
+  from the other. COMMENT, EXTRACT, EXPORT, and PRINT remain separate.
 - Available label operations only when the current account and policy permit
   them.
 
@@ -477,6 +480,13 @@ not expose independent bypass paths.
 - Use no application-only SuperUser role for public desktop sign-in.
 - Never mark package metadata preservation as live MIP support.
 - Treat unknown or unreadable rights as denied.
+- Route conversion, Combine, insertion, replacement, comment/data import,
+  batch, audit, and every CLI inspection/render path through the provider
+  before parsing protected bytes. EXTRACT alone never authorizes a new
+  unprotected PDF; that derivative requires EXPORT or OWNER.
+- A successful security-changing label operation invalidates incompatible
+  undo/redo history. A cancelled recovery waiting for Microsoft sign-in returns
+  to the recoverable set instead of discarding its snapshot.
 - Preserve ordinary password security and MIP rights independently. Intersect
   effective rights only for SDK-supported combinations; reject unsupported
   password-protected or digitally signed PDF labeling/protection without
