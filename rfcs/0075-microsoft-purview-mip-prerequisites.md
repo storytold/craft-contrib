@@ -132,7 +132,7 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Official MIP SDK package | Release engineering | Every SDK adoption/release; repeat on SDK, security, OS, or architecture change | Download the official package from Microsoft's official MIP SDK channel. Verify the package, version, license, `redist.txt`, `include/`, and `bins/release/<arch>/` for each OS/architecture. Record version, SHA-256, source URL, and redist inventory. | Builds are reproducible and redistributable policy is reviewable. | SDK build fails closed or cannot be packaged. |
 | Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
 | Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
-| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery with no email textbox. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Public builds persist account profiles and refresh/session state only in the platform credential store. | A person can add, switch, and sign out accounts, and automation can report the active account. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
+| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery with no email textbox. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Follow RFC-0025: non-secret display identity, account handle, routing, and generation metadata belong in the shared suite account list; tokens and other secrets belong only in the shared platform secret/credential store. | A person can add, switch, and sign out accounts, and automation can report the active account without duplicating or exposing credentials. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
 | Token renewal and authentication challenges | Storytold identity/engineering owner, per app integration | On provider-reported expiry or challenge; retest whenever authentication, SDK, or tenant policy changes | Use an approved identity implementation and secure credential storage where persistence is needed. Renew or reauthenticate the same account and tenant, preserve unsaved protected work, and revalidate SDK rights before continuing. Handle MFA, Conditional Access, revocation, and failure without plaintext fallback. Do not assume a fixed token lifetime. | Long-running protected sessions can continue only after identity and rights are verified. | Protected operations, saves, and recovery may fail after expiry; public use is blocked until safe renewal is implemented and tested. |
 | Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, and MFA/Conditional Access. Create tenant-issued fixtures for every claimed format and protection mode, including native protection and PFILE where claimed. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
@@ -241,7 +241,7 @@ not mean no owner or procedure.
 | Task | Normal trigger | Suggested timing | Procedure | Evidence |
 |---|---|---|---|---|
 | SDK package/security update | New SDK release, security advisory, or app major release | Immediately for a security advisory; otherwise in the next major SDK/OS support window | Download official package, verify license/redist, rebuild all affected app/platform targets, rerun unit/tenant matrix, sign/package, update RFC/PR status | SDK version, SHA-256, test report, package report |
-| App/platform signing certificate | Certificate renewal, identity change, or signing failure | Renew 60-90 days before expiry; never wait for expiration | Provision/rotate certificate, update CI, codesign helper and libraries, notarize/sign/package, verify OS trust | Certificate ID or fingerprint metadata, verification log |
+| App/platform signing certificate | Certificate renewal, identity change, or signing-verification failure | Renew 60-90 days before the credential expires, while preserving required timestamping for existing signed artifacts | Provision/rotate the credential before producing new releases, update CI, codesign helper/libraries, notarize/sign/package, and verify every existing and new artifact. A timestamped artifact whose signature remains valid is not declared broken merely because the signing credential later expired. | Certificate ID or fingerprint metadata, timestamp/signature/notarization verification log |
 | IPIA/app identity review | New App ID, separate trust boundary/publisher, legal owner change, or Microsoft request | At change time and after the relevant app identity approval | Send update/request as required, record Microsoft acknowledgment and signed IPIA/change, update app registration and package identity | IPIA record, app ID, Microsoft acknowledgment |
 | Public app permission/redirect review | Permission or auth protocol change | At design review and before public release | Confirm delegated permissions only, public/native client redirect, consent behavior, no secrets, no application-only privilege | Entra change record, app manifest, permission diff |
 | Customer tenant consent/licensing | Customer onboarding or tenant policy/permission change | Once per tenant when required; recheck after app permission or policy change | Verify Purview license, tenant consent, label publication, user/group scope, external recipient policy, MFA/Conditional Access | Customer check record and test fixture |
@@ -265,12 +265,12 @@ The owner and evidence must be recorded even when no renewal is needed.
 | SDK/helper/signing present but tenant consent absent | Sign-in or label/rights API returns tenant/consent error | User can retry; no protected content is opened without authorization |
 | Customer Purview license/label policy absent | Labels/policy or use-license unavailable | Protected PFILE may fail authorization or labels may not appear |
 | PFILE without SDK or rights state | No plaintext fallback | User receives protected-document/not-configured/SDK-unavailable state |
-| PFILE with sign-in but no use-license/rights | No-access or rights-restricted state | File remains closed or view-only according to SDK-confirmed rights |
+| PFILE with sign-in but no valid use-license/rights result | No plaintext fallback; remain closed | File may be opened for view only after the SDK acquires a valid license and confirms VIEW rights; unknown or failed rights never authorize rendering |
 | Token expires while a protected document is open | SDK calls, save, or protected recovery may fail; never fall back to plaintext | PdfCraft POC cannot safely reauthenticate that open document yet; unsaved work is at risk and public use remains blocked |
 | Protected file with export/owner rights | Re-publish/remove operations proceed only through SDK authorization | App may produce SDK-authorized output; unprotected output is never a silent fallback |
 | Protected file without export/owner rights | Remove protection/export is denied | App reports the rights requirement and preserves protection |
 | SDK helper missing runtime dependency | OS/dynamic-loader or helper startup error | Package is not accepted for release |
-| Certificate expired or app not notarized/signed | OS trust or package validation blocks helper/app | Release blocked until signing/trust is repaired |
+| New-release credential expired, or an artifact fails signature/notarization verification | Package validation blocks that artifact/helper | The affected new release is blocked until signing/trust is repaired; separately verify whether properly timestamped older artifacts remain valid |
 | Labeling required and no label chosen | Save/re-publish is blocked | User gets a mandatory-label/default-label prompt or clear save failure |
 | Password-protected or digitally signed PDF submitted for MIP labeling/protection | Reject the unsupported operation without stripping or weakening either security layer | Do not claim PDF password/MIP composition as supported; retain the original |
 | Other combined security layers supported by the SDK and format | Apply the intersection of their effective rights | No operation may bypass either supported layer |
@@ -376,10 +376,11 @@ Multiple accounts are part of the suite account contract:
   if none remain, the app becomes signed out.
 - Account profile metadata and active account selection must be verifiable in
   the UI, CLI/MCP status, and automation result.
-- Public builds should persist account profile and refresh/session state in
-  the platform credential store (for example, macOS Keychain, Windows
-  Credential Manager, or Linux Secret Service). Tokens must never be stored
-  in settings files or logs.
+- Public builds follow RFC-0025's split: non-secret account profile/routing and
+  selection state use the suite account list; tokens, refresh/session secrets,
+  and private credential state use the shared platform secret layer (for
+  example, macOS Keychain, Windows Credential Manager, or Linux Secret
+  Service). No token or secret belongs in settings, account-list JSON, or logs.
 - The POC may keep account sessions in process, but public persistence is
   required before public multi-account support is claimed.
 
@@ -398,9 +399,12 @@ For a detected label or protected file, the dialog shall show:
 - Mandatory-label, default-label, and downgrade-justification requirements.
 - A dynamic capability matrix: View, Edit, Save, Print, Copy/Extract,
   Comment, Export, and Change Security.
-- Each capability's allowed/not allowed state, derived from SDK-confirmed
-  rights and, where the SDK and format support both layers, intersected with
-  ordinary file-password permissions.
+- For a protected file, each capability's allowed/not allowed state is derived
+  from SDK-confirmed usage rights and, where Microsoft and the format support
+  both layers, intersected with ordinary file-password permissions.
+- For a label-only or otherwise unprotected file, there is no RMS use-license
+  rights record to inspect. Apply ordinary format/password permissions and
+  tenant label policy; do not invent unknown MIP usage-rights denial.
 - Microsoft SDK rights remain distinct: `EDIT` is the protected-save
   capability; `DOCEDIT` is the content-edit capability. Do not synthesize one
   from the other. COMMENT, EXTRACT, EXPORT, and PRINT remain separate.
@@ -479,7 +483,8 @@ not expose independent bypass paths.
   data.
 - Use no application-only SuperUser role for public desktop sign-in.
 - Never mark package metadata preservation as live MIP support.
-- Treat unknown or unreadable rights as denied.
+- Treat unknown or unreadable rights on a protected file as denied. This rule
+  is not an RMS-rights requirement for an unprotected, label-only file.
 - Route conversion, Combine, insertion, replacement, comment/data import,
   batch, audit, and every CLI inspection/render path through the provider
   before parsing protected bytes. EXTRACT alone never authorizes a new
