@@ -6,6 +6,10 @@ EffectCraft's physically based renderer into new craft-libs crates. Since that d
 MaterialCraft have added their own PBR code, craft-libs has added mesh, MaterialX, OpenEXR and Radiance
 HDR crates, and RFC-0022 has decided the GPU layer. This revision plans the move with those changes.
 
+A second revision, on 2026-11-26, widens the scope from the four apps the first design named to every
+Craft app. It adds "Scope", the status of the crates in craft-libs on that date, and Appendix A, which
+lists the 3D code each app has.
+
 Related: storytold/craft-contrib#59, storytold/craft-libs#778, storytold/craft-libs#115,
 storytold/vectorcraft#2560, storytold/effectcraft#2970, storytold/effectcraft#2199,
 storytold/deckcraft#743, storytold/deckcraft#1380, storytold/photocraft#8805, storytold/cadcraft#1796.
@@ -13,12 +17,34 @@ storytold/deckcraft#743, storytold/deckcraft#1380, storytold/photocraft#8805, st
 ## Summary
 
 Three new craft-libs crates, `craft-mesh-ops`, `craft-pbr` and `craft-raster3d`, and the existing
-`craft-texture` hold the 3D code that several apps now carry separately. Each crate is filled from the app whose code already
-has tests for that part. The crates add no importer or decoder of their own. They read the output of
+`craft-texture` hold the 3D code that the apps carry separately. This covers every Craft app, not only
+the four that carried the code when this RFC was opened. Each crate is filled from the app whose code
+already has tests for that part. The crates add no importer or decoder of their own. They read the output of
 `craft-mesh`, `craft-materialx`, `craft-hdr`, `craft-exr` and `craft-raster-codecs`, and the decoding
 features of `craft-texture` call those format crates. VectorCraft is a planned consumer.
 
-## What exists
+## Scope
+
+This RFC covers every Craft app. Code that draws, shades, lights or prepares 3D geometry and textures,
+and that more than one app has or will need, goes to one of the four crates. An app keeps what belongs to
+its product: its user interface, tools, importers, document model, effect parameters and the effects
+built on the shared code. Appendix A lists each app's 3D code, the crate it belongs in and which copy is
+the reference. It was read on 2026-11-26 and covers every repository named there. A repository with no
+row has no 3D code in the patterns searched.
+
+1. **Four crates.** The split is `craft-mesh-ops`, `craft-texture`, `craft-pbr` and `craft-raster3d`.
+   Code from another app goes into the crate it fits. A fifth crate needs a pull request that names the
+   code that fits none of the four and the apps that will use it. There is no catch-all geometry crate
+   (see "Defaults this RFC takes", default 1).
+2. **Reference copy.** Where several apps carry the same code, the reference is the copy with the most
+   tests, as in "The crates". Differences between copies are separate output-change pull requests with
+   the measured difference.
+3. **Owners.** Each app's maintainers own that app's switch pull request. This RFC does not change another
+   app's code.
+4. **Invitations.** The comment period's start names the apps in Appendix A. RFC-0019 asks for a review
+   request to each affected app's maintainers.
+
+## What existed on 2026-11-13
 
 Read on 2026-11-13 at craft-libs `75c70fa6`, effectcraft `05fc7f28`, texturecraft `386630ee`,
 materialcraft `31330629`, pdfcraft `0f22627b` and vectorcraft `08b6cfd3`.
@@ -47,11 +73,36 @@ materialcraft `31330629`, pdfcraft `0f22627b` and vectorcraft `08b6cfd3`.
 Open pull requests add further renderers: storytold/deckcraft#743, storytold/deckcraft#1380 and
 storytold/photocraft#8805. storytold/cadcraft#1796 asks for a CPU renderer for RENDER.
 
-Since that reading, storytold/craft-libs#1216 (merged on 2026-11-14) has added `craft-texture` with
-MaterialCraft's image planes, sampling and sRGB helpers. No app depends on it yet. Three open pull
-requests extend it: storytold/craft-libs#1400 (tests of the sRGB pair), storytold/craft-libs#1403
-(height to normal and ORM packing) and storytold/craft-libs#1429 (decoding PNG, TIFF, Radiance HDR and
-OpenEXR). These facts were checked on 2026-11-15 at craft-libs `8503f24c`.
+## What exists on 2026-11-26
+
+Read at craft-libs `f3d15cae`, effectcraft `8087064f`, texturecraft `d422c821`, materialcraft `e7ec9cb6`,
+pdfcraft `09175f49` and vectorcraft `c8c4faa3`. Appendix A names the other repositories' commits.
+
+- **craft-texture.** storytold/craft-libs#1216 added it on 2026-11-14 with MaterialCraft's image planes,
+  sampling and sRGB helpers. `main` now also holds mip chains (`mip.rs`), height to normal (`normal.rs`),
+  ORM packing (`packing.rs`) and, behind a `dds` feature, DDS decoding. storytold/craft-libs#1403
+  (height to normal and ORM packing) merged on 2026-11-17. Still open: storytold/craft-libs#1400 (tests
+  of the sRGB pair), storytold/craft-libs#1429 (decoding PNG, TIFF, Radiance HDR and OpenEXR) and
+  storytold/craft-libs#2833 (texture sets recognised from file names).
+- **craft-pbr.** It is on `main`. storytold/craft-libs#2850 (GGX prefilter and SH9 irradiance),
+  storytold/craft-libs#2873 (metallic-roughness BRDF, environment BRDF and the default environment) and
+  storytold/craft-libs#2880 (the shading functions as WGSL text) merged on 2026-11-26. Still open:
+  storytold/craft-libs#2908 (conversions from `craft-mesh` and MaterialX materials).
+- **craft-mesh-ops.** It is not on `main`. storytold/craft-libs#1233 adds it, and 15 more open pull
+  requests extend it (storytold/craft-libs#2842, #2898 and 13 more from #3657 to #3675).
+- **craft-raster3d.** It is not on `main`. Five open pull requests add it: storytold/craft-libs#2923,
+  #2950, #2958, #2985 and #2988.
+- **MaterialCraft** depends on `craft-texture` (`Cargo.toml`, craft-libs rev `d7010805`) and no longer has
+  `crates/image`. No app's manifest names `craft-pbr`.
+- **GPU layer.** RFC-0022 is on `main` (storytold/craft-contrib#38, merged 2026-11-10) and
+  storytold/craft-libs#663 merged on 2026-11-19, so `craft-gpu`, `craft-gpu-wgpu`, `craft-gpu-null` and
+  `craft-gpu-providers` are in craft-libs.
+- **Other apps.** DeckCraft, PhotoCraft and CADCraft have no 3D renderer on `main`. The open pull
+  requests storytold/deckcraft#743, storytold/deckcraft#1380 and storytold/photocraft#8805 add 3D
+  features, and storytold/cadcraft#1796 asks for a renderer. Appendix A lists the rest.
+
+The crates' pull requests were opened on or after 2026-11-13, and the three `craft-pbr` ones merged while
+this RFC was open. They follow the contents listed in "The crates".
 
 ## The crates
 
@@ -108,9 +159,11 @@ apps whose output it changes accept the recorded difference. TextureCraft keeps 
 
 ### GPU
 
-No shared wgpu pipeline is added until storytold/craft-libs#663 (RFC-0022) merges. The WGSL shading text
-moves with the CPU code it copies, and a craft-libs test behind a feature compares the two on a software
-GPU driver.
+This RFC adds no shared wgpu pipeline. One is built on `craft-gpu`, which RFC-0022 decided and
+storytold/craft-libs#663 added on 2026-11-19, in a later pull request that follows the CPU crates. Until
+then each app keeps its own pipeline (EffectCraft `crates/gpu/src/adv3d.rs`, TextureCraft
+`crates/render/src/renderer.rs`). The WGSL shading text moves with the CPU code it copies, and a
+craft-libs test behind a feature compares the two on a software GPU driver.
 
 ## How the code moves
 
@@ -131,6 +184,11 @@ The order follows the dependencies:
    EffectCraft's BRDF moves into the same crate.
 3. `craft-raster3d` is added, and EffectCraft switches its renderer to it.
 
+Each app's switch is its maintainers' pull request. The order above is the order of the first consumers.
+The other apps in Appendix A follow, each in its own switch pull request: PdfCraft to `craft-raster3d`
+once it is on `main`, VectorCraft after storytold/craft-contrib#59 (RFC-0059) is decided, and DeckCraft,
+PhotoCraft and CADCraft when their open pull requests continue.
+
 A new crate adds no workflow. Its wasm32 check is a row in craft-libs `formats.yml`, added by a separate
 pull request (house rule 11). An app that takes a shared crate moves every craft-libs dependency to one
 revision. Every dependency comes from a storytold repository, because the `git-sources` job in
@@ -140,7 +198,7 @@ craft-common-actions `release.yml` fails on any other git source.
 
 VectorCraft is a planned consumer of the four crates. How its 3D effects use them, with new effect
 parameters and rendering tiers, is proposed in RFC-0059 (storytold/craft-contrib#59) and is not decided
-here.
+here. VectorCraft's switch waits for that RFC.
 
 ## Defaults this RFC takes
 
@@ -163,8 +221,10 @@ here.
    including its rule that a crate has two consuming apps and its rule that a crate names a responsible
    maintainer. The moves in this RFC follow whatever #10 decides. Each crate names at least two planned
    consumers in its README, but two crates have fewer than two consuming apps at the steps above:
-   `craft-raster3d` has only EffectCraft at step 3, and no app depends on `craft-texture` yet (step 1
-   switches MaterialCraft to it). This RFC does not name a maintainer for any of the crates.
+   `craft-raster3d` has only EffectCraft at step 3, and only MaterialCraft depends on `craft-texture`
+   on 2026-11-26. With all apps in scope, PdfCraft is a second consumer of `craft-raster3d` and
+   TextureCraft a second consumer of `craft-texture`. This RFC does not name a maintainer for any of the
+   crates.
 7. **Other contributors' work.** This RFC changes no open pull request. When storytold/deckcraft#743,
    storytold/deckcraft#1380 or storytold/photocraft#8805 continues, it can use the shared crates. A CPU
    RENDER for storytold/cadcraft#1796 is a use of `craft-raster3d`. The `craft-pbr` material is the data
@@ -173,10 +233,55 @@ here.
 
 ## What this RFC decides
 
+- The scope: every Craft app, with the four crates of "Scope" and no crate beyond them without its own
+  pull request.
 - The three new crates, the contents that `craft-texture` gains, and the names and boundaries of all
   four, as listed in "The crates".
-- The source of each crate's code.
+- The source of each crate's code, and the reference copy of each piece in Appendix A.
 - The mesh input, the material, the shared sRGB pair and the Smith-Schlick GGX default.
 
-Work in TextureCraft and MaterialCraft starts after this RFC is accepted. Per RFC-0000 this is a 3-day
-comment period change.
+Per RFC-0000 this is a 3-day comment period change. The revision of 2026-11-26 widened the scope, so
+the comment period restarts when it lands; the pull request's comment gives the end date.
+
+## Appendix A: 3D code in every app
+
+Read on 2026-11-26 with shallow clones of each repository's default branch. Commits: craft-libs
+`f3d15cae`, effectcraft `8087064f`, texturecraft `d422c821`, materialcraft `e7ec9cb6`, pdfcraft
+`09175f49`, vectorcraft `c8c4faa3`, deckcraft `74591aba`, cadcraft `b3bc4a76`, photocraft `4a4e3cff`,
+designcraft `47e36bdd`, wordcraft `6c6ac698`, soundcraft `f07dc9e2`, filmcraft `a7dcaa22`, gridcraft
+`4870243e`, lightcraft `3c6a9f2c`, figcraft `e1361cb1`, craft-anything `3e59a9c3`. Paths are in each app's
+repository. "Reference" is the copy that becomes the crate's content.
+
+| App | Code | Path | Crate | Reference |
+|---|---|---|---|---|
+| EffectCraft | Cook-Torrance BRDF, environment BRDF, PCF shadows, environment light | `crates/render/src/three_d/adv/shade.rs` | `craft-pbr` | Landed in craft-libs#2873; the app copy is deleted by EffectCraft's switch |
+| EffectCraft | Default environment and scene data | `crates/render/src/three_d/adv/scene.rs` | `craft-pbr` | Landed in craft-libs#2873 |
+| EffectCraft | WGSL copy of the shading | `crates/gpu/src/shaders/advanced3d.wgsl` | `craft-pbr` | Landed in craft-libs#2880 |
+| EffectCraft | Depth-buffered rasterizer with shadow maps | `crates/render/src/three_d/adv/raster.rs` | `craft-raster3d` | EffectCraft's (craft-libs#2923) |
+| EffectCraft | Normals, tangents, primitives, triangulation, extrusion | `crates/model/src/{lib,prim,triangulate,extrude}.rs` | `craft-mesh-ops` | EffectCraft's for extrusion and triangulation (craft-libs#2898); TextureCraft's for tangents |
+| EffectCraft | Classic 3D plane compositor, cameras, Card Dance, 3D channels | `crates/render/src/three_d/{light,camera,compose}.rs`, `crates/effects/src/{card3d,channel3d}.rs`, `crates/raster/src/channels3d.rs` | none | Stays: built on the comp's layers and effect parameters |
+| TextureCraft | Mesh, MikkTSpace tangents, BVH, UV unwrap, UV G-buffer, primitives, orbit camera | `crates/geom/src/{mesh,bvh,unwrap,gbuffer,primitives,camera}.rs` | `craft-mesh-ops` | TextureCraft's, with MaterialCraft's changes folded in |
+| TextureCraft | CPU image-based lighting | `crates/render/src/ibl.rs` | `craft-pbr` | Landed in craft-libs#2850 |
+| TextureCraft | Viewport and path-tracer shading with height-correlated Smith visibility | `crates/render/src/shaders/{mesh,trace}.wgsl`, `crates/render/src/trace.rs` | none yet | Stays until the GGX default question in "GGX geometry term" is settled |
+| TextureCraft | Height to normal, ORM packing | `crates/compose/src/eval.rs`, `crates/formats/src/presets.rs` | `craft-texture` | Landed in `normal.rs` and `packing.rs` (craft-libs#1403) |
+| MaterialCraft | Copy of TextureCraft's geometry code | `crates/geom/src/{mesh,bvh,unwrap,gbuffer,primitives,camera}.rs` | `craft-mesh-ops` | TextureCraft's; MaterialCraft's differences are separate pull requests |
+| MaterialCraft | Image-based lighting | `crates/render/src/ibl.rs` | `craft-pbr` | Landed in craft-libs#2850 |
+| MaterialCraft | CPU ray caster over a BVH with GGX shading | `crates/render/src/preview.rs` | consumer | Uses `craft-mesh-ops` for the BVH and `craft-pbr` for the BRDF |
+| MaterialCraft | Image planes and sampling | was `crates/image` | `craft-texture` | Done: the app depends on `craft-texture` |
+| PdfCraft | `Camera::fit`, work and size ceilings, depth-tested triangle fill | `crates/prc-render/src/{render,raster}.rs` | `craft-raster3d` | PdfCraft's for `Camera::fit` and ceilings (craft-libs#2958) |
+| PdfCraft | Orbit navigation and vector helpers | `crates/prc-render/src/nav/orbit.rs`, `crates/prc-render/src/vec3.rs` | `craft-mesh-ops` | The camera of `craft-mesh-ops` (craft-libs#3664); PdfCraft's orbit moves if its tests show a difference |
+| VectorCraft | 3D effects as shaded vector faces, painter's algorithm | `crates/three-d/src/{solid,shading,shadow,visibility,lights}.rs` | none | Stays: it draws vector gradients, not pixels; RFC-0059 decides its use of the crates |
+| VectorCraft | Meshes of the effects' solids | `crates/three-d/src/mesh.rs` | `craft-mesh-ops` | A consumer of its mesh type; the extrusion code stays until RFC-0059 |
+| VectorCraft | Depth-buffered fill of a folded packaging blank | `crates/three-d/src/fold/raster.rs` | `craft-raster3d` | To be checked when `craft-raster3d` lands: it fills panels with a depth buffer |
+| DeckCraft | Transition layer mesh, 3-D format settings | `crates/anim/src/mesh.rs`, `crates/engine/src/cmd/three_d.rs` | none | Stays: 2D transition quads and XML settings; the open 3D pull requests use the crates |
+| CADCraft | 3D polylines and helixes | `crates/engine/src/cmd/draw2/curves3d.rs` | none | No renderer on `main`; a CPU RENDER (storytold/cadcraft#1796) uses `craft-raster3d` |
+| PhotoCraft | none on `main` | | | The 3D/UV workspace in storytold/photocraft#8805 uses the crates |
+| DesignCraft, WordCraft, SoundCraft, FilmCraft, GridCraft, LightCraft, FigCraft, craft-anything | none found | | | |
+
+Searched in each repository: mesh, normal and tangent functions, UV unwrapping, BVH, GGX and BRDF, IBL
+and SH9, shadow maps and PCF, rasterizer and camera-fit types, mip and height-to-normal code, and WGSL
+files. The hits in the other repositories were 2D code (curve tangents, `fit` functions for rectangles,
+brush mip caches, BM3D denoising). Mesh file readers and writers (`craft-mesh`, `craft-usd`,
+`craft-prc`) belong to the format program in storytold/craft-libs#778 and are not part of this RFC. The
+360-degree equirectangular effects in EffectCraft (`crates/effects/src/vr.rs`) and FilmCraft
+(`crates/render/src/vfx/immersive.rs`) are image effects and stay in the apps.
