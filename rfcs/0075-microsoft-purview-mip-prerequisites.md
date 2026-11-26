@@ -138,7 +138,8 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
 | App-specific format and rights implementation | Each app repository owner | Once per app format track; repeated for format/SDK/rights behavior changes | Implement format parse/write, label metadata, rights gates, UI/automation, save/re-publish behavior, private staging, and tests. Link a format-specific issue/PR to this RFC. | The app supports the format's agreed MIP behavior and cannot create an unauthorized plaintext copy. | Package metadata may survive, but live MIP sign-in, decryption, rights, or re-publishing is missing or falsely claimed. |
 
-PdfCraft tracks its current token-renewal blocker in
+PdfCraft tracks live tenant verification of its synthetic-tested same-account
+reauthentication and token-challenge blocker in
 [storytold/pdfcraft#7843](https://github.com/storytold/pdfcraft/pull/7843#discussion_r4687045314).
 
 ## Exact suite app setup procedure
@@ -266,7 +267,7 @@ The owner and evidence must be recorded even when no renewal is needed.
 | Customer Purview license/label policy absent | Labels/policy or use-license unavailable | Protected PFILE may fail authorization or labels may not appear |
 | PFILE without SDK or rights state | No plaintext fallback | User receives protected-document/not-configured/SDK-unavailable state |
 | PFILE with sign-in but no valid use-license/rights result | No plaintext fallback; remain closed | File may be opened for view only after the SDK acquires a valid license and confirms VIEW rights; unknown or failed rights never authorize rendering |
-| Token expires while a protected document is open | SDK calls, save, or protected recovery may fail; never fall back to plaintext | PdfCraft POC cannot safely reauthenticate that open document yet; unsaved work is at risk and public use remains blocked |
+| Token expires while a protected document is open | SDK calls stop at a sign-in challenge; never fall back to plaintext. Reauthentication must keep the same account, preserve working edits, and revalidate every protected original before rights resume. | PdfCraft implements this flow synthetically; public use remains blocked until live expiry, MFA, Conditional Access, and rights-refresh evidence exists |
 | Protected file with export/owner rights | Re-publish/remove operations proceed only through SDK authorization | App may produce SDK-authorized output; unprotected output is never a silent fallback |
 | Protected file without export/owner rights | Remove protection/export is denied | App reports the rights requirement and preserves protection |
 | SDK helper missing runtime dependency | OS/dynamic-loader or helper startup error | Package is not accepted for release |
@@ -283,7 +284,7 @@ protected content in a fallback path.
 
 | Repository/app | Current evidence | RFC status | Remaining work |
 |---|---|---|---|
-| PdfCraft | [issue #6747](https://github.com/storytold/pdfcraft/issues/6747), [draft PR #7843](https://github.com/storytold/pdfcraft/pull/7843), PFILE detection, native helper and synthetic rights/save/UI/automation tests | Draft POC; protected label/protection changes, optimization, digital signing and password composition remain gated | Resolve integration and remaining review findings; obtain app ID/IPIA, per-format tenant evidence and signed/notarized SDK packages |
+| PdfCraft | [issue #6747](https://github.com/storytold/pdfcraft/issues/6747), [draft PR #7843](https://github.com/storytold/pdfcraft/pull/7843), PFILE detection, native helper, original-plus-edits mutation, expiry/reauthentication, and synthetic rights/save/UI/automation tests | Draft POC; live authorization of the implemented mutation/reauthentication paths, optimization, digital signing and unsupported password/MIP composition remain gated | Resolve integration and live review findings; obtain app ID/IPIA, per-format tenant evidence and signed/notarized SDK packages |
 | GridCraft | [issue #865](https://github.com/storytold/gridcraft/issues/865), [open PR #867](https://github.com/storytold/gridcraft/pull/867) for sensitivity-label and table/custom-property pass-through, and [open PR #1221](https://github.com/storytold/gridcraft/pull/1221) stacked on it for table-level formats | Proposed metadata pass-through is format-fidelity work, not live MIP | Merge the relevant format changes; implement live MIP labels/protection, spreadsheet rights, re-publish/save, and tenant POC |
 | DeckCraft | [merged PR #535](https://github.com/storytold/deckcraft/pull/535) for sensitivity-label/customXML pass-through; [merged PR #2176](https://github.com/storytold/deckcraft/pull/2176) for password-protected PPTX CFB detection | Metadata and ordinary encrypted-deck detection improve format compatibility | Live MIP label/protection, presentation rights, re-publish/save, and tenant POC |
 | WordCraft | [issue #5827](https://github.com/storytold/wordcraft/issues/5827) for password-protected DOCX/ODT | Ordinary password/encryption work is separate | Live MIP labeling/protection for Office-supported files, rights, save/re-publish, tenant POC |
@@ -468,8 +469,11 @@ not expose independent bypass paths.
   exchange, URL parsing, and JSON/profile decoding. Do not add UUID, generic
   Base64, Azure CLI, refresh-token persistence, or device-code dependencies
   unless a documented product requirement and security review approve them.
-- Before release, implement and test safe same-account token renewal and
-  challenge handling without losing unsaved protected work or reusing stale rights.
+- Before release, verify safe same-account token renewal and SDK challenge
+  handling in a real tenant without losing unsaved protected work or reusing
+  stale rights. The POC implementation preserves edits and revalidates
+  protected originals; that is not a substitute for live expiry/MFA/Conditional
+  Access evidence.
 - Package official SDK binaries and redistributables for macOS arm64/x86_64,
   supported Windows architectures, and supported Linux distributions/architectures.
 - The native helper is platform-specific packaging; the Rust policy and rights
