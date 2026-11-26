@@ -72,12 +72,16 @@ other apps can follow it.
 1. **Name and shape.** The binary is `<app>-cli`, with subcommands
    (`<app>-cli convert …`). `--help`/`-h` and `--version`/`-V` work everywhere;
    `help <subcommand>` works too. There is no `version` subcommand.
-2. **Exit codes.** `0` success, `1` the command failed, `2` usage error.
+2. **Exit codes.** `0` success, `1` the command failed, `2` usage error. When a signal ends the
+   process, the shell's `128 + signal` (130 for Ctrl-C). A command adds no other code.
 3. **Streams.** Results go to stdout: JSON when a program is meant to read them
    (pretty-printed by default, one line with `--compact` or as the command
    documents). Errors, warnings and progress go to stderr, errors as
    `error: <message>`. A subcommand that speaks a protocol on stdio (an MCP or
-   JSON-lines server) writes nothing else to stdout.
+   JSON-lines server) writes nothing else to stdout. Where a subcommand has
+   `--json`, it means the same everywhere: JSON alone on stdout, nothing else
+   on that stream, and the exit code unchanged. A subcommand needs `--json` only
+   where a program is expected to read its output.
 4. **Strict parsing, before any work starts.** These are usage errors (exit 2,
    on stderr): a flag the subcommand doesn't take, a flag given twice unless it
    is documented as repeatable, a value of the wrong type or out of range,
@@ -96,7 +100,12 @@ other apps can follow it.
    - a bad value is a usage error that names the variable, not the flag;
    - a secret's value is never shown (`hide_env_values`);
    - a variable never grants filesystem or network access on its own: such
-     authority comes from flags only.
+     authority comes from flags only;
+   - a variable never sets a destructive flag. `--in-place`, any other flag that
+     overwrites or deletes (`--overwrite`, a force flag) and any flag like them
+     come from the command line only and declare no `env =`. A stale
+     `PHOTOCRAFT_IN_PLACE=1` in a CI job must not turn a conversion into an
+     overwrite.
 
    clap's `env =` alone gives only the first of these. Photocraft adds the
    empty-means-unset and variable-naming parts with
@@ -108,9 +117,17 @@ other apps can follow it.
 9. **Shell completions and man pages** (bash, zsh, fish, elvish, PowerShell, and
    a page per subcommand) are generated from the same clap command by
    [clap_complete](https://docs.rs/clap_complete) and
-   [clap_mangen](https://docs.rs/clap_mangen) in an example or build step, and
-   the Linux and FreeBSD packages install them. The generators are dev or build
-   dependencies, not part of the binary.
+   [clap_mangen](https://docs.rs/clap_mangen) in an example or build step. The
+   generators are dev or build dependencies, not part of the binary.
+   - **Linux and FreeBSD packages** install the bash, zsh and fish completions
+     and the man pages, the formats that have a standard directory there. The
+     elvish and PowerShell files are generated but not installed.
+   - **macOS and Windows are out of scope** for installed completions and man
+     pages. The macOS CLI is a zip with the binary and the licence files, which
+     craft-launcher installs
+     ([craft-launcher#1422](https://github.com/storytold/craft-launcher/issues/1422)).
+     An app that wants them there puts them in its zip and changes the launcher in
+     its own pull request. The CLI's book page says which platforms ship them.
 
 ### 2. How it is built
 
@@ -149,12 +166,14 @@ other apps can follow it.
    - a path that isn't valid Unicode reaching the command;
    - a bad typed value, malformed JSON, conflicting flags and a flag the mode
      doesn't use, each refused before any file is written;
-   - an output that would replace an input refused without the overwrite flag;
+   - an output that would replace an input refused without the overwrite flag,
+     and a destructive flag set only through the environment changing nothing;
+   - where `--json` exists, JSON alone on stdout with the exit code unchanged;
    - for each variable: empty counts as unset, the flag wins, an error names
      the variable, a secret's value never shows in help or errors, and the
      variable alone grants no filesystem or network access;
    - and, in the packaging tests, that the Linux and FreeBSD packages install
-     the completions and a man page per subcommand.
+     the bash, zsh and fish completions and a man page per subcommand.
 
 ### 3. Tools and enforcement
 
