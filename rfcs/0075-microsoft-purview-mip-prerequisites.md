@@ -138,6 +138,9 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
 | App-specific format and rights implementation | Each app repository owner | Once per app format track; repeated for format/SDK/rights behavior changes | Implement format parse/write, label metadata, rights gates, UI/automation, save/re-publish behavior, private staging, and tests. Link a format-specific issue/PR to this RFC. | The app supports the format's agreed MIP behavior and cannot create an unauthorized plaintext copy. | Package metadata may survive, but live MIP sign-in, decryption, rights, or re-publishing is missing or falsely claimed. |
 
+PdfCraft tracks its current token-renewal blocker in
+[storytold/pdfcraft#7843](https://github.com/storytold/pdfcraft/pull/7843#discussion_r4687045314).
+
 ## Exact suite app setup procedure
 
 ### A. Storytold app registration
