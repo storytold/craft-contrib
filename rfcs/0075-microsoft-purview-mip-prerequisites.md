@@ -1,4 +1,4 @@
-# RFC-0041: Microsoft Purview/MIP prerequisites, rollout, and renewal standard
+# RFC-0075: Microsoft Purview/MIP prerequisites, rollout, and renewal standard
 
 ## Status
 
@@ -33,10 +33,10 @@ PdfCraft is the implementation POC and the completion standard for PDF:
 - POC follow-up commit:
   [dbde699256f5594cdf755651de5363c40eba0c4a](https://github.com/storytold/pdfcraft/commit/dbde699256f5594cdf755651de5363c40eba0c4a)
 
-The POC currently proves native SDK bridging, PFILE detection, rights and
-save-state seams, fail-closed behavior, password/MIP composition, UI,
-automation/MCP, and packaging. It does not claim live tenant authorization
-until the complete external test gate in this RFC passes.
+The POC exercises native SDK bridging, PFILE detection, rights and save-state
+seams, UI, automation/MCP, and packaging with synthetic tests. Protected PDF
+password/MIP composition is not implemented and must fail closed. These tests
+do not establish live tenant authorization or production readiness.
 
 ## Motivation
 
@@ -133,7 +133,7 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
 | Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
 | Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery with no email textbox. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Public builds persist account profiles and refresh/session state only in the platform credential store. | A person can add, switch, and sign out accounts, and automation can report the active account. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
-| Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, MFA/Conditional Access, and one PFILE fixture. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
+| Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, and MFA/Conditional Access. Create tenant-issued fixtures for every claimed format and protection mode, including native protection and PFILE where claimed. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
 | Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
 | App-specific format and rights implementation | Each app repository owner | Once per app format track; repeated for format/SDK/rights behavior changes | Implement format parse/write, label metadata, rights gates, UI/automation, save/re-publish behavior, private staging, and tests. Link a format-specific issue/PR to this RFC. | The app supports the format's agreed MIP behavior and cannot create an unauthorized plaintext copy. | Package metadata may survive, but live MIP sign-in, decryption, rights, or re-publishing is missing or falsely claimed. |
 
@@ -217,10 +217,12 @@ plaintext.
 
 1. The security/identity owner confirms the test tenant and test users.
 2. The Purview administrator publishes test labels and label policies.
-3. The tenant creates protected and unprotected PFILE/PDF fixtures.
-4. The app opens the fixture and requests Entra sign-in if needed.
+3. The tenant creates labeled and protected fixtures for each claimed native
+   format and protection mode, plus PFILE fixtures where PFILE support is claimed.
+4. The app opens each fixture and requests Entra sign-in if needed.
 5. The SDK acquires delegated tokens, use-license, label metadata, and rights.
-6. The app enforces rights and re-publish behavior.
+6. For each claimed supported path, test open, save, re-publish and reopen; test
+   that unsupported combinations fail without stripping protection.
 7. The test matrix includes MFA, Conditional Access, external recipient,
    no-access, view-only, copy/print/edit/export/owner/change-rights, label
    justification, remove-label, remove-protection, save, revert, and reopen.
@@ -239,7 +241,7 @@ not mean no owner or procedure.
 | IPIA/app identity review | New App ID, separate trust boundary/publisher, legal owner change, or Microsoft request | At change time and after the relevant app identity approval | Send update/request as required, record Microsoft acknowledgment and signed IPIA/change, update app registration and package identity | IPIA record, app ID, Microsoft acknowledgment |
 | Public app permission/redirect review | Permission or auth protocol change | At design review and before public release | Confirm delegated permissions only, public/native client redirect, consent behavior, no secrets, no application-only privilege | Entra change record, app manifest, permission diff |
 | Customer tenant consent/licensing | Customer onboarding or tenant policy/permission change | Once per tenant when required; recheck after app permission or policy change | Verify Purview license, tenant consent, label publication, user/group scope, external recipient policy, MFA/Conditional Access | Customer check record and test fixture |
-| Tenant POC matrix | SDK update, major app release, OS support change, or label-policy change | Before each public SDK-enabled release and after each relevant tenant-policy change | Run real PFILE fixtures and rights matrix; run ordinary-password and MIP composition; capture evidence | POC report, screenshots, pass/fail count |
+| Tenant POC matrix | SDK update, major app release, OS support change, or label-policy change | Before each public SDK-enabled release and after each relevant tenant-policy change | Run the rights and open/save/re-publish matrix with real tenant fixtures for every claimed format and protection mode; verify unsupported password/MIP combinations fail closed | POC report, screenshots, pass/fail/skip count by format and mode |
 | Microsoft account-session persistence | Account UX, auth protocol, credential-store, or app major-release change | POC before release; public builds before public multi-account support is claimed | Test add/switch/sign-out behavior, active-account isolation, OS credential-store persistence, token cleanup, app restart, and no plaintext settings/log storage | Account matrix, credential-store evidence, sign-out/restart verification |
 | App format rights implementation | Format adapter or rights behavior change | Once per app rollout; rerun for format/save/export/rights changes | Add issue/PR, format tests, engine/UI/CLI/MCP gates, re-publish/revert tests, tenant POC | App PR and test evidence |
 | Security and dependency review | SDK update, package change, vulnerability, or annual review | Triggered immediately for a finding; at least annually for the suite | Review SDK/C++ helper dependencies, staging cleanup, signing, logging, temp-file permissions, and revocation behavior | Security-review result and remediation link |
@@ -264,7 +266,8 @@ The owner and evidence must be recorded even when no renewal is needed.
 | SDK helper missing runtime dependency | OS/dynamic-loader or helper startup error | Package is not accepted for release |
 | Certificate expired or app not notarized/signed | OS trust or package validation blocks helper/app | Release blocked until signing/trust is repaired |
 | Labeling required and no label chosen | Save/re-publish is blocked | User gets a mandatory-label/default-label prompt or clear save failure |
-| Password protection and MIP protection both apply | Effective rights are the intersection of ordinary PDF permissions and MIP rights | No operation may bypass either security layer |
+| Password-protected or digitally signed PDF submitted for MIP labeling/protection | Reject the unsupported operation without stripping or weakening either security layer | Do not claim PDF password/MIP composition as supported; retain the original |
+| Other combined security layers supported by the SDK and format | Apply the intersection of their effective rights | No operation may bypass either supported layer |
 | Everything above is complete | SDK signs in, acquires rights, opens authorized content, enforces operations, and re-publishes through the SDK | Public POC or app feature can be released with live tenant evidence |
 
 Ordinary builds must remain usable and must never silently export or strip
@@ -274,7 +277,7 @@ protected content in a fallback path.
 
 | Repository/app | Current evidence | RFC status | Remaining work |
 |---|---|---|---|
-| PdfCraft | [issue #6747](https://github.com/storytold/pdfcraft/issues/6747), [draft PR #7843](https://github.com/storytold/pdfcraft/pull/7843), PFILE detection, native helper, SDK build, rights/save/label/password/UI/automation/packaging seams | POC implementation is substantially complete; live tenant gate remains | Public app ID/IPIA, tenant POC, real use-license/rights, signed/notarized SDK package |
+| PdfCraft | [issue #6747](https://github.com/storytold/pdfcraft/issues/6747), [draft PR #7843](https://github.com/storytold/pdfcraft/pull/7843), PFILE detection, native helper and synthetic rights/save/UI/automation tests | Draft POC; protected label/protection changes, optimization, digital signing and password composition remain gated | Resolve integration and remaining review findings; obtain app ID/IPIA, per-format tenant evidence and signed/notarized SDK packages |
 | GridCraft | [issue #865](https://github.com/storytold/gridcraft/issues/865), [open PR #1221](https://github.com/storytold/gridcraft/pull/1221) for sensitivity-label and table/custom-property pass-through | Metadata pass-through exists as format-fidelity work | Live MIP labels/protection, spreadsheet rights, re-publish/save, and tenant POC |
 | DeckCraft | [merged PR #535](https://github.com/storytold/deckcraft/pull/535) for sensitivity-label/customXML pass-through; [merged PR #2176](https://github.com/storytold/deckcraft/pull/2176) for password-protected PPTX CFB detection | Metadata and ordinary encrypted-deck detection improve format compatibility | Live MIP label/protection, presentation rights, re-publish/save, and tenant POC |
 | WordCraft | [issue #5827](https://github.com/storytold/wordcraft/issues/5827) for password-protected DOCX/ODT | Ordinary password/encryption work is separate | Live MIP labeling/protection for Office-supported files, rights, save/re-publish, tenant POC |
@@ -309,7 +312,8 @@ Each app follows the same implementation gate:
 5. Wire the engine/API, desktop UI, CLI/MCP, save/export/print/edit operations,
    and mandatory-label behavior.
 6. Add ordinary-format and synthetic MIP tests.
-7. Run the real tenant PFILE matrix.
+7. Run the real tenant matrix for every claimed native format and protection
+   mode, including PFILE where supported; record unsupported combinations.
 8. Add platform packaging/signing evidence.
 9. Attach screenshots and runtime evidence to the app PR and RFC.
 10. Keep the app work draft or unsupported until the live tenant and public
@@ -356,9 +360,11 @@ Multiple accounts are part of the suite account contract:
 
 - Signing in adds or replaces the account's in-process session and makes it
   active.
-- Switching account changes the active RMS and MIP policy/sync session
-  immediately; open protected documents are retried only through the normal
-  rights-aware reopen/re-publish path.
+- Switching accounts must not reuse rights or decrypted state authorized for
+  another account. Close protected documents before switching unless the app
+  implements and tests an atomic rights-aware reopen for every open document.
+- Reauthentication of the same verified account must remain possible without
+  discarding unsaved work; never replace it with a different account silently.
 - Signing out removes the active account from the in-process account list.
   If another account remains, that account becomes the next active account;
   if none remain, the app becomes signed out.
@@ -387,7 +393,8 @@ For a detected label or protected file, the dialog shall show:
 - A dynamic capability matrix: View, Edit, Save, Print, Copy/Extract,
   Comment, Export, and Change Security.
 - Each capability's allowed/not allowed state, derived from SDK-confirmed
-  rights and intersected with ordinary PDF password permissions.
+  rights and, where the SDK and format support both layers, intersected with
+  ordinary file-password permissions.
 - Available label operations only when the current account and policy permit
   them.
 
@@ -397,8 +404,9 @@ The Apply, Remove Label, and Remove Protection actions are stateful:
   selected.
 - Remove Label is available only when a current label exists and the SDK/rights
   state permits changing security.
-- Remove Protection is available only when the document is protected and the
-  SDK confirms EXPORT/Owner or Change Rights capability.
+- Remove Protection is available only when the document is protected, the SDK
+  confirms EXPORT or OWNER, and any additional applicable policy permits it.
+  Change Rights alone is not sufficient.
 - Justification is required when the SDK/policy requires it for downgrade or
   removal.
 
@@ -427,7 +435,8 @@ Required operation states:
 - SDK unavailable/not configured.
 - Mandatory/default/downgrade-label state.
 - Remove-label/remove-protection/export-required/justification state.
-- Ordinary password and MIP effective rights.
+- Fail-closed handling of unsupported password/MIP combinations and effective
+  rights for combinations the SDK and format support.
 
 UI, engine, CLI, and automation/MCP must use the SDK-confirmed rights and must
 not expose independent bypass paths.
@@ -460,8 +469,10 @@ not expose independent bypass paths.
 - Use no application-only SuperUser role for public desktop sign-in.
 - Never mark package metadata preservation as live MIP support.
 - Treat unknown or unreadable rights as denied.
-- Separate ordinary password security from MIP rights and intersect them
-  rather than choosing the weaker or stronger layer incorrectly.
+- Preserve ordinary password security and MIP rights independently. Intersect
+  effective rights only for SDK-supported combinations; reject unsupported
+  password-protected or digitally signed PDF labeling/protection without
+  stripping either layer.
 - Preserve unknown package and document parts without misrepresenting their
   security state.
 
@@ -493,12 +504,14 @@ Every public or live-MIP completion record must include:
 - App/platform/package build ID.
 - Signing/notarization evidence.
 - Tenant test environment without personal data.
-- PFILE or protected PDF fixture type and protection level.
+- Real tenant fixture, format, protection mode and level for every claimed
+  native format and for PFILE where claimed.
 - Test matrix and exact pass/fail/skip counts.
 - Sign-in/MFA/Conditional Access result.
 - Use-license and rights result.
 - Save/re-publish/revert/remove operations.
-- Password/MIP intersection result.
+- Supported combined-layer rights results and fail-closed results for
+  unsupported password-protected or digitally signed PDF combinations.
 - UI/CLI/MCP/automation evidence.
 - Remaining unsupported or blocked cases.
 
@@ -508,7 +521,7 @@ outside source and public issue/PR comments.
 
 ## Acceptance criteria
 
-RFC-0041 is implemented for the suite standard when:
+RFC-0075 is implemented for the suite standard when:
 
 1. One suite app ID and one IPIA scope are recorded.
 2. The exact SDK package and redist inventory are recorded.
@@ -516,10 +529,11 @@ RFC-0041 is implemented for the suite standard when:
    tested.
 4. The customer-tenant onboarding procedure is documented and repeatable.
 5. Every app claiming live MIP support has a real format adapter and tenant
-   POC.
+   evidence for each claimed format and protection mode, including native
+   protected open/save/re-publish and PFILE where claimed.
 6. Metadata pass-through is not described as live MIP support.
-7. Ordinary password protection remains independent and can intersect with MIP
-   rights safely.
+7. Supported security layers retain their independent rights; unsupported
+   password-protected or digitally signed PDF/MIP operations fail closed.
 8. UI, engine, CLI, MCP, save/export/print/edit/copy rights use the same SDK
    decisions.
 9. Temporary decrypted/working files are private and cleaned.
@@ -531,6 +545,8 @@ RFC-0041 is implemented for the suite standard when:
 - [Microsoft MIP SDK API permissions](https://learn.microsoft.com/en-us/information-protection/develop/concept-api-permissions)
 - [Microsoft MIP SDK supported file types](https://learn.microsoft.com/en-us/information-protection/develop/concept-supported-filetypes)
 - [Microsoft MIP SDK overview](https://learn.microsoft.com/en-us/information-protection/develop/overview)
+- [MIP SDK troubleshooting: password-protected or digitally signed PDFs](https://learn.microsoft.com/en-us/information-protection/develop/troubleshooting)
+- [MIP SDK file handlers and protection removal](https://learn.microsoft.com/en-us/information-protection/develop/concept-handler-file-csharp)
 - [Microsoft Entra app registration quickstart](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 - [Configure desktop apps that call web APIs](https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-app-configuration)
 - [SharePoint-compatible IRM PDF readers](https://learn.microsoft.com/en-us/purview/sp-compatible-pdf-readers-for-irm)

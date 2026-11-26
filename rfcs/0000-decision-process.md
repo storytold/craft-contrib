@@ -1,6 +1,6 @@
 # RFC-0000: How we make decisions
 
-Updated by: [RFC-0013](0013-amending-rfcs.md)
+Updated by: [RFC-0013](0013-amending-rfcs.md), [RFC-0076](0076-rfc-numbers.md), [RFC-0019](0019-rfc-scope-and-review-invitations.md)
 
 Changes to this repo, and decisions that affect several apps, are made
 through RFCs: pull requests here that add `rfcs/NNNN-short-title.md`.

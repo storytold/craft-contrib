@@ -8,26 +8,31 @@ The Craft apps — PhotoCraft, WordCraft, EffectCraft, VectorCraft and the rest 
 
 ## What are the Craft apps?
 
-The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0006](rfcs/0006-coding-agents.md) explains the rules that apply to them.
+The Craft apps are a suite of independent creative applications for desktop and web, written in Rust. Each app works on its own, but they share libraries, tools and rules. AI-assisted contributions, including coding agents, are welcome; [RFC-0072](rfcs/0072-shared-agents-md.md) explains the rules that apply to them.
 
 ## What lives in this repository
 
 | Folder | What it is |
 | --- | --- |
 | `rfcs/` | Decision documents. Each one proposes a change and records why it was accepted. |
-| `standards/` | The rule texts copied into the Craft apps' `AGENTS.md` files. |
+| `AGENTS.md` | Notes for agents working in this repository. |
+| `standards/` | `app-agents.md`, the shared rules copied into every Craft repository's `AGENTS.md`, and the longer rules it links. |
 
 The most important documents:
 
 - [RFC-0000: How we make decisions](rfcs/0000-decision-process.md) — the decision process itself
 - [RFC-0013: Amending an accepted RFC](rfcs/0013-amending-rfcs.md) — how accepted decisions are changed
-- [House rules (core)](standards/house-rules-core.md) — the rules for every Craft repository
-- [House rules (Rust)](standards/house-rules-rust.md) — extra rules for Rust code
+- [App agents](standards/app-agents.md) — the shared rules for agents in every Craft repository ([RFC-0072](rfcs/0072-shared-agents-md.md))
+- [Claims](standards/claims.md) — claiming issues and duplicate pull requests
+- [Pull requests](standards/pull-requests.md) — shape, description and review
+- [Testing](standards/testing.md) — the test rules ([RFC-0071](rfcs/0071-test-rules.md))
+- [Clean room](standards/clean-room.md) — where knowledge, assets and fixtures may come from
+- [Licences](standards/licences.md) — the licence allowlist, fonts and vendored code
 - [Accessibility](standards/accessibility.md) — the full accessibility standard
-- [Time](standards/time.md) — the calendar exception to the Rust rules
+- [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
-Repositories copy the core and language-specific rules into `AGENTS.md`. Repositories that draw an interface also copy the short accessibility rules from [house-rules-accessibility.md](standards/house-rules-accessibility.md).
+Each repository's `AGENTS.md` starts with a copy of [standards/app-agents.md](standards/app-agents.md). Until a repository moves to it, it carries the generated house-rules blocks from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md), which are deleted once every repository has moved.
 
 ## How a decision is made (the short version)
 
@@ -52,7 +57,7 @@ See the [open pull requests](https://github.com/storytold/craft-contrib/pulls) f
 
 Questions are comments too. If an RFC is hard to understand, saying so is valuable — it means the text needs work.
 
-**Open an RFC.** If you want to change a rule or decision, add `rfcs/NNNN-short-title.md` in a pull request. Pick the next free number, describe the problem first and the solution second, and say which apps it affects. An accepted RFC is not edited to change its meaning: add `Updates: RFC-NNNN` or `Obsoletes: RFC-NNNN` below the new RFC's title, as described in [RFC-0013](rfcs/0013-amending-rfcs.md).
+**Open an RFC.** If you want to change a rule or decision, add `rfcs/NNNN-short-title.md` in a pull request. Its number is the pull request's number ([RFC-0076](rfcs/0076-rfc-numbers.md)): once the PR is open, rename the file and set `RFC-NNNN` in its heading and the PR title. Describe the problem first and the solution second, and say which apps it affects. An accepted RFC is not edited to change its meaning: add `Updates: RFC-NNNN` or `Obsoletes: RFC-NNNN` below the new RFC's title, as described in [RFC-0013](rfcs/0013-amending-rfcs.md).
 
 **Fix small things.** Typos, broken links and wording clarifications that do not change a rule's meaning can be ordinary pull requests. They still need a maintainer's approval.
 
@@ -64,7 +69,7 @@ Questions are comments too. If an RFC is hard to understand, saying so is valuab
 | **Comment period** | The days when a proposal is open for comments. A maintainer starts it by posting the end date. |
 | **Maintainer** | A member of the `craft-app-team` GitHub team. Maintainers review and merge RFCs. |
 | **Owner** | An admin of the storytold organisation who can decide objections. |
-| **House rules** | Rules that apply in every Craft repository. They live in `standards/` here and are copied into each repository's `AGENTS.md`. |
+| **House rules** | Rules that apply in every Craft repository. They live in `standards/` here, and `standards/app-agents.md` is copied into each repository's `AGENTS.md`. |
 | **`AGENTS.md`** | The instruction file that coding agents read in every repository. |
 | **`craft-libs`** | The shared Rust library repository that several apps depend on. |
 | **Claim** | Saying on an issue that you are working on it, so two people do not fix the same bug ([RFC-0003](rfcs/0003-claiming-issues.md)). |
