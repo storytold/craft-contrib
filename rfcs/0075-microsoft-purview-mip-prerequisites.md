@@ -96,6 +96,17 @@ preservation is not treated as live MIP support.
 - **Customer tenant**: A Microsoft 365/Purview tenant owned and administered by
   a customer. Storytold must not provision or silently administer the customer's
   labels or Purview policy.
+- **Workforce tenant**: A normal Microsoft Entra tenant containing an
+  organization's employees, business applications, Microsoft 365 resources,
+  and B2B guest identities.
+- **External ID external tenant**: A separate Microsoft Entra tenant used for
+  customer identity and access management in Storytold-owned consumer or
+  customer-facing applications. It is not the Microsoft 365/Purview resource
+  tenant and it is not required for a multitenant Craft App ID.
+- **External-tenant federation bridge**: A server-side application registration
+  in a workforce tenant that federates that tenant's organizational identities
+  into a separately registered External ID application. Its confidential client
+  secret is never part of a Craft desktop/mobile client.
 - **One-time prerequisite**: Required once for the suite trust boundary unless
   the trust boundary or legal/publisher identity changes.
 - **Repeated prerequisite**: Required again because of SDK, app, platform,
@@ -112,6 +123,22 @@ Storytold will maintain:
 4. Separate app/platform signing and package procedures.
 5. A format-specific rights and re-publishing implementation in each app.
 6. One suite-wide test matrix and evidence standard.
+
+An External ID external tenant is optional CIAM infrastructure for a separate
+customer/consumer application. It is not a prerequisite for worldwide
+multitenant organizational authentication. The suite MIP identity remains a
+secretless public/native registration in the Storytold workforce tenant. An
+external-tenant application may have its own App ID and user flows; those tokens
+and local customer identities must not be substituted for the delegated
+organizational-identity tokens used by Azure Rights Management and Purview in
+the user's workforce tenant. External
+tenant creation, app registration, and federation do not grant Microsoft 365
+single sign-on, Purview licensing, label visibility, or document rights.
+
+When external partners need access to Storytold's Microsoft 365, line-of-business,
+or SaaS resources, use External ID B2B collaboration in the workforce tenant.
+An external tenant is the separate CIAM choice for customers/consumers of a
+Storytold-owned application.
 
 Separate app IDs are allowed only for a real trust-boundary change, such as a
 separate publisher/legal owner, separate public consent/revocation boundary,
@@ -132,6 +159,7 @@ cover that app identity. An existing IPIA must not be assumed to cover it.
 | Official MIP SDK package | Release engineering | Every SDK adoption/release; repeat on SDK, security, OS, or architecture change | Download the official package from Microsoft's official MIP SDK channel. Verify the package, version, license, `redist.txt`, `include/`, and `bins/release/<arch>/` for each OS/architecture. Record version, SHA-256, source URL, and redist inventory. | Builds are reproducible and redistributable policy is reviewable. | SDK build fails closed or cannot be packaged. |
 | Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
 | Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
+| Optional External ID external tenant and federation | Storytold CIAM owner, only for a separately approved customer/consumer app | Once per external identity domain; retest for provider/user-flow/authentication-policy change | Create the external tenant with the Tenant Creator role and approved region/subscription/billing owner. Register the customer app and user flow there. If workforce employees must use that app, create a separate single-tenant, server-side federation bridge in the workforce tenant, add the documented external-tenant callback URIs, configure the bridge only with delegated Graph `email`, `openid`, `profile`, and `User.Read`, and store its secret in the approved secret store. Add the workforce tenant as a custom OIDC provider in the external tenant and to its user flow. Never use the bridge App ID, external-tenant App ID, or secret in the Craft MIP desktop client. | The customer app has a separate CIAM directory and an explicit workforce-identity federation path. | No effect on required Craft MIP sign-in. The separate customer app lacks External ID signup/federation until implemented. |
 | Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery. An app may offer an optional work/school-email **login hint** only while opening a protected file; clear it after browser handoff and never persist it. Keep passwords/MFA and tenant selection on the Microsoft page. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Follow RFC-0025: non-secret display identity, account handle, routing, and generation metadata belong in the shared suite account list; tokens and other secrets belong only in the shared platform secret/credential store. | A person can add, switch, and sign out accounts, and automation can report the active account without duplicating or exposing credentials. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
 | Token renewal and authentication challenges | Storytold identity/engineering owner, per app integration | On provider-reported expiry or challenge; retest whenever authentication, SDK, or tenant policy changes | Use an approved identity implementation and secure credential storage where persistence is needed. Renew or reauthenticate the same account and tenant, preserve unsaved protected work, and revalidate SDK rights before continuing. Handle MFA, Conditional Access, revocation, and failure without plaintext fallback. Do not assume a fixed token lifetime. | Long-running protected sessions can continue only after identity and rights are verified. | Protected operations, saves, and recovery may fail after expiry; public use is blocked until safe renewal is implemented and tested. |
 | Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, and MFA/Conditional Access. Create tenant-issued fixtures for every claimed format and protection mode, including native protection and PFILE where claimed. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
@@ -162,6 +190,61 @@ reauthentication and token-challenge blocker in
 
 The app ID is a public identifier. It is not a secret. Customers do not
 register a separate Storytold app for each tenant.
+
+#### Optional: separate External ID external tenant
+
+Do not perform this subsection for PdfCraft MIP alone. An external tenant is
+needed only for a separately approved customer/consumer identity application.
+It is created as a distinct tenant in **Manage tenants** → **Create** →
+**External** by a Tenant Creator and, unless the approved trial is used, linked
+to an approved Azure subscription and resource group. Record its immutable
+region, tenant ID, domain, billing owner, data-residency decision, and tenant
+support/deletion owner. Register the customer application and user flow in
+that tenant.
+
+To let users from the Storytold workforce tenant sign in to that external-tenant
+application:
+
+1. In the workforce tenant, create a separate single-tenant server-side
+   federation app registration.
+2. Add Microsoft's documented external-tenant Web redirects:
+   `https://<tenant-subdomain>.ciamlogin.com/<external-tenant-id>/federation/oauth2`
+   and
+   `https://<tenant-subdomain>.ciamlogin.com/<tenant-subdomain>.onmicrosoft.com/federation/oauth2`.
+3. Create a client secret for the federation bridge and store it only in the
+   approved server-side secret store. Never bundle it in Craft.
+4. Add delegated Graph `email`, `openid`, `profile`, and `User.Read`; grant admin
+   consent when required.
+5. In the external tenant, configure that workforce tenant as a custom OIDC
+   identity provider. Use the Microsoft organizations discovery endpoint,
+   the workforce tenant's tenant-ID/onmicrosoft issuer, the federation App ID
+   and secret, `openid profile`, and response type `code`.
+6. Add the identity provider to the external-tenant sign-up/sign-in user flow
+   and test workforce MFA, Conditional Access, claims, account creation, and
+   lifecycle. External ID may prompt for MFA again because it does not currently
+   trust the completed workforce-tenant MFA claim.
+
+This is application-level OIDC federation, not directory merge, cross-tenant
+sync, or Purview delegation. The external tenant can contain its own local,
+social, or federated customer accounts. Each additional workforce identity
+provider must be configured and reviewed separately.
+
+Protected content continues to use customer workforce-tenant identities.
+Where Purview cross-tenant settings restrict access, the involved workforce
+tenant administrators must permit Microsoft Rights Management Services
+(`00000012-0000-0000-c000-000000000000`) in the required inbound or outbound
+direction. A recipient without an eligible organizational identity may require
+a B2B guest in the resource tenant. Neither authentication path grants rights:
+the label/document policy must authorize that resolved identity.
+
+Official setup references:
+
+- [External ID tenant overview](https://learn.microsoft.com/en-us/entra/external-id/external-identities-overview)
+- [B2B collaboration in a workforce tenant](https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b)
+- [Create an external tenant](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-create-external-tenant-portal)
+- [Plan an External ID deployment](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-planning-your-solution)
+- [Federate a workforce tenant into an external tenant](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-entra-id-federation-customers)
+- [Configure Entra for Purview-encrypted content](https://learn.microsoft.com/en-us/purview/encryption-azure-ad-configuration)
 
 ### B. IPIA
 
@@ -245,6 +328,7 @@ not mean no owner or procedure.
 | App/platform signing certificate | Certificate renewal, identity change, or signing-verification failure | Renew 60-90 days before the credential expires, while preserving required timestamping for existing signed artifacts | Provision/rotate the credential before producing new releases, update CI, codesign helper/libraries, notarize/sign/package, and verify every existing and new artifact. A timestamped artifact whose signature remains valid is not declared broken merely because the signing credential later expired. | Certificate ID or fingerprint metadata, timestamp/signature/notarization verification log |
 | IPIA/app identity review | New App ID, separate trust boundary/publisher, legal owner change, or Microsoft request | At change time and after the relevant app identity approval | Send update/request as required, record Microsoft acknowledgment and signed IPIA/change, update app registration and package identity | IPIA record, app ID, Microsoft acknowledgment |
 | Public app permission/redirect review | Permission or auth protocol change | At design review and before public release | Confirm delegated permissions only, public/native client redirect, consent behavior, no secrets, no application-only privilege | Entra change record, app manifest, permission diff |
+| Optional External ID external-tenant federation | Provider, issuer, redirect, user flow, secret, tenant policy, or bridge-application change | Before each affected customer-app release; before a federation secret expires | Rotate/update the separate confidential server-side bridge in the workforce tenant, update the OIDC provider and user flow in the external tenant, retest workforce sign-in/MFA/claims/account lifecycle, and verify no credential crossed into a Craft public/native client | External-tenant change record, secret rotation evidence, user-flow test, updated App ID inventory |
 | Customer tenant consent/licensing | Customer onboarding or tenant policy/permission change | Once per tenant when required; recheck after app permission or policy change | Verify Purview license, tenant consent, label publication, user/group scope, external recipient policy, MFA/Conditional Access | Customer check record and test fixture |
 | Tenant POC matrix | SDK update, major app release, OS support change, or label-policy change | Before each public SDK-enabled release and after each relevant tenant-policy change | Run the rights and open/save/re-publish matrix with real tenant fixtures for every claimed format and protection mode; verify unsupported password/MIP combinations fail closed | POC report, screenshots, pass/fail/skip count by format and mode |
 | Microsoft account-session persistence | Account UX, auth protocol, credential-store, or app major-release change | POC before release; public builds before public multi-account support is claimed | Test add/switch/sign-out behavior, active-account isolation, OS credential-store persistence, token cleanup, app restart, and no plaintext settings/log storage | Account matrix, credential-store evidence, sign-out/restart verification |
