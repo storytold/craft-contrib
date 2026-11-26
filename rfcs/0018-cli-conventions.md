@@ -183,16 +183,24 @@ workspace dependencies.
 Rules that can be checked mechanically are checked in CI with
 [ast-grep](https://ast-grep.github.io/) through craft-common-actions'
 [`ast-grep.yml`](https://github.com/storytold/craft-common-actions/blob/main/.github/workflows/ast-grep.yml)
-reusable workflow. Each rule ships with its tests. A follow-up PR there adds the
-first shared rules:
+reusable workflow (storytold/craft-common-actions#80, merged). Each rule ships
+with its tests. On 2026-11-26 the rules are not in craft-common-actions: photocraft,
+cadcraft and soundcraft each hold the same four in `lint/ast-grep/rules/` and call
+the workflow from `.github/workflows/ast-grep.yml`. A follow-up PR in
+craft-common-actions gives them one home. They are:
 
 - `clap-error-message`: no string or `format!` passed to `Command::error`
   (rule 2.2).
+- `clap-error-message-variable`: no string held in a variable and passed to
+  `Command::error` (rule 2.2).
 - `string-error`: no `Result<_, String>` (rule 2.2).
+- `args-os`: no `std::env::args()`, which panics on a file name that isn't
+  valid Unicode (rule 1.5).
 
-Both were tried on photocraft: the first finds the two messages that #9194
-replaced and passes on main; the second finds 640 existing uses, so an app
-turns it on once it has none left.
+`string-error` was tried on photocraft: it found 640 existing uses, so an app
+turns it on once it has none left. Fifteen of the nineteen CLI crates return
+`Result<_, String>` somewhere, so most apps start with it off (see "Open
+questions").
 
 An app's `AGENTS.md` asks coding agents to run the same scan before pushing.
 
@@ -220,7 +228,12 @@ whole CLI already complies. At
   parsing. Full adoption needs native path types and a path through execution
   that preserves them, with a non-Unicode-path test.
 
-These are reference implementation gaps, not exceptions for the twelve ports.
+A re-check on 2026-11-26 at photocraft `4a4e3cff` finds both gaps still there: the root
+command has no `propagate_version`, and the release refuses `photocraft-cli convert --version`
+(exit 2); `DropletArgs` still uses `String`. cadcraft and soundcraft have the same version
+gap: their subcommands refuse `--version` too.
+
+These are reference implementation gaps, not exceptions for the other CLIs' ports.
 The reference must list them when describing its compliance; a clean ast-grep
 scan alone does not establish that these or the other behavior and packaging
 requirements pass.
@@ -243,14 +256,16 @@ requirements pass.
 
 ## Open questions
 
-- Should the rules move to a living document (`docs/cli-conventions.md`) as
-  [RFC-0013](https://github.com/storytold/craft-contrib/pull/17) would allow, so
-  this RFC stays the record of the decision? This RFC keeps them inline until
-  RFC-0013 is accepted.
+- *Closed.* The rules stay inline. [RFC-0013](0013-amending-rfcs.md) is accepted:
+  an accepted RFC isn't edited, and a change to these rules is a new RFC that says
+  `Updates: RFC-0018`. A later RFC may move them to a living document.
 - Should `string-error` warn rather than fail for an app that still has
-  existing hits, so it can be turned on before the cleanup is finished?
-- Should `--json` be required on every subcommand that prints a listing, or
-  only where a program is expected to read it?
+  existing hits, so it can be turned on before the cleanup is finished? Fifteen
+  of the nineteen CLI crates have hits. Where the setting lives is open too: an
+  input of the shared workflow, so the same rule file ships everywhere, or a
+  per-app rule override.
+- *Closed.* `--json` is needed only where a program is expected to read the
+  output, and where it exists it means the same everywhere (rule 1.3).
 
 ## Appendix A: the CLIs on 2026-11-26
 
