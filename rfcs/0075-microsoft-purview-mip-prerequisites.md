@@ -1,0 +1,699 @@
+# RFC-0075: Microsoft Purview/MIP prerequisites, rollout, and renewal standard
+
+## Status
+
+Draft. This document defines the suite-wide operating standard for Microsoft
+Purview/MIP integration. It does not by itself claim that a public release,
+tenant test, or application integration is complete.
+
+Discussion: [storytold/craft-contrib#73](https://github.com/storytold/craft-contrib/issues/73)
+
+## Summary
+
+One Microsoft Entra app identity and one public-application IPIA may serve the
+native Craft application suite. The MIP SDK and redistributables are bundled
+per application and platform, while each customer tenant owns its own
+Purview licensing, sensitivity labels, policies, consent, and recipient
+authorization.
+
+This RFC does two things:
+
+1. States the exact Storytold prerequisites for public Microsoft Purview/MIP
+   support.
+2. Defines what must be done once, what is repeated per app or platform, what
+   triggers renewal or retesting, and what happens if a prerequisite is not
+   completed.
+
+PdfCraft is the implementation POC and the completion standard for PDF:
+
+- Feature issue:
+  [storytold/pdfcraft#6747](https://github.com/storytold/pdfcraft/issues/6747)
+- Implementation PR:
+  [storytold/pdfcraft#7843](https://github.com/storytold/pdfcraft/pull/7843)
+- Validated protected-open login-hint implementation:
+  [2901b8d0a6d861286268679b4abf586f44688ebf](https://github.com/storytold/pdfcraft/commit/2901b8d0a6d861286268679b4abf586f44688ebf)
+- External-tenant prerequisite runbook:
+  [b7f55a2e7e7a4c8930d770aa123762084a5252a8](https://github.com/storytold/pdfcraft/commit/b7f55a2e7e7a4c8930d770aa123762084a5252a8)
+
+The upstream implementation PR is the canonical current-state reference; the
+linked Storytold commit URLs resolve to its cross-repository source history.
+
+The POC exercises native SDK bridging, PFILE detection, rights and save-state
+seams, UI, automation/MCP, and packaging with synthetic tests. Protected PDF
+password/MIP composition is not implemented and must fail closed. These tests
+do not establish live tenant authorization or production readiness.
+
+A client ID supplied to unblock a private POC is **POC-only**. It must not be
+committed as the Storytold suite identity or used as production release evidence.
+Production still requires an official Storytold-owned multitenant public/native
+registration with publisher identity, owners, delegated permissions, consent,
+IPIA, release inventory, and maintenance ownership. The POC ID and the production
+ID must be recorded as separate identities.
+
+Recreating a POC registration in a security-isolated tenant is an App ID rotation,
+not a publisher or production migration. Keep that POC identity out of source and
+Partner Center unless the organization explicitly decides to promote the tenant.
+The official production identity belongs in the intended publisher-owned tenant;
+if a different production tenant is selected, associate that tenant with the
+verified Partner Global Account before publisher verification. Do not associate
+an otherwise disposable POC tenant merely to make private sign-in work.
+
+## Motivation
+
+Purview/MIP support crosses several boundaries that cannot be solved by one
+application PR:
+
+- Microsoft Entra app identity and delegated API consent.
+- Microsoft legal/commercial integration approval.
+- Official MIP SDK binaries and redistributable licenses.
+- Platform signing and notarization.
+- Customer tenant licensing, label policies, MFA/Conditional Access, and
+  recipient rights.
+- Format-specific package handling and rights enforcement in each app.
+- Repeatable validation after SDK, OS, app, or policy changes.
+
+The suite needs one stable trust boundary, without pretending that a file
+format pass-through or a local SDK build proves public or tenant support.
+
+## Scope
+
+This RFC applies to:
+
+- PdfCraft.
+- GridCraft.
+- DeckCraft.
+- WordCraft.
+- ArtCraft and generated-PDF/Office export flows.
+- Any future native desktop Craft app that reads, labels, protects, exports,
+  or republishes Microsoft-supported documents.
+- Shared providers or package work that lives in `storytold/craft-libs`.
+- Release tooling that packages MIP SDK helpers or redistributables.
+
+This RFC does not make every app MIP-capable. Each application needs an
+approved format adapter and rights implementation. Package metadata
+preservation is not treated as live MIP support.
+
+## Definitions
+
+- **Suite app identity**: The one public/native Microsoft Entra application
+  registration used by the Storytold Craft desktop suite.
+- **IPIA**: Microsoft Information Protection Integration Agreement. Microsoft
+  requires this formal agreement before a public application developed with
+  MIP SDK is released.
+- **MIP SDK package**: The official Microsoft C++ SDK package and headers,
+  binaries, license/redistribution files, and supported platform
+  redistributables obtained from Microsoft's official distribution channels.
+- **Helper**: The signed native process or library bridge that calls the MIP
+  SDK on behalf of one Craft app.
+- **MIP native protection**: Protection that is enforced by the associated
+  application and SDK for supported text, image, Office, and PDF file types.
+- **Generic protection**: `.pfile` encapsulation for file types not supported
+  natively. Microsoft documents that generic protection authenticates access
+  but does not enforce usage rights inside the app; rights are informational
+  rather than a native usage-rights enforcement mechanism.
+- **PFILE**: A generic `.pfile` protected container or PFILE-style protected
+  PDF payload. It must not be opened as plaintext.
+- **Customer tenant**: A Microsoft 365/Purview tenant owned and administered by
+  a customer. Storytold must not provision or silently administer the customer's
+  labels or Purview policy.
+- **Workforce tenant**: A normal Microsoft Entra tenant containing an
+  organization's employees, business applications, Microsoft 365 resources,
+  and B2B guest identities.
+- **External ID external tenant**: A separate Microsoft Entra tenant used for
+  customer identity and access management in Storytold-owned consumer or
+  customer-facing applications. It is not the Microsoft 365/Purview resource
+  tenant and it is not required for a multitenant Craft App ID.
+- **External-tenant federation bridge**: A server-side application registration
+  in a workforce tenant that federates that tenant's organizational identities
+  into a separately registered External ID application. Its confidential client
+  secret is never part of a Craft desktop/mobile client.
+- **One-time prerequisite**: Required once for the suite trust boundary unless
+  the trust boundary or legal/publisher identity changes.
+- **Repeated prerequisite**: Required again because of SDK, app, platform,
+  certificate, customer, consent, policy, or security-change triggers.
+
+## Standard decision
+
+Storytold will maintain:
+
+1. One multitenant public/native Entra app registration for the Storytold
+   Craft suite.
+2. One IPIA associated with the suite app identity.
+3. One official-SDK build and validation procedure per supported app/platform.
+4. Separate app/platform signing and package procedures.
+5. A format-specific rights and re-publishing implementation in each app.
+6. One suite-wide test matrix and evidence standard.
+
+An External ID external tenant is optional CIAM infrastructure for a separate
+customer/consumer application. It is not a prerequisite for worldwide
+multitenant organizational authentication. The suite MIP identity remains a
+secretless public/native registration in the Storytold workforce tenant. An
+external-tenant application may have its own App ID and user flows; those tokens
+and local customer identities must not be substituted for the delegated
+organizational-identity tokens used by Azure Rights Management and Purview in
+the user's workforce tenant. External
+tenant creation, app registration, and federation do not grant Microsoft 365
+single sign-on, Purview licensing, label visibility, or document rights.
+
+When external partners need access to Storytold's Microsoft 365, line-of-business,
+or SaaS resources, use External ID B2B collaboration in the workforce tenant.
+An external tenant is the separate CIAM choice for customers/consumers of a
+Storytold-owned application.
+
+Separate app IDs are allowed only for a real trust-boundary change, such as a
+separate publisher/legal owner, separate public consent/revocation boundary,
+or a third-party/customer fork released under a different trust name.
+Different operating systems, apps in the suite, customer tenants, or test
+environments are not reasons to create a new public app ID.
+
+If a separate app ID is created, Microsoft requires the IPIA/update process to
+cover that app identity. An existing IPIA must not be assumed to cover it.
+
+## Suite-wide prerequisites
+
+| Requirement | Owner | Frequency | Exact procedure | If completed | If skipped |
+|---|---|---|---|---|---|
+| Multitenant public/native Entra app registration | Storytold security + Entra administrator | Once for the suite app identity; update only on permission/redirect/trust-boundary change | Register an app named `Storytold Craft Applications` or another stable approved public name. Set supported account types to multitenant organizational directories. Configure `http://localhost` as a mobile/desktop redirect and allow public client flows. Do not add app secrets or application certificates to the desktop identity. | Apps can request delegated tokens and customer tenants can grant consent. | User sign-in cannot proceed; protected PFILE/IRM opens fail closed with not-configured or sign-in-required state. |
+| Security-isolated POC registration | POC security + Entra owner | When required for a private test boundary; repeat only when the POC App ID or home tenant changes | Create a separate public/native POC registration in the isolated workforce tenant. Prefer organizational-directory account types and add only the delegated MIP permissions. Inject its client ID only through `PDFCRAFT_PURVIEW_APP_ID` for local builds. On replacement, rebuild every GUI/CLI artifact, verify the old ID is absent, rerun the setup verifier and live sign-in/label-policy checks, and revoke the obsolete registration after the replacement passes. Record identities in private evidence, not release configuration. | The POC has a disposable identity and repeatable rotation evidence without changing the production trust boundary. | A compromised, stale, or old POC App ID may remain usable, and mixed-identity test results become ambiguous. |
+| Delegated MIP API permissions | Storytold Entra/security owner | Once; re-review on permission or consent-policy change | Add delegated `Azure Rights Management Services/user_impersonation` and `Microsoft Information Protection Sync Service/UnifiedPolicy.User.Read`. Do not grant Content.SuperUser, Content.DelegatedReader/Writer, UnifiedPolicy.Tenant.Read, or application-only permissions for normal desktop use unless a separate service/daemon app has a documented need. | SDK policy and rights calls receive delegated authorization. | Label discovery, use-license acquisition, or label operations fail or return incomplete rights. |
+| Public IPIA | Storytold legal/business owner | Initial for the public suite app identity; update for a new app ID/publisher/trust boundary or a Microsoft-directed change | Email `IPIA@microsoft.com` with the application/product name, requester identity, and contact email. Microsoft returns a form. Return the legal company name, incorporation location/country, URL, contact, app name, description, Azure tenant ID, App ID, and critical-support contacts. Digitally sign the final IPIA and wait for Microsoft signature. For a new App ID on an existing IPIA, email Microsoft with the app name, description, tenant ID, App ID, and critical-support contacts. | Storytold may distribute a public SDK-enabled app under the signed identity. | Internal POC builds may continue, but public SDK-enabled builds must not be claimed or released. |
+| Official MIP SDK package | Release engineering | Every SDK adoption/release; repeat on SDK, security, OS, or architecture change | Download the official package from Microsoft's official MIP SDK channel. Verify the package, version, license, `redist.txt`, `include/`, and `bins/release/<arch>/` for each OS/architecture. Record version, SHA-256, source URL, and redist inventory. | Builds are reproducible and redistributable policy is reviewable. | SDK build fails closed or cannot be packaged. |
+| Native helper and app packaging | Release engineering | Once per app/OS adapter; repeated for every SDK/app release | Build native C++ SDK helper, stage official SDK binaries, and package the helper with one app/platform release. Do not copy or hand-roll SDK binaries. | The helper starts and loads SDK dependencies. | App reports SDK unavailable or the OS blocks/quarantines the helper. |
+| Platform signing/notarization | Storytold release/security owner | Every release; repeat for certificate/identity renewals | macOS: codesign nested SDK/helper/dylibs and notarize/sign the app artifact. Windows: Authenticode sign the app/helper/DLL package. Linux: sign/package according to the distribution and supported package format. Include or stage platform runtime dependencies required by the SDK. | Public OS trust checks pass. | macOS quarantine, Windows SmartScreen/Authenticode, or Linux package integrity checks block the helper. |
+| Optional External ID external tenant and federation | Storytold CIAM owner, only for a separately approved customer/consumer app | Once per external identity domain; retest for provider/user-flow/authentication-policy change | Create the external tenant with the Tenant Creator role and approved region/subscription/billing owner. Register the customer app and user flow there. If workforce employees must use that app, create a separate single-tenant, server-side federation bridge in the workforce tenant, add the documented external-tenant callback URIs, configure the bridge only with delegated Graph `email`, `openid`, `profile`, and `User.Read`, and store its secret in the approved secret store. Add the workforce tenant as a custom OIDC provider in the external tenant and to its user flow. Never use the bridge App ID, external-tenant App ID, or secret in the Craft MIP desktop client. | The customer app has a separate CIAM directory and an explicit workforce-identity federation path. | No effect on required Craft MIP sign-in. The separate customer app lacks External ID signup/federation until implemented. |
+| Microsoft account session and account switching | Storytold identity/engineering owner | POC in-process account list; public persistence repeated for platform credential-store changes | Use Microsoft sign-in for account discovery. An app may offer an optional work/school-email **login hint** only while opening a protected file; clear it after browser handoff and never persist it. Keep passwords/MFA and tenant selection on the Microsoft page. Keep the active account and its RMS/MIP tokens scoped to the in-process account session. Follow RFC-0025: non-secret display identity, account handle, routing, and generation metadata belong in the shared suite account list; tokens and other secrets belong only in the shared platform secret/credential store. | A person can add, switch, and sign out accounts, and automation can report the active account without duplicating or exposing credentials. | POC account switching may work only for the running process; public multi-account support cannot be claimed across restarts. |
+| Token renewal and authentication challenges | Storytold identity/engineering owner, per app integration | On provider-reported expiry or challenge; retest whenever authentication, SDK, or tenant policy changes | Use an approved identity implementation and secure credential storage where persistence is needed. Renew or reauthenticate the same account and tenant, preserve unsaved protected work, and revalidate SDK rights before continuing. Handle MFA, Conditional Access, revocation, and failure without plaintext fallback. Do not assume a fixed token lifetime. | Long-running protected sessions can continue only after identity and rights are verified. | Protected operations, saves, and recovery may fail after expiry; public use is blocked until safe renewal is implemented and tested. |
+| Microsoft 365 test tenant | Storytold security/engineering | Once for the POC tenant; repeat tenant-policy validation after major label/policy changes | Create a dedicated tenant or isolated test environment. Publish test labels, protected and unprotected labels, mandatory/default/downgrade policies, test users/groups, and MFA/Conditional Access. Create tenant-issued fixtures for every claimed format and protection mode, including native protection and PFILE where claimed. | POC can test real use-license and rights behavior. | No live result can be claimed. Synthetic tests prove code paths only. |
+| Customer tenant licensing and label policy | Customer Purview/Microsoft 365 administrator | At onboarding and whenever the customer changes Purview license, labels, policy, user scope, recipient scope, or consent policy | Customer enables the required Purview/IRM licensing and label policy, publishes labels, configures protected-label permissions and external recipients, and grants tenant consent when the tenant policy requires it. | Customer users receive tenant-approved labels and rights. | Labels are missing, sign-in works but authorization fails, or recipients cannot open protected documents. |
+| App-specific format and rights implementation | Each app repository owner | Once per app format track; repeated for format/SDK/rights behavior changes | Implement format parse/write, label metadata, rights gates, UI/automation, save/re-publish behavior, private staging, and tests. Link a format-specific issue/PR to this RFC. | The app supports the format's agreed MIP behavior and cannot create an unauthorized plaintext copy. | Package metadata may survive, but live MIP sign-in, decryption, rights, or re-publishing is missing or falsely claimed. |
+
+PdfCraft tracks live tenant verification of its synthetic-tested same-account
+reauthentication and token-challenge blocker in
+[storytold/pdfcraft#7843](https://github.com/storytold/pdfcraft/pull/7843#discussion_r4687045314).
+
+## Exact suite app setup procedure
+
+### A. Storytold app registration
+
+1. The Storytold Entra administrator opens App registrations and creates or
+   confirms `Storytold Craft Applications`.
+2. Set supported account types to multitenant organizational directories.
+3. Add `http://localhost` as the mobile/desktop/public-client redirect.
+4. Enable public client/desktop flows.
+5. Add delegated `Azure Rights Management Services/user_impersonation`.
+6. Add delegated
+   `Microsoft Information Protection Sync Service/UnifiedPolicy.User.Read`.
+7. Grant tenant-level admin consent in the Storytold tenant if Storytold
+   tenant policy requires it.
+8. Store the public client ID in the release manifest/CI configuration.
+9. Never store a client secret, tenant secret, or private key in source,
+   desktop binaries, environment files, logs, or screenshots.
+
+The app ID is a public identifier. It is not a secret. Customers do not
+register a separate Storytold app for each tenant.
+
+#### Optional: separate External ID external tenant
+
+Do not perform this subsection for PdfCraft MIP alone. An external tenant is
+needed only for a separately approved customer/consumer identity application.
+It is created as a distinct tenant in **Manage tenants** → **Create** →
+**External** by a Tenant Creator and, unless the approved trial is used, linked
+to an approved Azure subscription and resource group. Record its immutable
+region, tenant ID, domain, billing owner, data-residency decision, and tenant
+support/deletion owner. Register the customer application and user flow in
+that tenant.
+
+To let users from the Storytold workforce tenant sign in to that external-tenant
+application:
+
+1. In the workforce tenant, create a separate single-tenant server-side
+   federation app registration.
+2. Add Microsoft's documented external-tenant Web redirects:
+   `https://<tenant-subdomain>.ciamlogin.com/<external-tenant-id>/federation/oauth2`
+   and
+   `https://<tenant-subdomain>.ciamlogin.com/<tenant-subdomain>.onmicrosoft.com/federation/oauth2`.
+3. Create a client secret for the federation bridge and store it only in the
+   approved server-side secret store. Never bundle it in Craft.
+4. Add delegated Graph `email`, `openid`, `profile`, and `User.Read`; grant admin
+   consent when required.
+5. In the external tenant, configure that workforce tenant as a custom OIDC
+   identity provider. Use the Microsoft organizations discovery endpoint,
+   the workforce tenant's tenant-ID/onmicrosoft issuer, the federation App ID
+   and secret, `openid profile`, and response type `code`.
+6. Add the identity provider to the external-tenant sign-up/sign-in user flow
+   and test workforce MFA, Conditional Access, claims, account creation, and
+   lifecycle. External ID may prompt for MFA again because it does not currently
+   trust the completed workforce-tenant MFA claim.
+
+This is application-level OIDC federation, not directory merge, cross-tenant
+sync, or Purview delegation. The external tenant can contain its own local,
+social, or federated customer accounts. Each additional workforce identity
+provider must be configured and reviewed separately.
+
+Protected content continues to use customer workforce-tenant identities.
+Where Purview cross-tenant settings restrict access, the involved workforce
+tenant administrators must permit Microsoft Rights Management Services
+(`00000012-0000-0000-c000-000000000000`) in the required inbound or outbound
+direction. A recipient without an eligible organizational identity may require
+a B2B guest in the resource tenant. Neither authentication path grants rights:
+the label/document policy must authorize that resolved identity.
+
+Official setup references:
+
+- [External ID tenant overview](https://learn.microsoft.com/en-us/entra/external-id/external-identities-overview)
+- [B2B collaboration in a workforce tenant](https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b)
+- [Create an external tenant](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-create-external-tenant-portal)
+- [Plan an External ID deployment](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-planning-your-solution)
+- [Federate a workforce tenant into an external tenant](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-entra-id-federation-customers)
+- [Configure Entra for Purview-encrypted content](https://learn.microsoft.com/en-us/purview/encryption-azure-ad-configuration)
+
+### B. IPIA
+
+1. Legal submits the IPIA request to `IPIA@microsoft.com`.
+2. The request identifies the company, app name, requester, email, and
+   critical-support contacts.
+3. Microsoft sends the IPIA form. Storytold provides legal name, incorporation
+   location/country, company URL, app name/description, Azure tenant ID,
+   App ID, and contact details.
+4. Both parties sign the IPIA before public SDK-enabled distribution.
+5. Storytold records the app ID, IPIA version/approval date, renewal or
+   change owner, and evidence location.
+6. A new App ID or real publisher/trust-boundary change follows Microsoft's
+   IPIA update process; it is not assumed to be covered automatically.
+
+### C. Official SDK package
+
+1. Release engineering selects an exact SDK version and target package.
+2. Storytold obtains the package from Microsoft's official MIP SDK download
+   channel.
+3. It verifies source, version, license, `redist.txt`, and third-party notices.
+4. It verifies:
+   - macOS arm64 and x86_64 SDK/layout where supported.
+   - Windows amd64, x86, and arm64 SDK/layout where supported.
+   - supported Linux distribution/architecture layouts.
+5. It records package SHA-256 values and redist inventory outside app source.
+6. It builds the native helper in each supported app and OS target.
+7. It packages only official SDK binaries and reviewed dependencies.
+
+Official Microsoft guidance:
+
+- [MIP SDK setup and configuration](https://learn.microsoft.com/en-us/information-protection/develop/setup-configure-mip)
+- [MIP SDK API permissions](https://learn.microsoft.com/en-us/information-protection/develop/concept-api-permissions)
+- [MIP SDK supported file types](https://learn.microsoft.com/en-us/information-protection/develop/concept-supported-filetypes)
+- [MIP SDK overview](https://learn.microsoft.com/en-us/information-protection/develop/overview)
+- [Official MIP SDK binaries](https://aka.ms/mipsdkbinaries)
+- [SharePoint-compatible protected-PDF readers](https://learn.microsoft.com/en-us/purview/sp-compatible-pdf-readers-for-irm)
+
+### D. Application build and package
+
+1. The app enables MIP SDK support only in an explicit SDK build feature.
+2. It resolves the SDK root and app ID at build/release time.
+3. It stages the native helper beside or inside the app according to platform
+   rules.
+4. It stages official SDK libraries and required runtime dependencies.
+5. It signs nested code before the parent app/package signature.
+6. It notarizes macOS releases when the real signing identity is available.
+7. It Authenticode-signs Windows app/helper/DLL/MSI components where required.
+8. It signs or packages Linux artifacts according to the distribution target.
+9. It proves helper discovery and runtime library resolution after staging,
+   before user testing.
+
+Ordinary builds remain ordinary password-protected/PDF or format builds. They
+must not present MIP support as enabled and must not open MIP-shaped bytes as
+plaintext.
+
+### E. Tenant POC
+
+1. The security/identity owner confirms the test tenant and test users.
+2. The Purview administrator publishes test labels and label policies.
+3. The tenant creates labeled and protected fixtures for each claimed native
+   format and protection mode, plus PFILE fixtures where PFILE support is claimed.
+4. The app opens each fixture and requests Entra sign-in if needed.
+5. The SDK acquires delegated tokens, use-license, label metadata, and rights.
+6. For each claimed supported path, test open, save, re-publish and reopen; test
+   that unsupported combinations fail without stripping protection.
+7. The test matrix includes MFA, Conditional Access, external recipient,
+   no-access, view-only, copy/print/edit/export/owner/change-rights, label
+   justification, remove-label, remove-protection, save, revert, and reopen.
+8. The result is recorded with pass/fail evidence and no secret or personal
+   tenant data.
+
+## Recurrence and renewal standard
+
+These tasks repeat based on triggers. The absence of a fixed annual date does
+not mean no owner or procedure.
+
+| Task | Normal trigger | Suggested timing | Procedure | Evidence |
+|---|---|---|---|---|
+| SDK package/security update | New SDK release, security advisory, or app major release | Immediately for a security advisory; otherwise in the next major SDK/OS support window | Download official package, verify license/redist, rebuild all affected app/platform targets, rerun unit/tenant matrix, sign/package, update RFC/PR status | SDK version, SHA-256, test report, package report |
+| App/platform signing certificate | Certificate renewal, identity change, or signing-verification failure | Renew 60-90 days before the credential expires, while preserving required timestamping for existing signed artifacts | Provision/rotate the credential before producing new releases, update CI, codesign helper/libraries, notarize/sign/package, and verify every existing and new artifact. A timestamped artifact whose signature remains valid is not declared broken merely because the signing credential later expired. | Certificate ID or fingerprint metadata, timestamp/signature/notarization verification log |
+| IPIA/app identity review | New App ID, separate trust boundary/publisher, legal owner change, or Microsoft request | At change time and after the relevant app identity approval | Send update/request as required, record Microsoft acknowledgment and signed IPIA/change, update app registration and package identity | IPIA record, app ID, Microsoft acknowledgment |
+| Public app permission/redirect review | Permission or auth protocol change | At design review and before public release | Confirm delegated permissions only, public/native client redirect, consent behavior, no secrets, no application-only privilege | Entra change record, app manifest, permission diff |
+| Optional External ID external-tenant federation | Provider, issuer, redirect, user flow, secret, tenant policy, or bridge-application change | Before each affected customer-app release; before a federation secret expires | Rotate/update the separate confidential server-side bridge in the workforce tenant, update the OIDC provider and user flow in the external tenant, retest workforce sign-in/MFA/claims/account lifecycle, and verify no credential crossed into a Craft public/native client | External-tenant change record, secret rotation evidence, user-flow test, updated App ID inventory |
+| Customer tenant consent/licensing | Customer onboarding or tenant policy/permission change | Once per tenant when required; recheck after app permission or policy change | Verify Purview license, tenant consent, label publication, user/group scope, external recipient policy, MFA/Conditional Access | Customer check record and test fixture |
+| Tenant POC matrix | SDK update, major app release, OS support change, or label-policy change | Before each public SDK-enabled release and after each relevant tenant-policy change | Run the rights and open/save/re-publish matrix with real tenant fixtures for every claimed format and protection mode; verify unsupported password/MIP combinations fail closed | POC report, screenshots, pass/fail/skip count by format and mode |
+| Microsoft account-session persistence | Account UX, auth protocol, credential-store, or app major-release change | POC before release; public builds before public multi-account support is claimed | Test add/switch/sign-out behavior, active-account isolation, OS credential-store persistence, token cleanup, app restart, and no plaintext settings/log storage | Account matrix, credential-store evidence, sign-out/restart verification |
+| Token renewal and challenge handling | Provider expiry/challenge, auth/SDK change, or tenant-policy change | As required by the provider; exercise before each supported release | Test renewal and same-account reauthentication with unsaved protected edits, account-substitution rejection, MFA/Conditional Access, rights changes, failed renewal, save, and protected recovery | Tenant test matrix and evidence that failures preserve protection and surface unsaved-work risk |
+| App format rights implementation | Format adapter or rights behavior change | Once per app rollout; rerun for format/save/export/rights changes | Add issue/PR, format tests, engine/UI/CLI/MCP gates, re-publish/revert tests, tenant POC | App PR and test evidence |
+| Security and dependency review | SDK update, package change, vulnerability, or annual review | Triggered immediately for a finding; at least annually for the suite | Review SDK/C++ helper dependencies, staging cleanup, signing, logging, temp-file permissions, and revocation behavior | Security-review result and remediation link |
+
+This is a trigger-based standard. It intentionally does not say "renew every
+year" unless a legal, certificate, or Microsoft term is actually time-bound.
+The owner and evidence must be recorded even when no renewal is needed.
+
+## Outcomes and failure matrix
+
+| Situation | App behavior | Product/release outcome |
+|---|---|---|
+| MIP SDK package/helper absent | Ordinary build recognizes MIP-shaped files and fails closed; SDK unavailable state is explicit | Local ordinary build and POC UI tests may run; no live Purview support is claimed |
+| App ID absent | SDK helper exists but app registration is not configured | Sign-in cannot proceed; protected file reports not configured |
+| App ID present but public IPIA absent | SDK can build internally for POC testing | Public SDK-enabled distribution is prohibited/unsupported until IPIA approval |
+| SDK/helper/signing present but tenant consent absent | Sign-in or label/rights API returns tenant/consent error | User can retry; no protected content is opened without authorization |
+| Customer Purview license/label policy absent | Labels/policy or use-license unavailable | Protected PFILE may fail authorization or labels may not appear |
+| PFILE without SDK or rights state | No plaintext fallback | User receives protected-document/not-configured/SDK-unavailable state |
+| PFILE with sign-in but no valid use-license/rights result | No plaintext fallback; remain closed | File may be opened for view only after the SDK acquires a valid license and confirms VIEW rights; unknown or failed rights never authorize rendering |
+| Token expires while a protected document is open | SDK calls stop at a sign-in challenge; never fall back to plaintext. Reauthentication must keep the same account, preserve working edits, and revalidate every protected original before rights resume. | PdfCraft implements this flow synthetically; public use remains blocked until live expiry, MFA, Conditional Access, and rights-refresh evidence exists |
+| Protected file with export/owner rights | Re-publish/remove operations proceed only through SDK authorization | App may produce SDK-authorized output; unprotected output is never a silent fallback |
+| Protected file without export/owner rights | Remove protection/export is denied | App reports the rights requirement and preserves protection |
+| SDK helper missing runtime dependency | OS/dynamic-loader or helper startup error | Package is not accepted for release |
+| New-release credential expired, or an artifact fails signature/notarization verification | Package validation blocks that artifact/helper | The affected new release is blocked until signing/trust is repaired; separately verify whether properly timestamped older artifacts remain valid |
+| Labeling required and no label chosen | Save/re-publish is blocked | User gets a mandatory-label/default-label prompt or clear save failure |
+| Password-protected or digitally signed PDF submitted for MIP labeling/protection | Reject the unsupported operation without stripping or weakening either security layer | Do not claim PDF password/MIP composition as supported; retain the original |
+| Other combined security layers supported by the SDK and format | Apply the intersection of their effective rights | No operation may bypass either supported layer |
+| Everything above is complete | SDK signs in, acquires rights, opens authorized content, enforces operations, and re-publishes through the SDK | Public POC or app feature can be released with live tenant evidence |
+
+Ordinary builds must remain usable and must never silently export or strip
+protected content in a fallback path.
+
+## Current application applicability
+
+| Repository/app | Current evidence | RFC status | Remaining work |
+|---|---|---|---|
+| PdfCraft | [issue #6747](https://github.com/storytold/pdfcraft/issues/6747), [draft PR #7843](https://github.com/storytold/pdfcraft/pull/7843), PFILE detection, native helper, original-plus-edits mutation, expiry/reauthentication, and synthetic rights/save/UI/automation tests | Draft POC; live authorization of the implemented mutation/reauthentication paths, optimization, digital signing and unsupported password/MIP composition remain gated | Resolve integration and live review findings; obtain app ID/IPIA, per-format tenant evidence and signed/notarized SDK packages |
+| GridCraft | [issue #865](https://github.com/storytold/gridcraft/issues/865), [open PR #867](https://github.com/storytold/gridcraft/pull/867) for sensitivity-label and table/custom-property pass-through, and [open PR #1221](https://github.com/storytold/gridcraft/pull/1221) stacked on it for table-level formats | Proposed metadata pass-through is format-fidelity work, not live MIP | Merge the relevant format changes; implement live MIP labels/protection, spreadsheet rights, re-publish/save, and tenant POC |
+| DeckCraft | [merged PR #535](https://github.com/storytold/deckcraft/pull/535) for sensitivity-label/customXML pass-through; [merged PR #2176](https://github.com/storytold/deckcraft/pull/2176) for password-protected PPTX CFB detection | Metadata and ordinary encrypted-deck detection improve format compatibility | Live MIP label/protection, presentation rights, re-publish/save, and tenant POC |
+| WordCraft | [issue #5827](https://github.com/storytold/wordcraft/issues/5827) for password-protected DOCX/ODT | Ordinary password/encryption work is separate | Live MIP labeling/protection for Office-supported files, rights, save/re-publish, tenant POC |
+| ArtCraft | [issue #2447](https://github.com/storytold/artcraft/issues/2447) | Enterprise export/label requirement is documented | Decide supported export formats, label application, live tenant policy, rights, and automation |
+| Future CAD/partner app | Microsoft supports native/protected formats such as `.dwfx` and has partner patterns such as [HaloCAD](https://www.microsoft.com/en-us/security/blog/2021/07/22/how-to-protect-your-cad-data-files-with-mip-and-halocad/) | No current app repository is accepted as live MIP work | Confirm specific file formats and SDK support, partner/plugin trust boundaries, plugin IPIA, and whether the host app needs its own IPIA |
+| Future FigCraft/VectorCraft/DesignCraft/media exporters | No live implementation record | Candidate only | Adopt only when the exported format is supported and the app can preserve label/protection/rights evidence |
+
+Microsoft's supported-file-type matrix also governs scope:
+
+- PDF and Microsoft Office files support native protection.
+- PowerPoint/Word/Excel native protection keeps or changes the relevant file
+  extension according to Microsoft format rules.
+- Generic protection creates a `.pfile`; it is encapsulation and
+  authentication, not native usage-rights enforcement.
+- Container files such as ZIP/MSG/EML/PDF attachments are not recursively
+  labeled/protected; app-level recursion is the app's responsibility.
+
+No app should describe pass-through or generic PFILE handling as complete live
+native MIP support.
+
+## App rollout procedure
+
+Each app follows the same implementation gate:
+
+1. Open or update an app issue that names the format, supported/unsupported
+   operations, rights, and customer workflow.
+2. Link the app issue/PR to this RFC and the PdfCraft POC evidence.
+3. Move format-independent provider/auth/rights policy into
+   `storytold/craft-libs` if it is shared. Do not create an unused library API
+   for a one-app POC. PdfCraft currently consumes the merged
+   [craft-libs PR #2473](https://github.com/storytold/craft-libs/pull/2473)
+   `FileIntake`/macOS Apple-event implementation at
+   `0a6e42b80bfd586aee6ee1144aa98cf1ea37a844`; the framework PR has no open
+   review threads and passed its SonarQube quality gate. The MIP auth/provider
+   and PDF-specific rights/re-publish boundary stays in PdfCraft until a
+   second app establishes a stable shared contract.
+4. Keep format parsing, editing, rights gates, and re-publishing local to the
+   app.
+5. Wire the engine/API, desktop UI, CLI/MCP, save/export/print/edit operations,
+   and mandatory-label behavior.
+6. Add ordinary-format and synthetic MIP tests.
+7. Expose a preflight verifier that checks App ID syntax, SDK/helper readiness,
+   public-client/loopback operation, each required delegated token, and label-policy access
+   without returning credentials or token values. Errors must map to the exact Entra
+   registration, consent, licensing, or Conditional Access fix.
+8. Run the real tenant matrix for every claimed native format and protection
+   mode, including PFILE where supported; record unsupported combinations.
+9. Add platform packaging/signing evidence.
+10. Attach screenshots and runtime evidence to the app PR and RFC.
+11. Keep the app work draft or unsupported until the live tenant and public
+    release gates pass.
+
+## UI and operation standard
+
+The suite will use native Rust UI components and localization, original Craft
+design, existing icon conventions, and shared states. Public screens and
+behavior may use Microsoft or PDF/Office behavior as a usability reference,
+but not as copied artwork, trademarks, icons, proprietary fonts, screenshots,
+or design traces.
+
+### Microsoft account UX
+
+The Microsoft sign-in page owns password entry, account selection, MFA,
+Conditional Access, tenant consent, and account verification. When a protected
+file is waiting to open, PdfCraft may offer one optional work/school-email
+**login hint** to skip a first account-identification screen. The hint is
+ephemeral: clear it at browser handoff, never persist or log it, and still allow
+the field to be empty so Microsoft shows its normal account chooser.
+
+When signed out:
+
+- Show one primary **Sign in** action for ordinary sign-in; a protected-open
+  gate may label that action **Continue with Microsoft**.
+- Do not show **Sign out**.
+- Do not require an email or password in the app. Show an email textbox only as
+  an optional protected-open login hint, not as credential capture.
+- If app configuration or the SDK is unavailable, show that state instead of
+  a false sign-in action.
+
+When signed in:
+
+- Show the active account in the account card.
+- Prefer Microsoft `display_name`; show email/principal name as the secondary
+  line. A compact `Display name - email/principal name` label is the fallback
+  wherever one identity label is needed.
+- Replace **Sign in** with **Sign out** for the active account.
+- Offer **Add account** to start Microsoft account selection without exposing
+  the protected-open login-hint field.
+- Offer an account switcher only when more than one account is signed in.
+- The active account is the only account used for the MIP helper until the
+  person switches or signs out.
+
+Multiple accounts are part of the suite account contract:
+
+- Signing in adds or replaces the account's in-process session and makes it
+  active.
+- Switching accounts must not reuse rights or decrypted state authorized for
+  another account. Close protected documents before switching unless the app
+  implements and tests an atomic rights-aware reopen for every open document.
+- Reauthentication of the same verified account must remain possible without
+  discarding unsaved work; never replace it with a different account silently.
+- Signing out removes the active account from the in-process account list.
+  If another account remains, that account becomes the next active account;
+  if none remain, the app becomes signed out.
+- Account profile metadata and active account selection must be verifiable in
+  the UI, CLI/MCP status, and automation result.
+- Public builds follow RFC-0025's split: non-secret account profile/routing and
+  selection state use the suite account list; tokens, refresh/session secrets,
+  and private credential state use the shared platform secret layer (for
+  example, macOS Keychain, Windows Credential Manager, or Linux Secret
+  Service). No token or secret belongs in settings, account-list JSON, or logs.
+- The POC may keep account sessions in process, but public persistence is
+  required before public multi-account support is claimed.
+
+### Detected document state
+
+The sensitivity-label dialog is not a static label catalog. Its document
+section is populated only after successful Microsoft sign-in and SDK/tenant
+inspection of the open document.
+
+For a detected label or protected file, the dialog shall show:
+
+- The document label name and policy description or tooltip.
+- Sensitivity/label metadata available from the SDK.
+- Protection state: label-only, protected/IRM, or unprotected.
+- Document owner and, when available, the protected-policy/content ID.
+- Mandatory-label, default-label, and downgrade-justification requirements.
+- A dynamic capability matrix: View, Edit, Save, Print, Copy/Extract,
+  Comment, Export, and Change Security.
+- For a protected file, each capability's allowed/not allowed state is derived
+  from SDK-confirmed usage rights and, where Microsoft and the format support
+  both layers, intersected with ordinary file-password permissions.
+- For a label-only or otherwise unprotected file, there is no RMS use-license
+  rights record to inspect. Apply ordinary format/password permissions and
+  tenant label policy; do not invent unknown MIP usage-rights denial.
+- Microsoft SDK rights remain distinct: `EDIT` is the protected-save
+  capability; `DOCEDIT` is the content-edit capability. Do not synthesize one
+  from the other. COMMENT, EXTRACT, EXPORT, and PRINT remain separate.
+- Available label operations only when the current account and policy permit
+  them.
+
+The Apply, Remove Label, and Remove Protection actions are stateful:
+
+- Apply is available only when the account is signed in and a tenant label is
+  selected.
+- Remove Label is available only when a current label exists and the SDK/rights
+  state permits changing security.
+- Remove Protection is available only when the document is protected, the SDK
+  confirms EXPORT or OWNER, and any additional applicable policy permits it.
+  Change Rights alone is not sufficient.
+- Justification is required when the SDK/policy requires it for downgrade or
+  removal.
+
+The no-label state is also dynamic:
+
+- Before sign-in: do not list tenant labels or document capabilities.
+- After sign-in: "No sensitivity labels are available to this account or
+  tenant policy" is the normal tenant-policy result, not a sign-in retry
+  instruction.
+- After sign-in with a labeled document: show label/owner/protection/capability
+  information rather than the no-label message.
+
+The UI, engine, CLI/MCP, and automation surfaces must use the same
+SDK-confirmed account, label, owner, policy, and rights snapshot. No UI-only
+capability may bypass a provider or engine gate.
+
+Required operation states:
+
+- Protected document recognition.
+- Sign-in prompt/account hint.
+- Sign-in progress, success, cancel, timeout, retry.
+- MFA/Conditional Access handoff.
+- Label/current-label/label-policy display.
+- View/edit/save/print/copy/comment/export/change-security rights.
+- No access.
+- SDK unavailable/not configured.
+- Mandatory/default/downgrade-label state.
+- Remove-label/remove-protection/export-required/justification state.
+- Fail-closed handling of unsupported password/MIP combinations and effective
+  rights for combinations the SDK and format support.
+
+UI, engine, CLI, and automation/MCP must use the SDK-confirmed rights and must
+not expose independent bypass paths.
+
+## Security and privacy standard
+
+- Use Microsoft's official native MIP SDK C++ library through a native helper.
+- Do not replace the SDK with independent PDF/Office decryption, Azure CLI
+  credentials, or a third-party MIP SDK wrapper.
+- Azure CLI may be used by Storytold maintainers for tenant/app-registration
+  setup and Azure resource administration, but it is not a runtime identity or
+  credential source for PdfCraft or other Craft apps.
+- A future device-code flow is headless/CLI fallback material only and still
+  requires the Storytold app client ID and delegated MIP scopes.
+- Keep authentication dependencies to browser launch, OAuth/PKCE, HTTPS token
+  exchange, URL parsing, and JSON/profile decoding. Do not add UUID, generic
+  Base64, Azure CLI, refresh-token persistence, or device-code dependencies
+  unless a documented product requirement and security review approve them.
+- Before release, verify safe same-account token renewal and SDK challenge
+  handling in a real tenant without losing unsaved protected work or reusing
+  stale rights. The POC implementation preserves edits and revalidates
+  protected originals; that is not a substitute for live expiry/MFA/Conditional
+  Access evidence.
+- Package official SDK binaries and redistributables for macOS arm64/x86_64,
+  supported Windows architectures, and supported Linux distributions/architectures.
+- The native helper is platform-specific packaging; the Rust policy and rights
+  seam stays platform-neutral.
+- Use the official SDK for decryption and authorization.
+- Never decrypt or unprotect independently to implement a bypass.
+- Stage original and decrypted files with owner-only/private permissions.
+- Bound temporary file sizes and allocations.
+- Delete temporary plaintext and SDK output promptly after use.
+- Never log access tokens, passwords, use-license content, or private tenant
+  data.
+- Use no application-only SuperUser role for public desktop sign-in.
+- Never mark package metadata preservation as live MIP support.
+- Treat unknown or unreadable rights on a protected file as denied. This rule
+  is not an RMS-rights requirement for an unprotected, label-only file.
+- Route conversion, Combine, insertion, replacement, comment/data import,
+  batch, audit, and every CLI inspection/render path through the provider
+  before parsing protected bytes. EXTRACT alone never authorizes a new
+  unprotected PDF; that derivative requires EXPORT or OWNER.
+- A successful security-changing label operation invalidates incompatible
+  undo/redo history. A cancelled recovery waiting for Microsoft sign-in returns
+  to the recoverable set instead of discarding its snapshot.
+- Preserve ordinary password security and MIP rights independently. Intersect
+  effective rights only for SDK-supported combinations; reject unsupported
+  password-protected or digitally signed PDF labeling/protection without
+  stripping either layer.
+- Preserve unknown package and document parts without misrepresenting their
+  security state.
+
+## Ownership and review
+
+Recommended owners:
+
+- **Legal/business**: IPIA request, contract, new app IDs, and trust boundary.
+- **Storytold Entra/security**: app registration, permissions, consent, app
+  ID, identity, certificate custody, and security review.
+- **Release engineering**: official SDK package, helper build, OS dependencies,
+  signing, notarization, package, and evidence.
+- **PdfCraft/app maintainers**: format adapter, rights/UI/automation, tests,
+  and tenant POC.
+- **Customer Purview administrators**: customer license, labels, policy,
+  consent, users, recipients, and revocation.
+- **Support**: incident runbook, known failures, tenant escalation, and
+  customer communication.
+
+No team should mark a public MIP feature complete while another owner still
+has an unresolved prerequisite.
+
+## Evidence standard
+
+Every public or live-MIP completion record must include:
+
+- SDK package name/version/SHA-256/source.
+- App ID and IPIA/change record; do not publish tokens or secrets.
+- App/platform/package build ID.
+- Signing/notarization evidence.
+- Tenant test environment without personal data.
+- Real tenant fixture, format, protection mode and level for every claimed
+  native format and for PFILE where claimed.
+- Test matrix and exact pass/fail/skip counts.
+- Sign-in/MFA/Conditional Access result.
+- Use-license and rights result.
+- Save/re-publish/revert/remove operations.
+- Supported combined-layer rights results and fail-closed results for
+  unsupported password-protected or digitally signed PDF combinations.
+- UI/CLI/MCP/automation evidence.
+- Remaining unsupported or blocked cases.
+
+The POC PR and RFC issue are linked public evidence. Private credentials,
+tokens, tenant IDs that are sensitive, and customer personal data must remain
+outside source and public issue/PR comments.
+
+## Acceptance criteria
+
+RFC-0075 is implemented for the suite standard when:
+
+1. One suite app ID and one IPIA scope are recorded.
+2. The exact SDK package and redist inventory are recorded.
+3. Each public app/platform package is signed/notarized and helper discovery is
+   tested.
+4. The customer-tenant onboarding procedure is documented and repeatable.
+5. Every app claiming live MIP support has a real format adapter and tenant
+   evidence for each claimed format and protection mode, including native
+   protected open/save/re-publish and PFILE where claimed.
+6. Metadata pass-through is not described as live MIP support.
+7. Supported security layers retain their independent rights; unsupported
+   password-protected or digitally signed PDF/MIP operations fail closed.
+8. UI, engine, CLI, MCP, save/export/print/edit/copy rights use the same SDK
+   decisions.
+9. Temporary decrypted/working files are private and cleaned.
+10. Recurrence, renewal, evidence, and failure owners are assigned.
+
+## Official references
+
+- [Microsoft MIP SDK setup and configuration](https://learn.microsoft.com/en-us/information-protection/develop/setup-configure-mip)
+- [Microsoft MIP SDK API permissions](https://learn.microsoft.com/en-us/information-protection/develop/concept-api-permissions)
+- [Microsoft MIP SDK supported file types](https://learn.microsoft.com/en-us/information-protection/develop/concept-supported-filetypes)
+- [Microsoft MIP SDK overview](https://learn.microsoft.com/en-us/information-protection/develop/overview)
+- [MIP SDK troubleshooting: password-protected or digitally signed PDFs](https://learn.microsoft.com/en-us/information-protection/develop/troubleshooting)
+- [MIP SDK file handlers and protection removal](https://learn.microsoft.com/en-us/information-protection/develop/concept-handler-file-csharp)
+- [Microsoft Entra app registration quickstart](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
+- [Configure desktop apps that call web APIs](https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-app-configuration)
+- [SharePoint-compatible IRM PDF readers](https://learn.microsoft.com/en-us/purview/sp-compatible-pdf-readers-for-irm)
+- [Microsoft MIP SDK binaries](https://aka.ms/mipsdkbinaries)
