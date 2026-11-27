@@ -1,5 +1,7 @@
 # RFC-0011: Language data comes from craft-i18n
 
+Updated by: [RFC-0093](0093-hyphenation-through-craft-proof.md)
+
 Spelling and hyphenation work for English and little else, and each app
 does it differently. WordCraft and DesignCraft embed Moby, PhotoCraft
 embeds SCOWL, DesignCraft and craft-text enable a few `hypher` languages,
