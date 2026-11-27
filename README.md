@@ -32,7 +32,7 @@ The most important documents:
 - [Time](standards/time.md) — dates and the calendar rules
 - [Naming](standards/naming.md) — the rules for other companies' names ([RFC-0029](rfcs/0029-other-companies-names.md))
 
-Each repository's `AGENTS.md` starts with a copy of [standards/app-agents.md](standards/app-agents.md). Until a repository moves to it, it carries the generated house-rules blocks from [house-rules-core.md](standards/house-rules-core.md), [house-rules-rust.md](standards/house-rules-rust.md) and [house-rules-accessibility.md](standards/house-rules-accessibility.md), which are deleted once every repository has moved.
+Each repository's `AGENTS.md` starts with a copy of [standards/app-agents.md](standards/app-agents.md) (RFC-0072). The RFC-0006 house-rules blocks it replaced are retired, and the check in craft-common-actions fails a file that still carries them.
 
 ## How a decision is made (the short version)
 
@@ -69,7 +69,7 @@ Questions are comments too. If an RFC is hard to understand, saying so is valuab
 | **Comment period** | The days when a proposal is open for comments. A maintainer starts it by posting the end date. |
 | **Maintainer** | A member of the `craft-app-team` GitHub team. Maintainers review and merge RFCs. |
 | **Owner** | An admin of the storytold organisation who can decide objections. |
-| **House rules** | Rules that apply in every Craft repository. They live in `standards/` here, and `standards/app-agents.md` is copied into each repository's `AGENTS.md`. |
+| **Shared agent rules** | Rules that apply in every Craft repository. They live in `standards/` here, and `standards/app-agents.md` is copied into each repository's `AGENTS.md`. RFC-0006 called them house rules. |
 | **`AGENTS.md`** | The instruction file that coding agents read in every repository. |
 | **`craft-libs`** | The shared Rust library repository that several apps depend on. |
 | **Claim** | Saying on an issue that you are working on it, so two people do not fix the same bug ([RFC-0003](rfcs/0003-claiming-issues.md)). |
