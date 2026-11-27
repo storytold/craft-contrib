@@ -43,6 +43,13 @@ seams, UI, automation/MCP, and packaging with synthetic tests. Protected PDF
 password/MIP composition is not implemented and must fail closed. These tests
 do not establish live tenant authorization or production readiness.
 
+A client ID supplied to unblock a private POC is **POC-only**. It must not be
+committed as the Storytold suite identity or used as production release evidence.
+Production still requires an official Storytold-owned multitenant public/native
+registration with publisher identity, owners, delegated permissions, consent,
+IPIA, release inventory, and maintenance ownership. The POC ID and the production
+ID must be recorded as separate identities.
+
 ## Motivation
 
 Purview/MIP support crosses several boundaries that cannot be solved by one
