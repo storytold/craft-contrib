@@ -10,6 +10,7 @@ Dependencies and assets use SPDX identifiers. A licence expression is allowed wh
 
 - `ISC`
 - `MIT`
+- `MIT-0`
 - `BSD-2-Clause`
 - `BSD-3-Clause`
 - `Apache-2.0`
