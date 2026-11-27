@@ -616,8 +616,8 @@ includes `crates/gpu/tests/it/main.rs:5`.
   `.sketch` fixtures; EffectCraft's `.aep` helpers and QA harness; AniCraft's `.fla` packer;
   WordCraft's `crates/doc/src/work.rs`; SoundCraft's CLAP and VST3 fixture plugins; Craft Anything's
   samples; and fixtures that are malformed on purpose.
-- **App xtask commands.** The step list of each `cargo xtask ci`, the checklist commands that RFC-0018
-  (storytold/craft-contrib#30) and RFC-0033 (storytold/craft-contrib#52) cover, `i18n-report`, whose
+- **App xtask commands.** The step list of each `cargo xtask ci`, the checklist commands that RFC-0044
+  (storytold/craft-contrib#30) and RFC-0052 (storytold/craft-contrib#52) cover, `i18n-report`, whose
   missing-translation report can move to craft-i18n's `craft-i18n-tests` or craft-libs `i18n`,
   LightCraft's `ci --quick`, EffectCraft's `ci --affected` and PdfCraft's license checker.
 - **Text snapshots.** `FILMCRAFT_BLESS` text fingerprints, GridCraft's `NUMFMT_BLESS` and PdfCraft's
@@ -842,10 +842,10 @@ PdfCraft and PhotoCraft.
 
     The `test-support` pull requests for `craft-pdf` and `craft-xlsx` and the `fixtures` move of `crates/audio/tests/codecs/testkit.rs` merge with these pull requests or wait for
     them. The `input` module follows whichever egui revision `craft-ui` has when it lands.
-13. **Command-line conventions.** Open RFC-0012 (storytold/craft-contrib#18) has each CLI's `main` pass
+13. **Command-line conventions.** RFC-0018 (storytold/craft-contrib#18, accepted) has each CLI's `main` pass
     its arguments and output streams to a library `run(args, out, err) -> exit code` that tests call
     directly. It also has tests pin `--help`, exit codes 0, 1 and 2, and that a protocol subcommand
-    such as MCP writes nothing else to stdout. If RFC-0012 is accepted, `bin` adds a helper that checks
+    such as MCP writes nothing else to stdout. Now that RFC-0018 is accepted, `bin` adds a helper that checks
     a child's exit code and streams against those rules, and `mcp` checks that the child writes only
     protocol lines on stdout.
 

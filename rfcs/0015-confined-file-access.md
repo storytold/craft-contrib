@@ -1,7 +1,7 @@
 # RFC-0015: Confined file access for agents
 
-Related: RFC-0009 (shared infrastructure, "security boundaries"), RFC-0012
-(command-line conventions) and RFC-0004 (duplicate PRs), all still proposals; storytold/effectcraft#2131 (audit F-11).
+Related: RFC-0009 (shared infrastructure, "security boundaries") and RFC-0004 (duplicate PRs), both still
+proposals; RFC-0018 (command-line conventions), accepted; storytold/effectcraft#2131 (audit F-11).
 
 ## Summary
 
@@ -39,8 +39,8 @@ The copies already disagree, and the gaps show up in the same places:
   in 0.19.0. The hosted BridgeCraft image pins EffectCraft 0.21.1
   (adikshan11/bridgecraft#66), which is after that fix.
 - **Flags that do nothing.** A FilmCraft build once accepted the flags and
-  ignored them, so `--help` alone doesn't prove a build is confined. RFC-0012's
-  proposed "reject unknown flags" rule would cover the parsing. This RFC covers what the
+  ignored them, so `--help` alone doesn't prove a build is confined. RFC-0018's
+  "reject unknown flags" rule covers the parsing. This RFC covers what the
   flags must do.
 - **Code and network.** Each app decides on its own whether scripts, plug-ins,
   running programs, URL fetches and control ports are allowed while confined.
