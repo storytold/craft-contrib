@@ -415,11 +415,15 @@ Each app follows the same implementation gate:
 5. Wire the engine/API, desktop UI, CLI/MCP, save/export/print/edit operations,
    and mandatory-label behavior.
 6. Add ordinary-format and synthetic MIP tests.
-7. Run the real tenant matrix for every claimed native format and protection
+7. Expose a preflight verifier that checks App ID syntax, SDK/helper readiness,
+   public-client/loopback operation, each required delegated token, and label-policy access
+   without returning credentials or token values. Errors must map to the exact Entra
+   registration, consent, licensing, or Conditional Access fix.
+8. Run the real tenant matrix for every claimed native format and protection
    mode, including PFILE where supported; record unsupported combinations.
-8. Add platform packaging/signing evidence.
-9. Attach screenshots and runtime evidence to the app PR and RFC.
-10. Keep the app work draft or unsupported until the live tenant and public
+9. Add platform packaging/signing evidence.
+10. Attach screenshots and runtime evidence to the app PR and RFC.
+11. Keep the app work draft or unsupported until the live tenant and public
     release gates pass.
 
 ## UI and operation standard
