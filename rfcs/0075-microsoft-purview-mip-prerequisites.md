@@ -402,7 +402,14 @@ Each app follows the same implementation gate:
    operations, rights, and customer workflow.
 2. Link the app issue/PR to this RFC and the PdfCraft POC evidence.
 3. Move format-independent provider/auth/rights policy into
-   `storytold/craft-libs` if it is shared.
+   `storytold/craft-libs` if it is shared. Do not create an unused library API
+   for a one-app POC. PdfCraft currently consumes the merged
+   [craft-libs PR #2473](https://github.com/storytold/craft-libs/pull/2473)
+   `FileIntake`/macOS Apple-event implementation at
+   `0a6e42b80bfd586aee6ee1144aa98cf1ea37a844`; the framework PR has no open
+   review threads and passed its SonarQube quality gate. The MIP auth/provider
+   and PDF-specific rights/re-publish boundary stays in PdfCraft until a
+   second app establishes a stable shared contract.
 4. Keep format parsing, editing, rights gates, and re-publishing local to the
    app.
 5. Wire the engine/API, desktop UI, CLI/MCP, save/export/print/edit operations,
